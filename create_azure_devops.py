@@ -1,7 +1,6 @@
 import pulumi
 import pulumi_azuredevops as azuredevops
 import pulumi_azure as azure
-import pulumi_azure_native.keyvault as keyvault
 from pulumi import Config
 import random
 
