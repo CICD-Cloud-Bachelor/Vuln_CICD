@@ -1,6 +1,3 @@
-"""A Python Pulumi program"""
-
-
 from vulnerabilities.vuln1 import main as vuln1
 
 
