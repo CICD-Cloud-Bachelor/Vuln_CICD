@@ -1,3 +1,4 @@
 Pulumi.yaml
+Pulumi*.yaml
 __pycache__/
 venv/
