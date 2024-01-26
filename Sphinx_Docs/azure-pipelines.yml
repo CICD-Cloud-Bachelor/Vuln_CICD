@@ -1,0 +1,63 @@
+trigger:
+  branches:
+    include:
+    - docs
+
+pool:
+  vmImage: ubuntu-latest
+
+strategy:
+  matrix:
+    Python37:
+      python.version: '3.7'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    git config --global user.email "pipeline@azure.com"
+    git config --global user.name "Pipeline"
+    git config --global credential.helper store
+    git config --global http.extraheader "AUTHORIZATION: basic $(echo -n git:$(GIT_TOKEN) | base64)"
+  displayName: 'Git config'
+
+- script: |
+    branchName=${BUILD_SOURCEBRANCH#refs/heads/}
+    echo "##vso[task.setvariable variable=currentBranch]$branchName"
+  displayName: 'Set current branch name'
+
+- script: |
+    sphinx-apidoc -o source    
+  displayName: 'Parse comments to REST files'
+
+- script: |
+    cd Sphinx_Docs/docs
+    make clean
+    make html
+  displayName: 'Generate HTML documents'
+
+- script: |
+    echo "Current Branch: $currentBranch"
+    git checkout $currentBranch
+    git fetch
+    git add --all
+    git commit -m "New edits en repo [skip ci]"
+    git push origin HEAD:$currentBranch
+  env:
+    GIT_TOKEN: $(GIT_TOKEN)  # Reference to your secret variable
+    currentBranch: $(currentBranch)
+  displayName: 'Commit and Push changes'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '/home/vsts/work/1/s/sphinx_test/docs/_build/html'
+    artifact: 'HTML'
+    publishLocation: 'pipeline'
