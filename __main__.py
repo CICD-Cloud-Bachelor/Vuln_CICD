@@ -1,4 +1,4 @@
-from vulnerabilities.vuln1 import main as vuln1
+from vulnerabilities.vuln3 import main as vuln3
 
 
-vuln1.start()
+vuln3.start()
