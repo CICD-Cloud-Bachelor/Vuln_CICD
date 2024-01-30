@@ -52,7 +52,7 @@ class CreateAzureDevops:
             project_id=self.project.id,
             default_branch="refs/heads/main",
             initialization=azuredevops.GitInitializationArgs(
-                init_type="Clean",
+                init_type="Import",
                 source_type="Git",
                 source_url=github_repo_url
             )
