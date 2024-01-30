@@ -85,6 +85,17 @@ class CreateAzureDevops:
         
         pulumi.export("ci_cd_pipeline_url", f"{self.project_url}/_build?definitionId={self.ci_cd_pipeline.id}")
 
+    def run_pipeline(self) -> None:
+        pulumi.log.info(f"Pushing to git and starting pipeline")
+        azuredevops.GitRepositoryFile(
+            "new-file",
+            repository_id=self.git_repo.id,
+            file=".ignoreme",
+            content="Ignore me, this file is only here to trigger a pipeline run",
+            commit_message="Add .ignoreme",
+            branch="refs/heads/main"
+        )
+
     def add_flag_pipeline_secret(self, identifier: str, value: str) -> None:
         self.variables = [
                 azuredevops.BuildDefinitionVariableArgs(
@@ -94,8 +105,6 @@ class CreateAzureDevops:
                 )
             ]
         
-
-
 
     def create_work_item(self, count: int) -> None:
         pulumi.log.info(f"Creating {count} work items")
@@ -130,11 +139,3 @@ class CreateAzureDevops:
 
             # Export the created work item's ID and URL
             pulumi.export("work_item_id", work_item.id)
-            
-
-
-
-
-        #pulumi.export('linked_pipeline_id', pipeline.id)
-        #pulumi.export("variable_group_id", self.variable_group.id)
-
