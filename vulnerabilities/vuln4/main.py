@@ -7,7 +7,7 @@ from source.container import DockerACR
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(resource_group, "registrypulumi")
     acr_string = acr.build_and_push_docker_image("mysqldb")
-    connection_string = acr.start_container(acr_string, "mysql-container", 3306, 1.0, 1.0)
+    connection_string = acr.start_container(acr_string, "mysql-container", [3306], 1.0, 1.0)
     
     github_repo_url = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
     azure_devops = CreateAzureDevops("VULN4", "Project for VULN4", "bachelor2024", resource_group)
