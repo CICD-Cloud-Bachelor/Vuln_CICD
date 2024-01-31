@@ -103,7 +103,7 @@ class DockerACR:
         pulumi.export("image_name", image.image_name.apply(lambda name: name))
         return image.image_name.apply(lambda name: name)
 
-    def start_container(self, image_name: str, container_name: str, port: int, cpu: float, memory: float):
+    def start_container(self, image_name: str, container_name: str, port: int, cpu: float, memory: float) -> str:
         pulumi.log.info(f"Starting container: {container_name}")
         
         container_group_name = container_name + "-group"
@@ -149,6 +149,4 @@ class DockerACR:
             lambda args: f"{container_name}{self.DNS_LABEL}.{args[1]}.azurecontainer.io"
         )
 
-        # Export the FQDN
-        pulumi.export('fqdn', fqdn)
-        pulumi.export("container_group_id", container_group.id)
+        return fqdn
