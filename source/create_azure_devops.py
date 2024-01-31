@@ -96,14 +96,16 @@ class CreateAzureDevops:
             branch=f"refs/heads/{branch}"
         )
 
-    def add_flag_pipeline_secret(self, identifier: str, value: str) -> None:
-        self.variables = [
+    def add_variables(self, variables: dict) -> None:
+        self.variables = []
+        for identifier, value in variables.items():
+            self.variables.append(
                 azuredevops.BuildDefinitionVariableArgs(
                     name=identifier,
                     secret_value=value,
                     is_secret=True,
                 )
-            ]
+            )
         
 
     def create_work_item(self, count: int) -> None:
