@@ -85,7 +85,7 @@ class CreateAzureDevops:
         
         pulumi.export("ci_cd_pipeline_url", f"{self.project_url}/_build?definitionId={self.ci_cd_pipeline.id}")
 
-    def run_pipeline(self) -> None:
+    def run_pipeline(self, branch: str) -> None:
         pulumi.log.info(f"Pushing to git and starting pipeline")
         azuredevops.GitRepositoryFile(
             "new-file",
@@ -93,7 +93,7 @@ class CreateAzureDevops:
             file=".ignoreme",
             content="Ignore me, this file is only here to trigger a pipeline run",
             commit_message="Add .ignoreme",
-            branch="refs/heads/main"
+            branch=f"refs/heads/{branch}"
         )
 
     def add_flag_pipeline_secret(self, identifier: str, value: str) -> None:
