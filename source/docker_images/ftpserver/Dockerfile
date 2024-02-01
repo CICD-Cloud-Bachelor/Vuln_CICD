@@ -2,7 +2,7 @@
 FROM ubuntu:latest
 
 # Install vsftpd
-RUN apt-get update && apt-get install -y vsftpd
+RUN apt-get update && apt-get install -y vsftpd curl
 
 # Create the secure_chroot_dir
 RUN mkdir -p /var/run/vsftpd/empty && \
@@ -26,5 +26,11 @@ COPY vsftpd.conf /etc/vsftpd.conf
 # Expose the FTP command port and the single data port
 EXPOSE 21 10000
 
-# Start vsftpd
-CMD ["/usr/sbin/vsftpd", "/etc/vsftpd.conf"]
+# Add the script to the image
+COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
+
+# Make the script executable
+RUN chmod +x /usr/local/bin/configure_vsftpd.sh
+
+# Run the script when the container starts
+CMD ["/usr/local/bin/configure_vsftpd.sh"]

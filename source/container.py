@@ -85,7 +85,7 @@ class DockerACR:
         
         # Define a Docker image resource that builds and pushes the image
         image = docker.Image(
-            "myimage",
+            image_name,
             image_name=image_name_with_tag,
             build=docker.DockerBuildArgs(
                 context=image_context_path,
