@@ -25,6 +25,8 @@ while true; do
     # Update the previous hash to reflect the new state
     PREV_HASH=$NEW_HASH
   fi
+
+  rm -rf /ftp/*
   
   # Wait for a bit before checking again
   sleep 2

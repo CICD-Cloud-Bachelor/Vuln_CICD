@@ -15,7 +15,7 @@ COPY flag.txt /flag.txt
 RUN chmod +x /usr/local/bin/watch_and_run.sh
 
 # Create a volume for the FTP download
-VOLUME /ftp
+RUN mkdir /ftp && chmod 777 /ftp
 
 # Run the script
 CMD while true; do /usr/local/bin/watch_and_run.sh || sleep 30; done
