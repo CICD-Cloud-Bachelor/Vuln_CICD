@@ -11,5 +11,5 @@ resource_group = azure.core.ResourceGroup('resource-group', location="West Europ
 
 #vuln1.start()
 
-#vuln4.start(resource_group)
-vuln5.start(resource_group)
+vuln4.start(resource_group)
+#vuln5.start(resource_group)
