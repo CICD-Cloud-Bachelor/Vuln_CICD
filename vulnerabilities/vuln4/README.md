@@ -1,0 +1,1 @@
+This vulnerability contains a repository with a pipeline that is not editable by the user. The goal is to find the password, username and connection string to the database used by the applcation. Login to that db and find the password for the user "Troll Trollington". That is the flag.
