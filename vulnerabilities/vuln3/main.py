@@ -15,26 +15,21 @@ def start():
 
     adoEnv = CreateAzureDevops("Vulnerability 3", "Insufficient Credential Hygiene", "hackegutta", resource_group)
     adoEnv.import_github_repo(github_repo_url, "Vulnerabity_3")
+    adoEnv.create_ci_cd_pipeline("Vulnerability-3-CICD-Pipeline")
 
     userCreator = CreateUsers("mohammedhussaini1268gmail.onmicrosoft.com")
-    ad_user = userCreator.create_user("Tom_Tomington", "Troll57Hoho69%MerryChristmas")
+    devops_user = userCreator.create_devops_user("Tom_Tomington", "Troll57Hoho69%MerryChristmas")
 
-    devops_user = azuredevops.User("Tom",
-                                   principal_name = ad_user.user_principal_name
-                                   )
-
-    # Get existing Readers group
-    readers_group = azuredevops.get_group_output(name = "Readers",
-        project_id = adoEnv.project.id
-        )
-
-    # Add the user to the group
-    azuredevops.GroupMembership("devOpsGroupMembership",
-        group = readers_group.descriptor,
-        members = [devops_user.descriptor]
-        )
+    # Add user to Readers group so they can view the project
+    adoEnv.add_user_to_group(devops_user, adoEnv.readers_group)
     
-    pulumi.export('azureDevOpsGroupIdExport', readers_group.id)
+    # Allow user to run pipelines
+    adoEnv.modify_pipeline_permissions(adoEnv.readers_group,
+        permissions = {
+            "QueueBuilds": "Allow",
+        }
+        )
+
     pulumi.export('devopsUserId', devops_user.id)
 
 
