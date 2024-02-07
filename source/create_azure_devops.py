@@ -1,8 +1,11 @@
 import pulumi
 import pulumi_azuredevops as azuredevops
+import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 from pulumi import Config
+import requests
 import random
+import base64
 
 
 
@@ -108,15 +111,19 @@ class CreateAzureDevops:
             )
         
 
-    def create_work_item(self, count: int) -> None:
+    def create_work_item(self, count: int, work_item_type=None, work_item_title=None, work_item_state=None, work_item_description=None) -> None:
+        
+        self.work_item_id_list = []
+
         pulumi.log.info(f"Creating {count} work items")
+
         for _ in range(count):
             # Work item details
             # Randomly select a work item type from the predefined list
-            work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"])
+            self.work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"]) if work_item_type is None else work_item_type
 
             # Randomly select a work item title based on the work item type
-            work_item_title = random.choice([
+            self.work_item_title = random.choice([
                 "Investigate production outage",
                 "Add new feature",
                 "Update documentation",
@@ -125,19 +132,45 @@ class CreateAzureDevops:
                 "Add tests",
                 "Update dependencies",
                 "Add new endpoint"
-            ])
-
+            ]) if work_item_title is None else work_item_title
            
-            work_item_state = "New"
-
+            self.work_item_state = "New" if work_item_state is None else work_item_state
 
             # Create a new Azure DevOps work item in the provided project
-            work_item = azuredevops.Workitem("workItem_" + work_item_title + str(random.randint(1, 100000)),
+            work_item = azuredevops.Workitem("workItem_" + self.work_item_title + str(random.randint(1, 100000)),
                 project_id=self.project.id,
-                type=work_item_type,
-                title=work_item_title,
-                state=work_item_state
+                type=self.work_item_type,
+                title=self.work_item_title,
+                state=self.work_item_state
             )
-
-            # Export the created work item's ID and URL
+            
             pulumi.export("work_item_id", work_item.id)
+
+    def add_comment_to_work_item(self, work_item_id: str, comment: str) -> None:
+        pulumi.log.info(f"Adding comment to work item: {work_item_id}")
+        
+        pat = "2pa2zwhvziixle6dblndnzpvuaordle756hmtxyjfuaqvoaeqsna" # Personal Access Token (PAT) with Work Items scope
+        url = f"https://dev.azure.com/MagnusMEriksen/vul2_test/_apis/wit/workItems/{work_item_id}/comments?7.0-preview.3"
+        
+        b64_pat = base64.b64encode(pat.encode("utf-8")).decode("utf-8")
+
+        headers = {
+            "Authorization": f"Basic MnBhMnp3aHZ6aWl4bGU2ZGJsbmRuenB2dWFvcmRsZTc1NmhtdHh5amZ1YXF2b2FlcXNuYTo=", # Use Basic authorization with the PAT
+            "Content-Type": "application/json"
+        }
+
+        data = {
+            "text": comment
+        }
+
+        params = {
+            "api-version": "7.0-preview.3"
+        }
+
+        response = requests.post(url, headers=headers, json=data, params=params)
+        pulumi.log.info(f"Response: {response.status_code} and {response.text}")
+
+
+
+        
+
