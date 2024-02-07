@@ -17,25 +17,25 @@ def start():
     adoEnv.import_github_repo(github_repo_url, "Vulnerabity_3")
 
     userCreator = CreateUsers("mohammedhussaini1268gmail.onmicrosoft.com")
-    ad_user = userCreator.create_user("Troll_Trollington", "Troll57Hoho69%MerryChristmas")
+    ad_user = userCreator.create_user("Tom_Tomington", "Troll57Hoho69%MerryChristmas")
 
-    devops_user = azuredevops.User("Troll",
+    devops_user = azuredevops.User("Tom",
                                    principal_name = ad_user.user_principal_name
                                    )
-    
 
-    # Create an Azure DevOps Group at the project level
-    devops_group = azuredevops.Group("devOpsGroup",
-        scope = adoEnv.project.id, # Scope the group to the project level
-        display_name="PulumiManagedDevOpsGroup",
-        members = [
-            devops_user.descriptor
-        ]
+    # Get existing Readers group
+    readers_group = azuredevops.get_group_output(name = "Readers",
+        project_id = adoEnv.project.id
         )
 
-
-    # Export the IDs of the created groups
-    pulumi.export('azureDevOpsGroupIdExport', devops_group.id)
+    # Add the user to the group
+    azuredevops.GroupMembership("devOpsGroupMembership",
+        group = readers_group.descriptor,
+        members = [devops_user.descriptor]
+        )
+    
+    pulumi.export('azureDevOpsGroupIdExport', readers_group.id)
+    pulumi.export('devopsUserId', devops_user.id)
 
 
     
