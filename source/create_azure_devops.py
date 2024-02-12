@@ -36,12 +36,7 @@ class CreateAzureDevops:
             description=self.description,
             visibility="private",
             work_item_template="Agile"  # Use the desired work item template
-            ) 
-        
-        # Get existing Readers group in the project
-        self.readers_group = azuredevops.get_group_output(name = "Readers",
-            project_id = self.project.id
-        )
+            )
 
 
     def import_github_repo(self, github_repo_url: str, repo_name: str) -> None:

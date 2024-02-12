@@ -1,17 +1,17 @@
 from faker import Faker
 import pulumi
 import pulumi_azuredevops as azuredevops
+import configparser
 from pulumi_azuread import User
 
-
+config = configparser.ConfigParser()
+config.read('config.ini')
+DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
     fake = Faker()
-    
-    def __init__(self, domain: str) -> None:
-        self.domain = domain
 
-    def __create_entra_user(self, name: str, password: str) -> None:
+    def create_entra_user(name: str, password: str) -> User:
             """
             Creates a user in Entra (Azure AD).
 
@@ -23,16 +23,18 @@ class UserCreator:
                 None
             """
             pulumi.log.info(f"Creating user in Entra (Azure AD): {name}")
-            self.entra_user = User(f"{name}",
+            entra_user = User(f"{name}",
                 display_name = name,
-                user_principal_name = f"{name.replace(' ', '.')}@{self.domain}",
+                user_principal_name = f"{name.replace(' ', '.')}@{DOMAIN}",
                 password = password,
                 force_password_change = False # Set to True if you want to force a password change on first login
                 )
-            pulumi.export(f"{name}_entra_user_id", self.entra_user.id)
+            pulumi.export(f"{name}_entra_user_id", entra_user.id)
+
+            return entra_user
 
 
-    def create_devops_user(self, name: str, password: str) -> User:
+    def create_devops_user(name: str, password: str) -> azuredevops.User:
             """
             Creates a user in Azure DevOps.
 
@@ -43,14 +45,15 @@ class UserCreator:
             Returns:
                 User: The created user object in Azure DevOps.
             """
-            self.__create_entra_user(name, password)
+            entra_user = UserCreator.create_entra_user(name, password)
 
             pulumi.log.info(f"Creating user in Azure DevOps: {name}")
-            self.devops_user = azuredevops.User(f"{name}",
-                principal_name = self.entra_user.user_principal_name
+            devops_user = azuredevops.User(f"{name}",
+                principal_name = entra_user.user_principal_name
                 )
-            pulumi.export(f"{name}_devops_user_id", self.devops_user.id)
-            return self.devops_user
+            pulumi.export(f"{name}_devops_user_id", devops_user.id)
+
+            return devops_user
 
 
     def __randomPass(self) -> str:
@@ -71,10 +74,10 @@ class GroupCreator:
             azuredevops.Group: The created Azure DevOps group.
         """
         pulumi.log.info("Creating Azure DevOps group")
-        group = azuredevops.Group("group",
-            project_id=project.id,
-            name=group_name,
-            description=f"{group_name} group"
+        group = azuredevops.Group("customGroup",
+            scope=project.id,
+            display_name=group_name,
+            description="Custom made permissions for devops"
         )
         return group
 
@@ -95,14 +98,13 @@ class GroupCreator:
             members=[user.descriptor]
         )
     
-    def modify_project_permission(project: azuredevops.Project, group: azuredevops.Group):
+    def modify_project_permission(project: azuredevops.Project, group: azuredevops.Group, permissions: dict):
         azuredevops.ProjectPermissions("projectPermissions",
             project_id=project.id,
             principal=group.id,
-            permissions={
-                "GENERIC_READ": "Allow"
-            }
+            permissions=permissions
             )
+        # Link to permissions overview https://www.pulumi.com/registry/packages/azuredevops/api-docs/projectpermissions/
 
 
     def modify_pipeline_permissions(project: azuredevops.Project, group: azuredevops.Group, pipeline: azuredevops.BuildDefinition, permissions: dict) -> None:
