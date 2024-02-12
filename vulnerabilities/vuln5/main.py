@@ -4,8 +4,9 @@ from source.container import DockerACR
 import configparser
 
 config = configparser.ConfigParser()
+config.read('config.ini')
 REGISTRY_NAME = config["DOCKER"]["REGISTRY_NAME"]
-ORGANIZATION_NAME = config["AZURE_DEVOPS"]["ORGANIZATION_NAME"]
+ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
 
 PROJECT_NAME = "VULN5"
 PROJECT_DESCRIPTION = "Project for VULN5"
