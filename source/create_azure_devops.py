@@ -35,7 +35,13 @@ class CreateAzureDevops:
             name=self.project_name,
             description=self.description,
             visibility="private",
-            work_item_template="Agile")  # Use the desired work item template
+            work_item_template="Agile"  # Use the desired work item template
+            ) 
+        
+        # Get existing Readers group in the project
+        self.readers_group = azuredevops.get_group_output(name = "Readers",
+            project_id = self.project.id
+        )
 
 
     def import_github_repo(self, github_repo_url: str, repo_name: str) -> None:
@@ -59,7 +65,7 @@ class CreateAzureDevops:
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
-    def create_ci_cd_pipeline(self, name: str) -> None:
+    def create_ci_cd_pipeline(self, name: str) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
@@ -68,7 +74,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating CI/CD Pipeline")
         
-        self.ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
+        ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
             project_id=self.project.id,
             name=name,
             repository=azuredevops.BuildDefinitionRepositoryArgs(
@@ -81,9 +87,9 @@ class CreateAzureDevops:
             },
             agent_pool_name="Azure Pipelines",
             variables=self.variables or []
-        )
+            )
+        return ci_cd_pipeline
         
-        pulumi.export("ci_cd_pipeline_url", f"{self.project_url}/_build?definitionId={self.ci_cd_pipeline.id}")
 
     def run_pipeline(self, branch: str) -> None:
         pulumi.log.info(f"Pushing to git and starting pipeline")
@@ -106,7 +112,6 @@ class CreateAzureDevops:
                     is_secret=True,
                 )
             )
-        
 
     def create_work_item(self, count: int) -> None:
         pulumi.log.info(f"Creating {count} work items")
