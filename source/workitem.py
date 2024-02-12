@@ -21,14 +21,15 @@ class HttpPostResource(Resource):
 
 class WorkItem:
     index = 0
-    def __init__(self, project_name, depends_on):
+    def __init__(self, organization_name: str, project_name, depends_on):
+        self.organization_name = organization_name
         self.project_name = project_name
         self.auth = ("bachelor_oppgave2024", "hxjg7hxn4q4jitnoglqxlgw2lice6e2556u7ma6ulsxiizcqoiqa")
         self.headers = {"Content-Type": "application/json-patch+json"}
         self.depends_on = depends_on
 
     def create(self, type, title, description, comment):
-        url = f"https://dev.azure.com/bachelor2024/{self.project_name}/_apis/wit/workitems/${type}?api-version=5"
+        url = f"https://dev.azure.com/{self.organization_name}/{self.project_name}/_apis/wit/workitems/${type}?api-version=5"
         json = [
             {
                 "op": "add", 

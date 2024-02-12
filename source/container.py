@@ -160,12 +160,12 @@ class DockerACR:
         pulumi.export("image_name", image.image_name.apply(lambda name: name))
         return image.image_name.apply(lambda name: name)
 
-    def start_container(self, image_name: str, container_name: str, ports: list[int], cpu: float, memory: float) -> str:
+    def start_container(self, docker_acr_image_name: str, container_name: str, ports: list[int], cpu: float, memory: float) -> str:
         """
         Starts a container in a container group.
 
         Args:
-            image_name (str): The name of the Docker image.
+            docker_acr_image_name (str): The name of the Docker image.
             container_name (str): The name of the container.
             ports (list[int]): The list of ports to expose.
             cpu (float): The CPU resource limit for the container.
@@ -187,7 +187,7 @@ class DockerACR:
             containers=[
                 containerinstance.ContainerArgs(
                     name=container_name,
-                    image=image_name,
+                    image=docker_acr_image_name,
                     resources=containerinstance.ResourceRequirementsArgs(
                         requests=containerinstance.ResourceRequestsArgs(
                             cpu=cpu,

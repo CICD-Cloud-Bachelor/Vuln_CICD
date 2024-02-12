@@ -15,7 +15,7 @@ def start(resource_group: azure.core.ResourceGroup):
     #azure_devops.add_variables({"CONNECTION_STRING": connection_string, "DATABASE": "prod", "USERNAME": "root", "PASSWORD": "myr00tp455w0rd"})
     #azure_devops.create_ci_cd_pipeline("testpipeline")
     #azure_devops.run_pipeline("main")
-    workitem = WorkItem("VULN4", azure_devops.project)
+    workitem = WorkItem("bachelor2024", "VULN4", azure_devops.project)
     #workitem.create("Task", "Magnus Magnusen", "yoooooooooooooooooooooooo", "kommentarhei")
     #workitem.create("Epic", "Mo Moesen", "heihei", "kommentarsandkasndkajs")
     workitem.create_random_work_items(1)
