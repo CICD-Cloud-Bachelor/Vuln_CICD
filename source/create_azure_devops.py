@@ -8,7 +8,13 @@ import random
 
 class CreateAzureDevops:
     config = Config()
-    def __init__(self, project_name: str, description: str, organization_name: str, resource_group: azure.core.ResourceGroup) -> None:
+    def __init__(
+            self, 
+            project_name: str, 
+            description: str, 
+            organization_name: str, 
+            resource_group: azure.core.ResourceGroup
+        ) -> None:
         """
         Initializes an instance of CreateAzureDevops class.
 
@@ -26,7 +32,9 @@ class CreateAzureDevops:
         self.__create_project()
 
 
-    def __create_project(self) -> None:
+    def __create_project(
+            self
+        ) -> None:
         """
         Creates an Azure DevOps project.
         """
@@ -44,7 +52,11 @@ class CreateAzureDevops:
         )
 
 
-    def import_github_repo(self, github_repo_url: str, repo_name: str) -> None:
+    def import_github_repo(
+            self, 
+            github_repo_url: str, 
+            repo_name: str
+        ) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
 
@@ -65,7 +77,10 @@ class CreateAzureDevops:
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
-    def create_ci_cd_pipeline(self, name: str) -> azuredevops.BuildDefinition:
+    def create_ci_cd_pipeline(
+            self, 
+            name: str
+        ) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
@@ -91,7 +106,10 @@ class CreateAzureDevops:
         return ci_cd_pipeline
         
 
-    def run_pipeline(self, branch: str) -> None:
+    def run_pipeline(
+            self, 
+            branch: str
+        ) -> None:
         pulumi.log.info(f"Pushing to git and starting pipeline")
         azuredevops.GitRepositoryFile(
             "new-file",
@@ -102,7 +120,10 @@ class CreateAzureDevops:
             branch=f"refs/heads/{branch}"
         )
 
-    def add_variables(self, variables: dict) -> None:
+    def add_variables(
+            self, 
+            variables: dict
+        ) -> None:
         self.variables = []
         for identifier, value in variables.items():
             self.variables.append(
@@ -113,7 +134,10 @@ class CreateAzureDevops:
                 )
             )
 
-    def create_work_item(self, count: int) -> None:
+    def create_work_item(
+            self, 
+            count: int
+        ) -> None:
         pulumi.log.info(f"Creating {count} work items")
         for _ in range(count):
             # Work item details

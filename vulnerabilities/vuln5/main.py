@@ -19,9 +19,15 @@ CONTAINER_NAME1 = "ftp-container"
 CONTAINER_NAME2 = "ftppoller-container"
 
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(resource_group, REGISTRY_NAME)
+    acr = DockerACR(
+        resource_group=resource_group, 
+        registry_name=REGISTRY_NAME
+    )
     
-    acr_string = acr.build_and_push_docker_image(IMAGE_NAME1)
+    acr_string = acr.build_and_push_docker_image(
+        image_name=IMAGE_NAME1
+    )
+
     connection_string = acr.start_container(
         docker_acr_image_name=acr_string, 
         container_name=CONTAINER_NAME1, 
@@ -30,7 +36,10 @@ def start(resource_group: azure.core.ResourceGroup):
         memory=1.0
     )
 
-    acr_string = acr.build_and_push_docker_image(IMAGE_NAME2)
+    acr_string = acr.build_and_push_docker_image(
+        image_name=IMAGE_NAME2
+    )
+    
     acr.start_container(
         docker_acr_image_name=acr_string, 
         container_name=CONTAINER_NAME2, 
@@ -40,13 +49,16 @@ def start(resource_group: azure.core.ResourceGroup):
     )
     
     azure_devops = CreateAzureDevops(
-        PROJECT_NAME, 
-        PROJECT_DESCRIPTION, 
-        ORGANIZATION_NAME, 
-        resource_group
+        project_name=PROJECT_NAME, 
+        description=PROJECT_DESCRIPTION, 
+        organization_name=ORGANIZATION_NAME, 
+        resource_group=resource_group
     )
 
-    azure_devops.import_github_repo(GITHUB_REPO_URL, REPO_NAME)
+    azure_devops.import_github_repo(
+        github_repo_url=GITHUB_REPO_URL, 
+        repo_name=REPO_NAME
+    )
     
     azure_devops.add_variables(
         {

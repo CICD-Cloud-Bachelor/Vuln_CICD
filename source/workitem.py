@@ -1,6 +1,14 @@
 from pulumi.dynamic import ResourceProvider, Resource, CreateResult
 import requests, pulumi, random
 from faker import Faker
+import configparser
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+USERNAME = config["AZURE"]["USERNAME"]
+PAT = config["AZURE"]["PAT"]
+
 
 
 class HttpPostProvider(ResourceProvider):
@@ -24,7 +32,7 @@ class WorkItem:
     def __init__(self, organization_name: str, project_name, depends_on):
         self.organization_name = organization_name
         self.project_name = project_name
-        self.auth = ("bachelor_oppgave2024", "hxjg7hxn4q4jitnoglqxlgw2lice6e2556u7ma6ulsxiizcqoiqa")
+        self.auth = (USERNAME, PAT)
         self.headers = {"Content-Type": "application/json-patch+json"}
         self.depends_on = depends_on
 
