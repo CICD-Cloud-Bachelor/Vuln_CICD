@@ -146,29 +146,6 @@ class CreateAzureDevops:
             
             pulumi.export("work_item_id", work_item.id)
 
-    def add_comment_to_work_item(self, work_item_id: str, comment: str) -> None:
-        pulumi.log.info(f"Adding comment to work item: {work_item_id}")
-        
-        pat = "2pa2zwhvziixle6dblndnzpvuaordle756hmtxyjfuaqvoaeqsna" # Personal Access Token (PAT) with Work Items scope
-        url = f"https://dev.azure.com/MagnusMEriksen/vul2_test/_apis/wit/workItems/{work_item_id}/comments?7.0-preview.3"
-        
-        b64_pat = base64.b64encode(pat.encode("utf-8")).decode("utf-8")
-
-        headers = {
-            "Authorization": f"Basic MnBhMnp3aHZ6aWl4bGU2ZGJsbmRuenB2dWFvcmRsZTc1NmhtdHh5amZ1YXF2b2FlcXNuYTo=", # Use Basic authorization with the PAT
-            "Content-Type": "application/json"
-        }
-
-        data = {
-            "text": comment
-        }
-
-        params = {
-            "api-version": "7.0-preview.3"
-        }
-
-        response = requests.post(url, headers=headers, json=data, params=params)
-        pulumi.log.info(f"Response: {response.status_code} and {response.text}")
 
 
 
