@@ -1,5 +1,5 @@
 import pulumi_azure as azure
-from source.add_users import CreateUsers
+from source.users_groups import CreateUsers
 from source.create_azure_devops import CreateAzureDevops
 from source.container import CreateContainer
 

@@ -65,7 +65,7 @@ class CreateAzureDevops:
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
-    def create_ci_cd_pipeline(self, name: str) -> None:
+    def create_ci_cd_pipeline(self, name: str) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
@@ -74,7 +74,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating CI/CD Pipeline")
         
-        self.ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
+        ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
             project_id=self.project.id,
             name=name,
             repository=azuredevops.BuildDefinitionRepositoryArgs(
@@ -87,7 +87,8 @@ class CreateAzureDevops:
             },
             agent_pool_name="Azure Pipelines",
             variables=self.variables or []
-        )
+            )
+        return ci_cd_pipeline
         
 
     def run_pipeline(self, branch: str) -> None:
@@ -111,30 +112,6 @@ class CreateAzureDevops:
                     is_secret=True,
                 )
             )
-    
-    def create_group(self, group_name: str) -> None:
-        pulumi.log.info("Creating Azure DevOps group")
-        self.group = azuredevops.Group("group",
-            project_id=self.project.id,
-            name=group_name,
-            description=f"{group_name} group"
-        )
-
-    def add_user_to_group(self, user: azuredevops.User, group: azuredevops.Group) -> None:
-        pulumi.log.info(f"Adding user to group")
-        azuredevops.GroupMembership("groupMembership",
-            group=group.descriptor,
-            members=[user.descriptor]
-        )
-
-    def modify_pipeline_permissions(self, group: azuredevops.Group, permissions: dict) -> None:
-        pulumi.log.info("Modifying pipeline permissions for group")
-        azuredevops.BuildDefinitionPermissions("pipelinePermission",
-            project_id=self.project.id,
-            principal=group.id,
-            build_definition_id=self.ci_cd_pipeline.id,
-            permissions=permissions
-        )
 
     def create_work_item(self, count: int) -> None:
         pulumi.log.info(f"Creating {count} work items")
