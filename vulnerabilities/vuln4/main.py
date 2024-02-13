@@ -48,7 +48,7 @@ def start(resource_group: azure.core.ResourceGroup):
     
     azure_devops.add_variables(
         {
-            "CONNECTION_STRING": connection_string, 
+            "CONNECTION_STRING": "aa",#connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
@@ -57,6 +57,10 @@ def start(resource_group: azure.core.ResourceGroup):
     
     azure_devops.create_ci_cd_pipeline(
         name=PIPELINE_NAME
+    )
+
+    azure_devops.run_pipeline(
+        branch="main"
     )
     
     workitem = WorkItem(

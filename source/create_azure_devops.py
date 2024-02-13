@@ -3,11 +3,14 @@ import pulumi_azuredevops as azuredevops
 import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 from pulumi import Config
-import requests
-import random
-import base64
+from REST_api import AzureDevOpsPipelineRun
+import configparser
 
-
+config = configparser.ConfigParser()
+config.read('config.ini')
+ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
+PAT = config["AZURE"]["PAT"]
+USERNAME = config["AZURE"]["USERNAME"]
 
 class CreateAzureDevops:
     config = Config()
@@ -87,7 +90,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating CI/CD Pipeline")
         
-        ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
+        self.ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
             project_id=self.project.id,
             name=name,
             repository=azuredevops.BuildDefinitionRepositoryArgs(
@@ -101,7 +104,7 @@ class CreateAzureDevops:
             agent_pool_name="Azure Pipelines",
             variables=self.variables or []
         )
-        return ci_cd_pipeline
+        return self.ci_cd_pipeline
         
 
     def run_pipeline(
@@ -109,13 +112,15 @@ class CreateAzureDevops:
             branch: str
         ) -> None:
         pulumi.log.info(f"Pushing to git and starting pipeline")
-        azuredevops.GitRepositoryFile(
-            "new-file",
-            repository_id=self.git_repo.id,
-            file=".ignoreme",
-            content="Ignore me, this file is only here to trigger a pipeline run",
-            commit_message="Add .ignoreme",
-            branch=f"refs/heads/{branch}"
+        AzureDevOpsPipelineRun(
+            name="myPipelineRun",
+            organization=ORGANIZATION_NAME,
+            username=USERNAME,
+            project=self.project,
+            personal_access_token=PAT,
+            pipeline_id=self.ci_cd_pipeline.id,
+            source_branch=branch,
+            opts=pulumi.ResourceOptions(parent=self.ci_cd_pipeline)
         )
 
     def add_variables(
@@ -132,43 +137,5 @@ class CreateAzureDevops:
                 )
             )
 
-    def create_work_item(
-            self, 
-            count: int
-        ) -> None:
-        pulumi.log.info(f"Creating {count} work items")
 
-        for _ in range(count):
-            # Work item details
-            # Randomly select a work item type from the predefined list
-            self.work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"]) if work_item_type is None else work_item_type
-
-            # Randomly select a work item title based on the work item type
-            self.work_item_title = random.choice([
-                "Investigate production outage",
-                "Add new feature",
-                "Update documentation",
-                "Refactor code",
-                "Fix bug",
-                "Add tests",
-                "Update dependencies",
-                "Add new endpoint"
-            ]) if work_item_title is None else work_item_title
-           
-            self.work_item_state = "New" if work_item_state is None else work_item_state
-
-            # Create a new Azure DevOps work item in the provided project
-            work_item = azuredevops.Workitem("workItem_" + self.work_item_title + str(random.randint(1, 100000)),
-                project_id=self.project.id,
-                type=self.work_item_type,
-                title=self.work_item_title,
-                state=self.work_item_state
-            )
-            
-            pulumi.export("work_item_id", work_item.id)
-
-
-
-
-        
 
