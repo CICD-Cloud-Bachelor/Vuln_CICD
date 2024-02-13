@@ -124,9 +124,9 @@ class GroupCreator:
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/builddefinitionpermissions/
         )
     
-    def modify_git_permissions(project: azuredevops.Project, group: azuredevops.Group, repository: azuredevops.Git, permissions: dict) -> None:
+    def modify_repository_permissions(project: azuredevops.Project, group: azuredevops.Group, repository: azuredevops.Git, permissions: dict) -> None:
         """
-        Modifies the git repository permissions for a specific group.
+        Modifies the git repository level permissions for a specific group. Applied to all branches.
 
         Args:
             project (azuredevops.Project): The Azure DevOps project.
@@ -139,6 +139,29 @@ class GroupCreator:
         """
         pulumi.log.info("Modifying git repository permissions for group")
         azuredevops.GitPermissions("repositoryPermissions",
+            project_id=project.id,
+            principal=group.id,
+            repository_id=repository.id,
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
+        )
+    
+    def modify_branch_permissions(project: azuredevops.Project, group: azuredevops.Group, repository: azuredevops.Git, branch: str, permissions: dict) -> None:
+        """
+        Modifies the git branch level permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            repository (azuredevops.Repository): The Azure DevOps repository.
+            branch (str): The name of the branch.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying git branch permissions for group")
+        azuredevops.GitPermissions("branchPermissions",
             project_id=project.id,
             principal=group.id,
             repository_id=repository.id,
