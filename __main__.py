@@ -8,9 +8,9 @@ from pulumi import Config
 
 config = Config("azure-native")
 location = config.get("location")
-resource_group = azure.core.ResourceGroup('resource-group', location=location)
+resource_group = azure.core.ResourceGroup('resource-group1', location=location)
 
 #vuln1.start()
-vul2.start(resource_group)
+vul2.start()
 #vuln4.start(resource_group)
 #vuln5.start(resource_group)
