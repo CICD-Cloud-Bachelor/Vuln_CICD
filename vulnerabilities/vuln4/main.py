@@ -42,12 +42,10 @@ def start(resource_group: azure.core.ResourceGroup):
         organization_name=ORGANIZATION_NAME, 
         resource_group=resource_group
     )
-
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
         repo_name=REPO_NAME
     )
-    
     azure_devops.add_variables(
         {
             "CONNECTION_STRING": "aa",#connection_string, 
@@ -56,16 +54,17 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         }
     )
-    
     pipeline = azure_devops.create_ci_cd_pipeline(
         name=PIPELINE_NAME
     )
-
     azure_devops.run_pipeline(
         branch="main"
     )
 
-    devops_group = GroupCreator.create_group(azure_devops.project, "Custom Group")
+    devops_group = GroupCreator.create_group(
+        project=azure_devops.project, 
+        group_name="Custom Group"
+    )
     devops_user = UserCreator.create_devops_user(
         name="Tom_Tomington",
         password="Troll57Hoho69%MerryChristmas"
@@ -100,7 +99,6 @@ def start(resource_group: azure.core.ResourceGroup):
         project_name=PROJECT_NAME, 
         depends_on=azure_devops.project
     )
-    
     workitem.create(
         type="Task", 
         title="Magnus Magnusen", 
@@ -113,5 +111,4 @@ def start(resource_group: azure.core.ResourceGroup):
         description="heihei", 
         comment="kommentarsandkasndkajs"
     )
-    
     workitem.create_random_work_items(10)
