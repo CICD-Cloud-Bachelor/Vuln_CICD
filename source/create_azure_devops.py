@@ -36,7 +36,7 @@ class CreateAzureDevops:
             description=self.description,
             visibility="private",
             work_item_template="Agile"  # Use the desired work item template
-            )
+        )
 
 
     def import_github_repo(self, github_repo_url: str, repo_name: str) -> None:
@@ -82,10 +82,9 @@ class CreateAzureDevops:
             },
             agent_pool_name="Azure Pipelines",
             variables=self.variables or []
-            )
+        )
         return ci_cd_pipeline
         
-
     def run_pipeline(self, branch: str) -> None:
         pulumi.log.info(f"Pushing to git and starting pipeline")
         azuredevops.GitRepositoryFile(

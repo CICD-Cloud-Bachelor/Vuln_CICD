@@ -29,10 +29,8 @@ class UserCreator:
                 password = password,
                 force_password_change = False # Set to True if you want to force a password change on first login
                 )
-            pulumi.export(f"{name}_entra_user_id", entra_user.id)
 
             return entra_user
-
 
     def create_devops_user(name: str, password: str) -> azuredevops.User:
             """
@@ -51,10 +49,8 @@ class UserCreator:
             devops_user = azuredevops.User(f"{name}",
                 principal_name = entra_user.user_principal_name
                 )
-            pulumi.export(f"{name}_devops_user_id", devops_user.id)
 
             return devops_user
-
 
     def __randomPass(self) -> str:
         return self.fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
@@ -73,8 +69,8 @@ class GroupCreator:
         Returns:
             azuredevops.Group: The created Azure DevOps group.
         """
-        pulumi.log.info("Creating Azure DevOps group")
-        group = azuredevops.Group("customGroup",
+        pulumi.log.info(f"Creating Azure DevOps group: {group_name}")
+        group = azuredevops.Group(f"customGroup_{group_name}",
             scope=project.id,
             display_name=group_name,
             description="Custom made permissions for devops"
@@ -92,7 +88,7 @@ class GroupCreator:
         Returns:
             None
         """
-        pulumi.log.info(f"Adding user to group")
+        pulumi.log.info("Adding user to group")
         azuredevops.GroupMembership("groupMembership",
             group=group.descriptor,
             members=[user.descriptor]
@@ -103,9 +99,8 @@ class GroupCreator:
             project_id=project.id,
             principal=group.id,
             permissions=permissions
-            )
+        )
         # Link to permissions overview https://www.pulumi.com/registry/packages/azuredevops/api-docs/projectpermissions/
-
 
     def modify_pipeline_permissions(project: azuredevops.Project, group: azuredevops.Group, pipeline: azuredevops.BuildDefinition, permissions: dict) -> None:
         """
@@ -121,11 +116,32 @@ class GroupCreator:
             None
         """
         pulumi.log.info("Modifying pipeline permissions for group")
-        azuredevops.BuildDefinitionPermissions("pipelinePermission",
+        azuredevops.BuildDefinitionPermissions("pipelinePermissions",
             project_id=project.id,
             principal=group.id,
             build_definition_id=pipeline.id,
             permissions=permissions
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/builddefinitionpermissions/
         )
-        
+    
+    def modify_git_permissions(project: azuredevops.Project, group: azuredevops.Group, repository: azuredevops.Git, permissions: dict) -> None:
+        """
+        Modifies the git repository permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            repository (azuredevops.Repository): The Azure DevOps repository.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying git repository permissions for group")
+        azuredevops.GitPermissions("repositoryPermissions",
+            project_id=project.id,
+            principal=group.id,
+            repository_id=repository.id,
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
+        )
