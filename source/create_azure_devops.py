@@ -141,7 +141,7 @@ class CreateAzureDevops:
         for _ in range(count):
             # Work item details
             # Randomly select a work item type from the predefined list
-            self.work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"]) if work_item_type is None else work_item_type
+            self.work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"])
 
             # Randomly select a work item title based on the work item type
             self.work_item_title = random.choice([
@@ -153,9 +153,9 @@ class CreateAzureDevops:
                 "Add tests",
                 "Update dependencies",
                 "Add new endpoint"
-            ]) if work_item_title is None else work_item_title
+            ]) 
            
-            self.work_item_state = "New" if work_item_state is None else work_item_state
+            self.work_item_state = "New" 
 
             # Create a new Azure DevOps work item in the provided project
             work_item = azuredevops.Workitem("workItem_" + self.work_item_title + str(random.randint(1, 100000)),
