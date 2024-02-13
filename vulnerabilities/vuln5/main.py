@@ -1,6 +1,7 @@
 import pulumi_azure as azure
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
+from source.workitem import WorkItem
 import configparser
 
 config = configparser.ConfigParser()
@@ -15,7 +16,7 @@ REPO_NAME = "VULN5_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
-CONTAINER_NAME1 = "ftp-container"
+CONTAINER_NAME1 = "ftpserver-container"
 CONTAINER_NAME2 = "ftppoller-container"
 
 def start(resource_group: azure.core.ResourceGroup):
@@ -39,7 +40,7 @@ def start(resource_group: azure.core.ResourceGroup):
     acr_string = acr.build_and_push_docker_image(
         image_name=IMAGE_NAME2
     )
-    
+
     acr.start_container(
         docker_acr_image_name=acr_string, 
         container_name=CONTAINER_NAME2, 
@@ -69,3 +70,13 @@ def start(resource_group: azure.core.ResourceGroup):
     )
     
     azure_devops.create_ci_cd_pipeline(PIPELINE_NAME)
+
+    workitem = WorkItem(
+        organization_name=ORGANIZATION_NAME, 
+        project_name=PROJECT_NAME, 
+        depends_on=azure_devops.project
+    )
+
+    workitem.create_random_work_items(20)
+
+

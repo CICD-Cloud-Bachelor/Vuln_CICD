@@ -122,7 +122,7 @@ class DockerACR:
         """
         pulumi.log.info(f"Creating registry: {self.registry_name}")
         self.registry = azure_native.containerregistry.Registry(
-            self.registry_name,
+            resource_name=self.registry_name,
             resource_group_name=self.resource_group.name,
             sku=azure_native.containerregistry.SkuArgs(
                 name="Basic"
@@ -141,43 +141,31 @@ class DockerACR:
 
     def build_and_push_docker_image(
             self, 
-            image_name: str
+            image_name: str #image name needs to be same as in github repo
         ) -> str:
-        """
-        Builds and pushes a Docker image to the registry.
-
-        Args:
-            image_name (str): The name of the Docker image.
-
-        Returns:
-            str: The name of the pushed Docker image.
-
-        """
-        pulumi.log.info(f"Building and pushing docker image: {image_name}")
-        
-        image_context_path = f"source/docker_images/{image_name}"
-        dockerfile_path = f"{image_context_path}/Dockerfile" 
-        image_name_with_tag = pulumi.Output.all(self.registry.login_server, image_name, self.IMAGE_TAG).apply(lambda args: f"{args[0].lower()}/{args[1]}:{args[2]}")
-        
-        # Define a Docker image resource that builds and pushes the image
-        image = docker.Image(
-            image_name,
-            image_name=image_name_with_tag,
-            build=docker.DockerBuildArgs(
-                context=image_context_path,
-                dockerfile=dockerfile_path,
-                platform="linux/amd64",
+        pulumi.log.info(f"Building and pushing Docker image: {image_name}")
+        self.task = azure_native.containerregistry.TaskRun(f"taskRun{image_name}",
+            force_update_tag="test",
+            location=self.resource_group.location,
+            registry_name=self.registry.name,
+            resource_group_name=self.resource_group.name,
+            run_request=azure_native.containerregistry.DockerBuildRequestArgs(
+                source_location=f"https://github.com/CICD-Cloud-Bachelor/Docker_Images.git#:{image_name}",
+                docker_file_path="Dockerfile",
+                image_names=[f"image/{image_name}:{self.IMAGE_TAG}"],
+                is_push_enabled=True,
+                no_cache=False,
+                type="Docker",
+                platform=azure_native.containerregistry.PlatformPropertiesArgs(
+                    # architecture="amd64",
+                    os="Linux",
+                ),
             ),
-            registry=docker.RegistryArgs(
-                server=self.registry.login_server.apply(lambda server: server),
-                username=self.credentials.apply(lambda creds: creds.username),
-                password=self.credentials.apply(lambda creds: creds.passwords[0].value),
-            ),
-            skip_push=False,
-        )
+            task_run_name=f"myRunbuild{image_name}"
+        )   
+        
+        return self.registry.login_server.apply(lambda login_server: f"{login_server}/image/{image_name}:{self.IMAGE_TAG}")
 
-        pulumi.export("image_name", image.image_name.apply(lambda name: name))
-        return image.image_name.apply(lambda name: name)
 
     def start_container(
             self, 
@@ -236,6 +224,7 @@ class DockerACR:
                 dns_name_label=f"{container_name}{DNS_LABEL}", # optional
             ),
             restart_policy="OnFailure",
+            opts=pulumi.ResourceOptions(depends_on=[self.task])
         )
 
         # Construct the FQDN
