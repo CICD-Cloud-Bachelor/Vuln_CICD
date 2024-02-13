@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # FTP server URL including the path to s.zip
-REMOTE_FTP="ftp://ftpshared:MAsds8ASDsadm82988@ftp-containerpulumibachelorproject.westus2.azurecontainer.io/home/ftpshared/ftp/s.zip"
+REMOTE_FTP="ftp://ftpshared:MAsds8ASDsadm82988@ftppoller-containerpulumibachelorproject.westeurope.azurecontainer.io/home/ftpshared/ftp/s.zip"
 LOCAL_ZIP="/ftp/s.zip"
 PREV_HASH=""
 

@@ -4,6 +4,12 @@ import pulumi_docker as docker
 import pulumi_azure_native as azure_native
 from pulumi_azure_native import containerinstance, resources
 from pulumi_azure_native import network, dbformysql
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+DNS_LABEL = config["DOCKER"]["DNS_LABEL"]
+
 
 class CreateContainer:
     """
@@ -18,7 +24,15 @@ class CreateContainer:
         cpu (int): The CPU limit for the container.
     """
 
-    def __init__(self, resource_group, name: str, image: str, memory: float, port: int, cpu: int):
+    def __init__(
+            self, 
+            resource_group: azure.core.ResourceGroup, 
+            name: str, 
+            image: str, 
+            memory: float, 
+            port: int, 
+            cpu: int
+        ) -> None:
         self.resource_group = resource_group
         self.name = name
         self.image = image
@@ -74,7 +88,6 @@ class DockerACR:
 
     Attributes:
         IMAGE_TAG (str): The tag for the Docker image.
-        DNS_LABEL (str): The DNS label for the container group.
 
     Methods:
         __init__(self, resource_group, registry_name): Initializes a new instance of the DockerACR class.
@@ -85,11 +98,14 @@ class DockerACR:
     """
 
     IMAGE_TAG = "v1.0"
-    DNS_LABEL = "pulumibachelorproject"
 
-    def __init__(self, resource_group, registry_name) -> None:
+    def __init__(
+            self, 
+            resource_group: azure.core.ResourceGroup, 
+            registry_name: str
+        ) -> None:
         """
-        Initializes a new instance of the DockerACR class.
+        Initializes a new instance of the Docker Azure Container Registry class.
 
         Args:
             resource_group (pulumi.ResourceGroup): The resource group where the registry will be created.
@@ -106,7 +122,7 @@ class DockerACR:
         """
         pulumi.log.info(f"Creating registry: {self.registry_name}")
         self.registry = azure_native.containerregistry.Registry(
-            self.registry_name,
+            resource_name=self.registry_name,
             resource_group_name=self.resource_group.name,
             sku=azure_native.containerregistry.SkuArgs(
                 name="Basic"
@@ -123,49 +139,47 @@ class DockerACR:
             )
         )
 
-    def build_and_push_docker_image(self, image_name: str) -> str:
-        """
-        Builds and pushes a Docker image to the registry.
-
-        Args:
-            image_name (str): The name of the Docker image.
-
-        Returns:
-            str: The name of the pushed Docker image.
-
-        """
-        pulumi.log.info(f"Building and pushing docker image: {image_name}")
-        
-        image_context_path = f"source/docker_images/{image_name}"
-        dockerfile_path = f"{image_context_path}/Dockerfile" 
-        image_name_with_tag = pulumi.Output.all(self.registry.login_server, image_name, self.IMAGE_TAG).apply(lambda args: f"{args[0].lower()}/{args[1]}:{args[2]}")
-        
-        # Define a Docker image resource that builds and pushes the image
-        image = docker.Image(
-            image_name,
-            image_name=image_name_with_tag,
-            build=docker.DockerBuildArgs(
-                context=image_context_path,
-                dockerfile=dockerfile_path,
-                platform="linux/amd64",
+    def build_and_push_docker_image(
+            self, 
+            image_name: str #image name needs to be same as in github repo
+        ) -> str:
+        pulumi.log.info(f"Building and pushing Docker image: {image_name}")
+        self.task = azure_native.containerregistry.TaskRun(f"taskRun{image_name}",
+            force_update_tag="test",
+            location=self.resource_group.location,
+            registry_name=self.registry.name,
+            resource_group_name=self.resource_group.name,
+            run_request=azure_native.containerregistry.DockerBuildRequestArgs(
+                source_location=f"https://github.com/CICD-Cloud-Bachelor/Docker_Images.git#:{image_name}",
+                docker_file_path="Dockerfile",
+                image_names=[f"image/{image_name}:{self.IMAGE_TAG}"],
+                is_push_enabled=True,
+                no_cache=False,
+                type="Docker",
+                platform=azure_native.containerregistry.PlatformPropertiesArgs(
+                    # architecture="amd64",
+                    os="Linux",
+                ),
             ),
-            registry=docker.RegistryArgs(
-                server=self.registry.login_server.apply(lambda server: server),
-                username=self.credentials.apply(lambda creds: creds.username),
-                password=self.credentials.apply(lambda creds: creds.passwords[0].value),
-            ),
-            skip_push=False,
-        )
+            task_run_name=f"myRunbuild{image_name}"
+        )   
+        
+        return self.registry.login_server.apply(lambda login_server: f"{login_server}/image/{image_name}:{self.IMAGE_TAG}")
 
-        pulumi.export("image_name", image.image_name.apply(lambda name: name))
-        return image.image_name.apply(lambda name: name)
 
-    def start_container(self, image_name: str, container_name: str, ports: list[int], cpu: float, memory: float) -> str:
+    def start_container(
+            self, 
+            docker_acr_image_name: str, 
+            container_name: str, 
+            ports: list[int], 
+            cpu: float, 
+            memory: float
+        ) -> str:
         """
         Starts a container in a container group.
 
         Args:
-            image_name (str): The name of the Docker image.
+            docker_acr_image_name (str): The name of the Docker image.
             container_name (str): The name of the container.
             ports (list[int]): The list of ports to expose.
             cpu (float): The CPU resource limit for the container.
@@ -187,7 +201,7 @@ class DockerACR:
             containers=[
                 containerinstance.ContainerArgs(
                     name=container_name,
-                    image=image_name,
+                    image=docker_acr_image_name,
                     resources=containerinstance.ResourceRequirementsArgs(
                         requests=containerinstance.ResourceRequestsArgs(
                             cpu=cpu,
@@ -207,14 +221,15 @@ class DockerACR:
             ip_address=containerinstance.IpAddressArgs(
                 ports=[containerinstance.PortArgs(protocol="TCP", port=p) for p in ports],
                 type="Public",
-                dns_name_label=f"{container_name}{self.DNS_LABEL}", # optional
+                dns_name_label=f"{container_name}{DNS_LABEL}", # optional
             ),
             restart_policy="OnFailure",
+            opts=pulumi.ResourceOptions(depends_on=[self.task])
         )
 
         # Construct the FQDN
         fqdn = pulumi.Output.all(container_group.name, container_group.location).apply(
-            lambda args: f"{container_name}{self.DNS_LABEL}.{args[1]}.azurecontainer.io"
+            lambda args: f"{container_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
         )
 
         return fqdn
