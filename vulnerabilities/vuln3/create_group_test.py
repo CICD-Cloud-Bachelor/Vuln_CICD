@@ -51,14 +51,6 @@ def start():
         devops_user, 
         custom_group
     )
-    
-    GroupCreator.modify_project_permission(
-        create_devops.project, 
-        custom_group,
-        permissions = {
-            "GENERIC_READ": "Allow"
-        }
-    )
 
     # Give custom_group read permissions to the devops project
     GroupCreator.modify_project_permission(
