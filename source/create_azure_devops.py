@@ -3,7 +3,7 @@ import pulumi_azuredevops as azuredevops
 import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 from pulumi import Config
-from REST_api import AzureDevOpsPipelineRun
+from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
 import configparser
 
 config = configparser.ConfigParser()

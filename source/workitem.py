@@ -2,7 +2,7 @@ from pulumi.dynamic import ResourceProvider, Resource, CreateResult
 import pulumi_azuredevops as azuredevops
 import pulumi, random
 import configparser
-from REST_api import HttpPostResource
+from source.azure_devops_rest_api import HttpPostResource
 
 config = configparser.ConfigParser()
 config.read('config.ini')
