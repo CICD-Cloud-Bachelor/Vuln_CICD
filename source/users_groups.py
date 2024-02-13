@@ -1,67 +1,147 @@
 from faker import Faker
 import pulumi
 import pulumi_azuredevops as azuredevops
+import configparser
 from pulumi_azuread import User
 
-
+config = configparser.ConfigParser()
+config.read('config.ini')
+DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
     fake = Faker()
-    
-    def __init__(self, domain: str) -> None:
-        self.domain = domain
 
-    def __create_entra_user(self, name: str, password: str) -> None:
-        pulumi.log.info(f"Creating user in Azure AD (Entra): {name}")
-        self.entra_user = User(f"{name}",
-            display_name = name,
-            user_principal_name = f"{name.replace(' ', '.')}@{self.domain}",
-            password = password,
-            force_password_change = False # Set to True if you want to force a password change on first login
-            )
-        pulumi.export(f"{name}_entra_user_id", self.entra_user.id)
+    def create_entra_user(name: str, password: str) -> User:
+            """
+            Creates a user in Entra (Azure AD).
 
-    def create_devops_user(self, name: str, password: str) -> User:
-        self.__create_entra_user(name, password)
+            Args:
+                name (str): The name of the user.
+                password (str): The password for the user.
 
-        pulumi.log.info(f"Creating user in Azure DevOps: {name}")
-        self.devops_user = azuredevops.User(f"{name}",
-            principal_name = self.entra_user.user_principal_name
-            )
-        pulumi.export(f"{name}_devops_user_id", self.devops_user.id)
-        return self.devops_user
+            Returns:
+                None
+            """
+            pulumi.log.info(f"Creating user in Entra (Azure AD): {name}")
+            entra_user = User(f"{name}",
+                display_name = name,
+                user_principal_name = f"{name.replace(' ', '.')}@{DOMAIN}",
+                password = password,
+                force_password_change = False # Set to True if you want to force a password change on first login
+                )
+
+            return entra_user
+
+    def create_devops_user(name: str, password: str) -> azuredevops.User:
+            """
+            Creates a user in Azure DevOps.
+
+            Args:
+                name (str): The name of the user.
+                password (str): The password for the user.
+
+            Returns:
+                User: The created user object in Azure DevOps.
+            """
+            entra_user = UserCreator.create_entra_user(name, password)
+
+            pulumi.log.info(f"Creating user in Azure DevOps: {name}")
+            devops_user = azuredevops.User(f"{name}",
+                principal_name = entra_user.user_principal_name
+                )
+
+            return devops_user
 
     def __randomPass(self) -> str:
         return self.fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
 
 
 class GroupCreator:
-    def __init__(self) -> None:
-        pass
 
-    def create_group(self, project: azuredevops.Project, group_name: str) -> azuredevops.Group:
-        pulumi.log.info("Creating Azure DevOps group")
-        group = azuredevops.Group("group",
-            project_id=project.id,
-            name=group_name,
-            description=f"{group_name} group"
+    def create_group(project: azuredevops.Project, group_name: str) -> azuredevops.Group:
+        """
+        Creates an Azure DevOps group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group_name (str): The name of the group.
+
+        Returns:
+            azuredevops.Group: The created Azure DevOps group.
+        """
+        pulumi.log.info(f"Creating Azure DevOps group: {group_name}")
+        group = azuredevops.Group(f"customGroup_{group_name}",
+            scope=project.id,
+            display_name=group_name,
+            description="Custom made permissions for devops"
         )
         return group
 
     def add_user_to_group(user: azuredevops.User, group: azuredevops.Group) -> None:
-        pulumi.log.info(f"Adding user to group")
+        """
+        Adds a user to a group in Azure DevOps.
+
+        Args:
+            user (azuredevops.User): The user to be added.
+            group (azuredevops.Group): The group to add the user to.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Adding user to group")
         azuredevops.GroupMembership("groupMembership",
             group=group.descriptor,
             members=[user.descriptor]
         )
+    
+    def modify_project_permission(project: azuredevops.Project, group: azuredevops.Group, permissions: dict):
+        azuredevops.ProjectPermissions("projectPermissions",
+            project_id=project.id,
+            principal=group.id,
+            permissions=permissions
+        )
+        # Link to permissions overview https://www.pulumi.com/registry/packages/azuredevops/api-docs/projectpermissions/
 
     def modify_pipeline_permissions(project: azuredevops.Project, group: azuredevops.Group, pipeline: azuredevops.BuildDefinition, permissions: dict) -> None:
+        """
+        Modifies the pipeline permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            pipeline (azuredevops.BuildDefinition): The Azure DevOps pipeline.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
         pulumi.log.info("Modifying pipeline permissions for group")
-        azuredevops.BuildDefinitionPermissions("pipelinePermission",
+        azuredevops.BuildDefinitionPermissions("pipelinePermissions",
             project_id=project.id,
             principal=group.id,
             build_definition_id=pipeline.id,
             permissions=permissions
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/builddefinitionpermissions/
         )
-        
+    
+    def modify_git_permissions(project: azuredevops.Project, group: azuredevops.Group, repository: azuredevops.Git, permissions: dict) -> None:
+        """
+        Modifies the git repository permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            repository (azuredevops.Repository): The Azure DevOps repository.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying git repository permissions for group")
+        azuredevops.GitPermissions("repositoryPermissions",
+            project_id=project.id,
+            principal=group.id,
+            repository_id=repository.id,
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
+        )
