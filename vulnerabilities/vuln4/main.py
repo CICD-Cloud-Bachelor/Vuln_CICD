@@ -4,7 +4,9 @@ from source.container import DockerACR
 from source.workitem import WorkItem
 from source.users_groups import GroupCreator, UserCreator
 import configparser
+from faker import Faker
 
+faker = Faker()
 config = configparser.ConfigParser()
 config.read('config.ini')
 ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
@@ -19,22 +21,22 @@ IMAGE_NAME = "mysqldb"
 CONTAINER_NAME = "mysql-container"
 
 def start(resource_group: azure.core.ResourceGroup):
-    # acr = DockerACR(
-    #     resource_group=resource_group, 
-    #     registry_name=REGISTRY_NAME
-    # )
+    acr = DockerACR(
+        resource_group=resource_group, 
+        registry_name=REGISTRY_NAME
+    )
     
-    # acr_string = acr.build_and_push_docker_image(
-    #     image_name=IMAGE_NAME
-    # )
+    acr_string = acr.build_and_push_docker_image(
+        image_name=IMAGE_NAME
+    )
 
-    # connection_string = acr.start_container(
-    #     docker_acr_image_name=acr_string, 
-    #     container_name=CONTAINER_NAME, 
-    #     ports=[3306], 
-    #     cpu=1.0, 
-    #     memory=1.0
-    # )
+    connection_string = acr.start_container(
+        docker_acr_image_name=acr_string, 
+        container_name=CONTAINER_NAME, 
+        ports=[3306], 
+        cpu=1.0, 
+        memory=1.0
+    )
     
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -48,7 +50,7 @@ def start(resource_group: azure.core.ResourceGroup):
     )
     azure_devops.add_variables(
         {
-            "CONNECTION_STRING": "aa",#connection_string, 
+            "CONNECTION_STRING": connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
@@ -66,7 +68,7 @@ def start(resource_group: azure.core.ResourceGroup):
         group_name="Custom Group"
     )
     devops_user = UserCreator.create_devops_user(
-        name="Tom_Tomington",
+        name=faker.name(),
         password="Troll57Hoho69%MerryChristmas"
     )
     GroupCreator.add_user_to_group(devops_user, devops_group)
@@ -74,7 +76,8 @@ def start(resource_group: azure.core.ResourceGroup):
         project=azure_devops.project, 
         group=devops_group, 
         permissions={
-            "GENERIC_READ": "Allow"
+            "GENERIC_READ": "Allow",
+            "WORK_ITEM_MOVE": "Allow"
         }
     )
     GroupCreator.modify_pipeline_permissions(
@@ -82,10 +85,11 @@ def start(resource_group: azure.core.ResourceGroup):
         group=devops_group, 
         pipeline=pipeline, 
         permissions={
-            "ViewBuilds": "Allow"
+            "ViewBuilds": "Allow",
+            "ViewBuildDefinition": "Allow"
         }
     )
-    GroupCreator.modify_git_permissions(
+    GroupCreator.modify_repository_permissions(
         project=azure_devops.project, 
         group=devops_group, 
         repository=azure_devops.git_repo,
