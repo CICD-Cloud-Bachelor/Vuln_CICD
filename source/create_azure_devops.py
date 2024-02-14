@@ -2,6 +2,7 @@ import pulumi
 import pulumi_azuredevops as azuredevops
 import pulumi_azure_native as azure_native
 import pulumi_azure as azure
+import os
 from pulumi import Config
 from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
 import configparser
@@ -14,13 +15,11 @@ USERNAME = config["AZURE"]["USERNAME"]
 
 class CreateAzureDevops:
     config = Config()
-    def __init__(
-            self, 
+    def __init__(self, 
             project_name: str, 
             description: str, 
             organization_name: str, 
-            resource_group: azure.core.ResourceGroup
-        ) -> None:
+            resource_group: azure.core.ResourceGroup) -> None:
         """
         Initializes an instance of CreateAzureDevops class.
 
@@ -45,7 +44,7 @@ class CreateAzureDevops:
         Creates an Azure DevOps project.
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
-        self.project = azuredevops.Project("project",
+        self.project = azuredevops.Project("project_" + os.urandom(5).hex(),
             name=self.project_name,
             description=self.description,
             visibility="private",
@@ -53,11 +52,9 @@ class CreateAzureDevops:
         )
 
 
-    def import_github_repo(
-            self, 
+    def import_github_repo(self, 
             github_repo_url: str, 
-            repo_name: str
-        ) -> None:
+            repo_name: str) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
 
@@ -66,7 +63,7 @@ class CreateAzureDevops:
             repo_name (str): The name of the repository in Azure DevOps.
         """
         pulumi.log.info(f"Importing GitHub repository: {github_repo_url}")
-        self.git_repo = azuredevops.Git("gitRepo",
+        self.git_repo = azuredevops.Git("gitRepo_" + os.urandom(5).hex(),
             name=repo_name,
             project_id=self.project.id,
             default_branch="refs/heads/main",
@@ -78,10 +75,8 @@ class CreateAzureDevops:
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
-    def create_ci_cd_pipeline(
-            self, 
-            name: str
-        ) -> azuredevops.BuildDefinition:
+    def create_ci_cd_pipeline(self, 
+            name: str) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
