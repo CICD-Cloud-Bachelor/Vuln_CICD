@@ -20,34 +20,30 @@ CONTAINER_NAME1 = "ftpserver-container"
 CONTAINER_NAME2 = "ftppoller-container"
 
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-        registry_name=REGISTRY_NAME
-    )
-    
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME1
-    )
-
-    connection_string = acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME1, 
-        ports=[21,10000], 
-        cpu=1.0, 
-        memory=1.0
-    )
-
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME2
-    )
-
-    acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME2, 
-        ports=[21,10000], 
-        cpu=1.0, 
-        memory=1.0
-    )
+    # acr = DockerACR(
+    #     resource_group=resource_group, 
+    #     registry_name=REGISTRY_NAME
+    # )
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME1
+    # )
+    # connection_string = acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME1, 
+    #     ports=[21,10000], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME2
+    # )
+    # acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME2, 
+    #     ports=[21,10000], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
     
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -55,28 +51,27 @@ def start(resource_group: azure.core.ResourceGroup):
         organization_name=ORGANIZATION_NAME, 
         resource_group=resource_group
     )
-
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
         repo_name=REPO_NAME
     )
-    
     azure_devops.add_variables(
         {
-            "FTP_HOST": connection_string, 
+            "FTP_HOST": "a2",#connection_string, 
             "FTP_USER": "ftpshared", 
             "FTP_PASS": "MAsds8ASDsadm82988"
         }
     )
-    
     azure_devops.create_ci_cd_pipeline(PIPELINE_NAME)
+    azure_devops.run_pipeline(
+        branch="main"
+    )
 
     workitem = WorkItem(
         organization_name=ORGANIZATION_NAME, 
         project_name=PROJECT_NAME, 
         depends_on=azure_devops.project
     )
-
     workitem.create_random_work_items(20)
 
 

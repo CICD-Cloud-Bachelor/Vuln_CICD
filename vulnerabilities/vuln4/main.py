@@ -1,4 +1,5 @@
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 from source.workitem import WorkItem
@@ -21,22 +22,22 @@ IMAGE_NAME = "mysqldb"
 CONTAINER_NAME = "mysql-container"
 
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-        registry_name=REGISTRY_NAME
-    )
+    # acr = DockerACR(
+    #     resource_group=resource_group, 
+    #     registry_name=REGISTRY_NAME
+    # )
     
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME
-    )
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME
+    # )
 
-    connection_string = acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME, 
-        ports=[3306], 
-        cpu=1.0, 
-        memory=1.0
-    )
+    # connection_string = acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME, 
+    #     ports=[3306], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
     
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -50,7 +51,7 @@ def start(resource_group: azure.core.ResourceGroup):
     )
     azure_devops.add_variables(
         {
-            "CONNECTION_STRING": connection_string, 
+            "CONNECTION_STRING": "a",#connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
@@ -67,17 +68,25 @@ def start(resource_group: azure.core.ResourceGroup):
         project=azure_devops.project, 
         group_name="Custom Group"
     )
+    project_collection_valid_users_group = azuredevops.get_group(
+        project_id=azure_devops.project.id,
+        name="Project Collection Valid Users"
+    )
     devops_user = UserCreator.create_devops_user(
         name=faker.name(),
         password="Troll57Hoho69%MerryChristmas"
     )
     GroupCreator.add_user_to_group(devops_user, devops_group)
+    GroupCreator.add_user_to_group(devops_user, project_collection_valid_users_group)
     GroupCreator.modify_project_permission(
         project=azure_devops.project, 
         group=devops_group, 
         permissions={
             "GENERIC_READ": "Allow",
-            "WORK_ITEM_MOVE": "Allow"
+            "WORK_ITEM_MOVE": "Allow",
+            "WORK_ITEM_DELETE": "Allow",
+            "WORK_ITEM_PERMANENTLY_DELETE": "Allow",
+            "BYPASS_RULES": "Allow"
         }
     )
     GroupCreator.modify_pipeline_permissions(
@@ -97,6 +106,16 @@ def start(resource_group: azure.core.ResourceGroup):
             "GenericRead": "Allow"
         }
     ) 
+    GroupCreator.modify_area_permissions(
+        project=azure_devops.project, 
+        group=devops_group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+            "WORK_ITEM_READ": "Allow",
+            "WORK_ITEM_WRITE": "Allow"
+        }
+    )
     
     workitem = WorkItem(
         organization_name=ORGANIZATION_NAME, 
@@ -107,7 +126,8 @@ def start(resource_group: azure.core.ResourceGroup):
         type="Task", 
         title="Magnus Magnusen", 
         description="yoooooooooooooooooooooooo", 
-        comment="kommentarhei"
+        comment="kommentarhei",
+        email=devops_user.principal_name
     )
     workitem.create(
         type="Epic", 

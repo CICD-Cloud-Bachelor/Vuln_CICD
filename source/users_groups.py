@@ -168,3 +168,28 @@ class GroupCreator:
             permissions=permissions
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
         )
+
+    def modify_area_permissions(
+        project: azuredevops.Project,
+        group: azuredevops.Group,
+        permissions: dict
+    ) -> None:
+        """
+        Modifies the area permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying area permissions for group")
+        azuredevops.AreaPermissions("areaPermissions",
+            project_id=project.id,
+            principal=group.id,
+            path="/",
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/areapermissions/
+        )

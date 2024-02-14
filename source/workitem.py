@@ -29,7 +29,8 @@ class WorkItem:
             type: str, 
             title: str, 
             description: str, 
-            comment: str
+            comment: str,
+            email: str = None
         ) -> None:
 
         url = f"https://dev.azure.com/{self.organization_name}/{self.project_name}/_apis/wit/workitems/${type}?api-version=5"
@@ -53,6 +54,16 @@ class WorkItem:
                 "value": comment
             }
         ]
+        if email is not None:
+            json.append(
+                {
+                    "op": "add",
+                    "path": "/fields/System.AssignedTo", 
+                    "from": "null",
+                    "value": email
+                }
+            )
+
         self.index += 1
         HttpPostResource(
             name=f"workitem{self.index}",
