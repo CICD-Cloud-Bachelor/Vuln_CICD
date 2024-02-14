@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_azuredevops as azuredevops
 import pulumi_azure as azure
+import os
 from pulumi import Config
 import random
 
@@ -8,7 +9,11 @@ import random
 
 class CreateAzureDevops:
     config = Config()
-    def __init__(self, project_name: str, description: str, organization_name: str, resource_group: azure.core.ResourceGroup) -> None:
+    def __init__(self, 
+            project_name: str, 
+            description: str, 
+            organization_name: str, 
+            resource_group: azure.core.ResourceGroup) -> None:
         """
         Initializes an instance of CreateAzureDevops class.
 
@@ -31,7 +36,7 @@ class CreateAzureDevops:
         Creates an Azure DevOps project.
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
-        self.project = azuredevops.Project("project",
+        self.project = azuredevops.Project("project_" + os.urandom(5).hex(),
             name=self.project_name,
             description=self.description,
             visibility="private",
@@ -39,7 +44,9 @@ class CreateAzureDevops:
         )
 
 
-    def import_github_repo(self, github_repo_url: str, repo_name: str) -> None:
+    def import_github_repo(self, 
+            github_repo_url: str, 
+            repo_name: str) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
 
@@ -48,7 +55,7 @@ class CreateAzureDevops:
             repo_name (str): The name of the repository in Azure DevOps.
         """
         pulumi.log.info(f"Importing GitHub repository: {github_repo_url}")
-        self.git_repo = azuredevops.Git("gitRepo",
+        self.git_repo = azuredevops.Git("gitRepo_" + os.urandom(5).hex(),
             name=repo_name,
             project_id=self.project.id,
             default_branch="refs/heads/main",
@@ -60,7 +67,8 @@ class CreateAzureDevops:
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
-    def create_ci_cd_pipeline(self, name: str) -> azuredevops.BuildDefinition:
+    def create_ci_cd_pipeline(self, 
+            name: str) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
@@ -69,7 +77,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating CI/CD Pipeline")
         
-        ci_cd_pipeline = azuredevops.BuildDefinition("ci-pipeline",
+        ci_cd_pipeline = azuredevops.BuildDefinition("pipeline_" + os.urandom(5).hex(),
             project_id=self.project.id,
             name=name,
             repository=azuredevops.BuildDefinitionRepositoryArgs(
@@ -85,29 +93,58 @@ class CreateAzureDevops:
         )
         return ci_cd_pipeline
         
-    def run_pipeline(self, branch: str) -> None:
-        pulumi.log.info(f"Pushing to git and starting pipeline")
-        azuredevops.GitRepositoryFile(
-            "new-file",
-            repository_id=self.git_repo.id,
-            file=".ignoreme",
-            content="Ignore me, this file is only here to trigger a pipeline run",
-            commit_message="Add .ignoreme",
-            branch=f"refs/heads/{branch}"
-        )
+    def run_pipeline(self, 
+                branch: str) -> None:
+            """
+            Pushes changes to the git repository and starts the pipeline.
 
-    def add_variables(self, variables: dict) -> None:
-        self.variables = []
-        for identifier, value in variables.items():
-            self.variables.append(
-                azuredevops.BuildDefinitionVariableArgs(
-                    name=identifier,
-                    secret_value=value,
-                    is_secret=True,
-                )
+            Args:
+                branch (str): The name of the branch to push the changes to.
+
+            Returns:
+                None
+            """
+            pulumi.log.info(f"Pushing to git and starting pipeline")
+            azuredevops.GitRepositoryFile(
+                "new-file",
+                repository_id=self.git_repo.id,
+                file=".ignoreme",
+                content="Ignore me, this file is only here to trigger a pipeline run",
+                commit_message="Add .ignoreme",
+                branch=f"refs/heads/{branch}"
             )
 
+    def add_variables(self, 
+                variables: dict) -> None:
+            """
+            Adds variables to the Azure DevOps build definition.
+
+            Args:
+                variables (dict): A dictionary containing the variables to be added. The keys represent the variable names, and the values represent the secret values.
+
+            Returns:
+                None
+            """
+            self.variables = []
+            for identifier, value in variables.items():
+                self.variables.append(
+                    azuredevops.BuildDefinitionVariableArgs(
+                        name=identifier,
+                        secret_value=value,
+                        is_secret=True,
+                    )
+                )
+
     def create_work_item(self, count: int) -> None:
+        """
+        Creates the specified number of work items in Azure DevOps.
+
+        Args:
+            count (int): The number of work items to create.
+
+        Returns:
+            None
+        """
         pulumi.log.info(f"Creating {count} work items")
         for _ in range(count):
             # Work item details
@@ -126,9 +163,7 @@ class CreateAzureDevops:
                 "Add new endpoint"
             ])
 
-           
             work_item_state = "New"
-
 
             # Create a new Azure DevOps work item in the provided project
             work_item = azuredevops.Workitem("workItem_" + work_item_title + str(random.randint(1, 100000)),
