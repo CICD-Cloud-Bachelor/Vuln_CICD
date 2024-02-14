@@ -1,54 +1,13 @@
 from pulumi.dynamic import ResourceProvider, Resource, CreateResult
 import pulumi_azuredevops as azuredevops
-import requests, pulumi, random
-from faker import Faker
+import pulumi, random
 import configparser
-
+from source.azure_devops_rest_api import HttpPostResource
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 USERNAME = config["AZURE"]["USERNAME"]
 PAT = config["AZURE"]["PAT"]
-
-class HttpPostProvider(ResourceProvider):
-    def create(
-            self, 
-            inputs: dict
-        ) -> CreateResult:
-
-        response = requests.post(
-            url=inputs['url'], 
-            headers=inputs['headers'], 
-            json=inputs['json'], 
-            auth=tuple(inputs['auth'])
-        )
-
-        pulumi.log.info(f"HTTP request response: {response.text}")
-        
-        return CreateResult(id_="1", outs={"response": response.text})
-
-class HttpPostResource(Resource):
-    def __init__(
-            self, 
-            name: str, 
-            url: str, 
-            headers: dict, 
-            json: list, 
-            auth: str, 
-            opts=None
-        ) -> None:
-
-        super().__init__(
-            provider=HttpPostProvider(), 
-            name=name, 
-            props={
-                "url": url,
-                "headers": headers,
-                "json": json,
-                "auth": auth,
-            }, 
-            opts=opts
-        )
 
 
 class WorkItem:
@@ -70,7 +29,8 @@ class WorkItem:
             type: str, 
             title: str, 
             description: str, 
-            comment: str
+            comment: str,
+            email: str = None
         ) -> None:
 
         url = f"https://dev.azure.com/{self.organization_name}/{self.project_name}/_apis/wit/workitems/${type}?api-version=5"
@@ -94,6 +54,16 @@ class WorkItem:
                 "value": comment
             }
         ]
+        if email is not None:
+            json.append(
+                {
+                    "op": "add",
+                    "path": "/fields/System.AssignedTo", 
+                    "from": "null",
+                    "value": email
+                }
+            )
+
         self.index += 1
         HttpPostResource(
             name=f"workitem{self.index}",

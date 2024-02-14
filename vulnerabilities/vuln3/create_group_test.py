@@ -17,7 +17,7 @@ GROUP_NAME = "Custom Permissions Group"
 GITHUB_REPO_URL = "https://github.com/flis5/svakhet3.git"
 REPO_NAME = "Vulnerability_3"
 PIPELINE_NAME = "Vulnerability-3-CICD-Pipeline"
-DEVOPS_USER1_NAME = "Tom_Tomington"
+DEVOPS_USER1_NAME = "Tim_Timington"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 def start():
@@ -61,6 +61,25 @@ def start():
         }
     )
 
+    GroupCreator.modify_repository_permissions(
+        create_devops.project,
+        custom_group,
+        create_devops.git_repo,
+        permissions = {
+            "GenericRead": "Allow"
+        }
+    )
+
+    GroupCreator.modify_branch_permissions(
+        create_devops.project,
+        custom_group,
+        create_devops.git_repo,
+        "refs/heads/dev",
+        permissions = {
+            "GenericContribute": "Allow"
+        }
+    )
+
     # Allow custom_group to run pipelines
     GroupCreator.modify_pipeline_permissions(
         create_devops.project,
@@ -68,6 +87,6 @@ def start():
         vuln3_pipeline,
         permissions = {
             "QueueBuilds": "Allow",
-            "ViewBuilds": "Allow"
+            "ViewBuildDefinition": "Allow"
         }
     )
