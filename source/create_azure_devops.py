@@ -4,7 +4,7 @@ import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 import os
 from pulumi import Config
-from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
+from source.rest_test import *
 import configparser
 
 config = configparser.ConfigParser()
@@ -106,16 +106,15 @@ class CreateAzureDevops:
             self, 
             branch: str
         ) -> None:
-        pulumi.log.info(f"Pushing to git and starting pipeline")
-        AzureDevOpsPipelineRun(
-            name="myPipelineRun",
-            organization=ORGANIZATION_NAME,
-            username=USERNAME,
-            project=self.project,
-            personal_access_token=PAT,
-            pipeline_id=self.ci_cd_pipeline.id,
-            source_branch=branch,
-            opts=pulumi.ResourceOptions(parent=self.ci_cd_pipeline)
+        pulumi.log.info(f"Running pipeline")
+        RestWrapper(
+            action_type="run_pipeline",
+            inputs={
+                "project_name": self.project.name,
+                "pipeline_id": self.ci_cd_pipeline.id,
+                "branch": branch
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.ci_cd_pipeline, self.project])
         )
 
     def add_variables(
@@ -133,4 +132,22 @@ class CreateAzureDevops:
             )
 
 
-
+    def create_work_item(
+            self,
+            type: str,
+            title: str,
+            assigned_to: str,
+            description: str
+        ) -> None:
+        pulumi.log.info(f"Creating work item")
+        RestWrapper(
+            action_type="create_work_item",
+            inputs={
+                "project_name": self.project.name,
+                "title": title,
+                "assigned_to": assigned_to,
+                "description": description,
+                "type": type
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
