@@ -10,8 +10,6 @@ config.read('config.ini')
 DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
-    fake = Faker()
-
     def create_entra_user(
             name: str, 
             password: str) -> User:
@@ -39,7 +37,7 @@ class UserCreator:
             name: str, 
             password: str) -> azuredevops.User:
         """
-        Creates a user in Azure DevOps.
+        Creates a user in Azure DevOps. Max 5 Users in free plan.
 
         Args:
             name (str): The name of the user.
@@ -57,8 +55,8 @@ class UserCreator:
 
         return devops_user
 
-    def __randomPass(self) -> str:
-        return self.fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
+    def randomPass() -> str:
+        return Faker().password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
 
 
 class GroupCreator:
@@ -224,7 +222,7 @@ class GroupCreator:
             None
         """
         pulumi.log.info("Modifying area permissions for group")
-        azuredevops.AreaPermissions("areaPermissions",
+        azuredevops.AreaPermissions("areaPermissions_" + os.urandom(5).hex(),
             project_id=project.id,
             principal=group.id,
             path="/",

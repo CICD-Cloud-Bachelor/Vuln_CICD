@@ -68,25 +68,24 @@ def start(resource_group: azure.core.ResourceGroup):
         project=azure_devops.project, 
         group_name="Custom Group"
     )
-    project_collection_valid_users_group = azuredevops.get_group(
-        project_id=azure_devops.project.id,
-        name="Project Collection Valid Users"
-    )
     devops_user = UserCreator.create_devops_user(
-        name=faker.name(),
+        name=faker.name().replace(".", " "),
         password="Troll57Hoho69%MerryChristmas"
     )
+    users = [
+        UserCreator.create_devops_user(
+            name=faker.name().replace(".", ""),
+            password=UserCreator.randomPass()
+        ) for _ in range(3)
+    ]
     GroupCreator.add_user_to_group(devops_user, devops_group)
-    GroupCreator.add_user_to_group(devops_user, project_collection_valid_users_group)
+    for user in users:
+        GroupCreator.add_user_to_group(user, devops_group)
     GroupCreator.modify_project_permission(
         project=azure_devops.project, 
         group=devops_group, 
         permissions={
             "GENERIC_READ": "Allow",
-            "WORK_ITEM_MOVE": "Allow",
-            "WORK_ITEM_DELETE": "Allow",
-            "WORK_ITEM_PERMANENTLY_DELETE": "Allow",
-            "BYPASS_RULES": "Allow"
         }
     )
     GroupCreator.modify_pipeline_permissions(
@@ -111,28 +110,27 @@ def start(resource_group: azure.core.ResourceGroup):
         group=devops_group, 
         permissions={
             "GENERIC_READ": "Allow",
-            "GENERIC_WRITE": "Allow",
             "WORK_ITEM_READ": "Allow",
-            "WORK_ITEM_WRITE": "Allow"
         }
     )
     
     workitem = WorkItem(
         organization_name=ORGANIZATION_NAME, 
         project_name=PROJECT_NAME, 
-        depends_on=azure_devops.project
+        depends_on=[devops_user, azure_devops.project]
+    )
+    workitem.create(
+        type="Task", 
+        title="Mo Moesen", 
+        description="yoooooooooooooooooooooooo", 
+        comments=["kommentarhei", "123", "asdasdads", "sadsadadsadsddsds"],
+        email=devops_user.principal_name
     )
     workitem.create(
         type="Task", 
         title="Magnus Magnusen", 
-        description="yoooooooooooooooooooooooo", 
-        comment="kommentarhei",
-        email=devops_user.principal_name
+        description="description Magnus", 
+        comments=["i fix -mo", "hello", "plz no", "ty"],
+        email=users[0].principal_name
     )
-    workitem.create(
-        type="Epic", 
-        title="Mo Moesen", 
-        description="heihei", 
-        comment="kommentarsandkasndkajs"
-    )
-    workitem.create_random_work_items(10)
+    workitem.create_random_work_items(2, users=users)

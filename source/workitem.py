@@ -16,7 +16,7 @@ class WorkItem:
             self, 
             organization_name: str, 
             project_name: str, 
-            depends_on: azuredevops.Project
+            depends_on: list[Resource]
         ) -> None:
         self.organization_name = organization_name
         self.project_name = project_name
@@ -29,11 +29,14 @@ class WorkItem:
             type: str, 
             title: str, 
             description: str, 
-            comment: str,
+            comments: list[str],
             email: str = None
         ) -> None:
+        #####
+        #Dette blir feil. Her settes url-en til å være for kort hvis det er flere enn en kommentar. Da vil det postes til den for korte urlen og det funker ikke. FIKS
+        #####
+        url = f"https://dev.azure.com/{self.organization_name}/{self.project_name}/_apis/wit/workitems/"
 
-        url = f"https://dev.azure.com/{self.organization_name}/{self.project_name}/_apis/wit/workitems/${type}?api-version=5"
         json = [
             {
                 "op": "add", 
@@ -46,12 +49,6 @@ class WorkItem:
                 "path": "/fields/System.Description", 
                 "from": "null",
                 "value": description
-            },
-            {
-                "op": "add",
-                "path": "/fields/System.History", 
-                "from": "null",
-                "value": comment
             }
         ]
         if email is not None:
@@ -59,11 +56,10 @@ class WorkItem:
                 {
                     "op": "add",
                     "path": "/fields/System.AssignedTo", 
-                    "from": "null",
                     "value": email
                 }
             )
-
+        
         self.index += 1
         HttpPostResource(
             name=f"workitem{self.index}",
@@ -71,20 +67,21 @@ class WorkItem:
             headers=self.headers,
             json=json,
             auth=self.auth,
-            opts=pulumi.ResourceOptions(depends_on=[self.depends_on])
+            type=type,
+            comments=comments,
+            opts=pulumi.ResourceOptions(depends_on=self.depends_on),
         )
 
     def create_random_work_items(
             self, 
-            amount: int
+            amount: int,
+            users: list[azuredevops.User] = None
         ) -> None:
 
-        #faker = Faker()
         work_item_type = [
             "Epic", 
             "Feature", 
-            "User Story", 
-            "Bug"
+            "Task"
         ]
         work_item_title = [
             "Investigate production outage",
@@ -101,5 +98,6 @@ class WorkItem:
                 type=random.choice(work_item_type), 
                 title=random.choice(work_item_title), 
                 description="This is a detailed description of the work item",
-                comment=f"Comment for task {i}"
+                comments=[f"Comment for task {i}"],
+                email=random.choice(users).principal_name if users is not None else None
             )
