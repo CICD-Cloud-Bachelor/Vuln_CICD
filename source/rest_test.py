@@ -78,34 +78,19 @@ class RestAPI(ResourceProvider):
             project=inputs.get("project_name"),
             type=inputs.get("type")
         )
+
+        comments = [CommentCreate(text=comment) for comment in inputs.get("comments")]
+
+        for comment in comments:
+            work_item_client.add_comment(
+                request=comment,
+                project=inputs.get("project_name"),
+                work_item_id=work_item.id
+            )
+
         return CreateResult(id_="1", outs={"work item id": work_item.id})
     
-    
-    # def add_comment_to_work_item(self, project, work_item_id, comment_text, comment_format='Markdown'):
-    #     """
-    #     Adds a comment to a specified work item.
-
-    #     :param str project: Project ID or project name.
-    #     :param int work_item_id: ID of the work item to add the comment to.
-    #     :param str comment_text: The text of the comment to add.
-    #     :param str comment_format: The format of the comment (Markdown or Html). Default is Markdown.
-    #     """
-    #     # Get the WorkItemTrackingClient from the connection
-    #     work_item_client = self.connection.clients.get_work_item_tracking_client()
-
-    #     # Create the CommentCreate object with the provided comment text
-    #     comment_request = CommentCreate(text=comment_text)
-
-    #     # Call the add_work_item_comment method with the constructed request
-    #     comment = work_item_client.add_work_item_comment(
-    #         request=comment_request,
-    #         project=project,
-    #         work_item_id=work_item_id,
-    #         format=comment_format
-    #     )
-
-    #     # Return the created comment object or its ID based on your needs
-    #     return comment
+   
 
 index = 0
 class RestWrapper(Resource):

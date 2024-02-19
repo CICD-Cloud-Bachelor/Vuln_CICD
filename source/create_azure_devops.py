@@ -138,6 +138,8 @@ class CreateAzureDevops:
             title: str,
             assigned_to: str,
             description: str,
+            comments: list[str],
+            project_name: str,
             depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
@@ -148,7 +150,9 @@ class CreateAzureDevops:
                 "title": title,
                 "assigned_to": assigned_to,
                 "description": description,
-                "type": type
+                "type": type,
+                "comments": comments,
+                "project_name": project_name
             },
             opts=pulumi.ResourceOptions(depends_on=depends_on)
         )

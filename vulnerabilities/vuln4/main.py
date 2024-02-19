@@ -68,85 +68,72 @@ def start(resource_group: azure.core.ResourceGroup):
         branch="main"
     )
 
-    # devops_group = GroupCreator.create_group(
-    #     project=azure_devops.project, 
-    #     group_name="Custom Group"
-    # )
+    devops_group = GroupCreator.create_group(
+        project=azure_devops.project, 
+        group_name="Custom Group"
+    )
     devops_user = UserCreator.create_devops_user(
-        name=faker.name().replace(".", " "),
+        name="TOMMEN TOMMEN",#faker.name().replace(".", " "),
         password="Troll57Hoho69%MerryChristmas"
     )
+    GroupCreator.add_user_to_group(devops_user, devops_group)
+
+    users = [
+        UserCreator.create_devops_user(
+            name=faker.name().replace(".", ""),
+            password=UserCreator.randomPass()
+        ) for _ in range(3)
+    ]
+
+    for user in users:
+        GroupCreator.add_user_to_group(user, devops_group)
+
+    GroupCreator.modify_project_permission(
+        project=azure_devops.project, 
+        group=devops_group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+        }
+    )
+    GroupCreator.modify_pipeline_permissions(
+        project=azure_devops.project, 
+        group=devops_group, 
+        pipeline=pipeline, 
+        permissions={
+            "ViewBuilds": "Allow",
+            "ViewBuildDefinition": "Allow"
+        }
+    )
+    GroupCreator.modify_repository_permissions(
+        project=azure_devops.project, 
+        group=devops_group, 
+        repository=azure_devops.git_repo,
+        permissions={
+            "GenericRead": "Allow"
+        }
+    ) 
+    GroupCreator.modify_area_permissions(
+        project=azure_devops.project, 
+        group=devops_group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+            "WORK_ITEM_READ": "Allow",
+        }
+    )
+    
 
     azure_devops.create_work_item(
         type="Task",
         title="Investigate production outage",
         description="Investigate production outage",
         assigned_to=devops_user.principal_name,
-        depends_on=[devops_user, azure_devops.project]
+        comments=[
+            "Correct", 
+            "Investigate production outage", 
+            "Investigate", 
+            "Fix production outage"
+        ],
+        project_name=azure_devops.project.name,
+        depends_on=[devops_user, azure_devops.project, devops_group]
     )
-
-
-
-
-    # users = [
-    #     UserCreator.create_devops_user(
-    #         name=faker.name().replace(".", ""),
-    #         password=UserCreator.randomPass()
-    #     ) for _ in range(3)
-    # ]
-    # GroupCreator.add_user_to_group(devops_user, devops_group)
-    # for user in users:
-    #     GroupCreator.add_user_to_group(user, devops_group)
-    # GroupCreator.modify_project_permission(
-    #     project=azure_devops.project, 
-    #     group=devops_group, 
-    #     permissions={
-    #         "GENERIC_READ": "Allow",
-    #     }
-    # )
-    # GroupCreator.modify_pipeline_permissions(
-    #     project=azure_devops.project, 
-    #     group=devops_group, 
-    #     pipeline=pipeline, 
-    #     permissions={
-    #         "ViewBuilds": "Allow",
-    #         "ViewBuildDefinition": "Allow"
-    #     }
-    # )
-    # GroupCreator.modify_repository_permissions(
-    #     project=azure_devops.project, 
-    #     group=devops_group, 
-    #     repository=azure_devops.git_repo,
-    #     permissions={
-    #         "GenericRead": "Allow"
-    #     }
-    # ) 
-    # GroupCreator.modify_area_permissions(
-    #     project=azure_devops.project, 
-    #     group=devops_group, 
-    #     permissions={
-    #         "GENERIC_READ": "Allow",
-    #         "WORK_ITEM_READ": "Allow",
-    #     }
-    # )
-    
-    # workitem = WorkItem(
-    #     organization_name=ORGANIZATION_NAME, 
-    #     project_name=PROJECT_NAME, 
-    #     depends_on=[devops_user, azure_devops.project]
-    # )
-    # workitem.create(
-    #     type="Task", 
-    #     title="Mo Moesen", 
-    #     description="yoooooooooooooooooooooooo", 
-    #     comments=["kommentarhei", "123", "asdasdads", "sadsadadsadsddsds"],
-    #     email=devops_user.principal_name
-    # )
-    # workitem.create(
-    #     type="Task", 
-    #     title="Magnus Magnusen", 
-    #     description="description Magnus", 
-    #     comments=["i fix -mo", "hello", "plz no", "ty"],
-    #     email=users[0].principal_name
-    # )
-    # workitem.create_random_work_items(2, users=users)
+  
