@@ -5,7 +5,7 @@ import pulumi_azure as azure
 import os
 from pulumi import Config
 from source.rest_test import *
-import configparser
+import configparser, time
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -137,7 +137,8 @@ class CreateAzureDevops:
             type: str,
             title: str,
             assigned_to: str,
-            description: str
+            description: str,
+            depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
         RestWrapper(
@@ -149,5 +150,5 @@ class CreateAzureDevops:
                 "description": description,
                 "type": type
             },
-            opts=pulumi.ResourceOptions(depends_on=[self.project])
+            opts=pulumi.ResourceOptions(depends_on=depends_on)
         )

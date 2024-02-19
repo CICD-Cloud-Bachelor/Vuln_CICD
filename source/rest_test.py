@@ -2,7 +2,7 @@ from pulumi.dynamic import Resource, ResourceProvider, CreateResult
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from azure.devops.v7_1.work_item_tracking.models import CommentCreate
-import configparser, random
+import configparser, random, time
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -66,7 +66,7 @@ class RestAPI(ResourceProvider):
             "/fields/System.AssignedTo": inputs.get("assigned_to"),
             "/fields/System.Description": inputs.get("description")
         }
-
+        time.sleep(60)
         work_item = work_item_client.create_work_item(
             document = [
                 {

@@ -68,10 +68,10 @@ def start(resource_group: azure.core.ResourceGroup):
         branch="main"
     )
 
-    devops_group = GroupCreator.create_group(
-        project=azure_devops.project, 
-        group_name="Custom Group"
-    )
+    # devops_group = GroupCreator.create_group(
+    #     project=azure_devops.project, 
+    #     group_name="Custom Group"
+    # )
     devops_user = UserCreator.create_devops_user(
         name=faker.name().replace(".", " "),
         password="Troll57Hoho69%MerryChristmas"
@@ -81,8 +81,9 @@ def start(resource_group: azure.core.ResourceGroup):
         type="Task",
         title="Investigate production outage",
         description="Investigate production outage",
-        assigned_to=devops_user.principal_name
-    ) # kanskje legge til depends on user
+        assigned_to=devops_user.principal_name,
+        depends_on=[devops_user, azure_devops.project]
+    )
 
 
 
