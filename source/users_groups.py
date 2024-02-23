@@ -31,7 +31,7 @@ class UserCreator:
             user_principal_name = f"{name.replace(' ', '.')}@{DOMAIN}",
             password = password,
             force_password_change = False # Set to True if you want to force a password change on first login
-            )
+        )
 
         return entra_user
 
@@ -53,7 +53,7 @@ class UserCreator:
         pulumi.log.info(f"Creating user in Azure DevOps: {name}")
         devops_user = azuredevops.User(f"{name}",
             principal_name = entra_user.user_principal_name
-            )
+        )
 
         return devops_user
 
@@ -224,7 +224,7 @@ class GroupCreator:
             None
         """
         pulumi.log.info("Modifying area permissions for group")
-        azuredevops.AreaPermissions("areaPermissions",
+        azuredevops.AreaPermissions("areaPermissions_" + os.urandom(5).hex(),
             project_id=project.id,
             principal=group.id,
             path="/",

@@ -6,7 +6,9 @@ import configparser
 from source.users_groups import UserCreator, GroupCreator
 from source.create_azure_devops import CreateAzureDevops
 from source.container import CreateContainer
+from faker import Faker
 
+faker = Faker()
 config = configparser.ConfigParser()
 config.read('config.ini')
 ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
@@ -17,7 +19,6 @@ GROUP_NAME = "Custom Permissions Group"
 GITHUB_REPO_URL = "https://github.com/flis5/svakhet3.git"
 REPO_NAME = "Vulnerability_3"
 PIPELINE_NAME = "Vulnerability-3-CICD-Pipeline"
-DEVOPS_USER1_NAME = "Tim_Timington"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 def start():
@@ -38,10 +39,10 @@ def start():
     vuln3_pipeline = create_devops.create_ci_cd_pipeline(PIPELINE_NAME)
 
     devops_user = UserCreator.create_devops_user(
-        DEVOPS_USER1_NAME, 
+        faker.name().replace('.', ' '),
         DEVOPS_USER1_PASSWORD
     )
-    
+
     custom_group = GroupCreator.create_group(
         create_devops.project, 
         GROUP_NAME
@@ -70,6 +71,7 @@ def start():
         }
     )
 
+    # Contribute permissions on dev branch
     GroupCreator.modify_branch_permissions(
         create_devops.project,
         custom_group,
@@ -87,6 +89,7 @@ def start():
         vuln3_pipeline,
         permissions = {
             "QueueBuilds": "Allow",
-            "ViewBuildDefinition": "Allow"
+            "ViewBuilds": "Allow", # Required to view the finished runs of the pipeline
+            "ViewBuildDefinition": "Allow" # Required to view the pipeline
         }
     )
