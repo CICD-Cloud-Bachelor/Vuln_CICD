@@ -17,55 +17,54 @@ PROJECT_NAME = "Vulnerability 3"
 PROJECT_DESCRIPTION = "Insufficient Credential Hygiene"
 GROUP_NAME = "Custom Permissions Group"
 GITHUB_REPO_URL = "https://github.com/flis5/svakhet3.git"
-REPO_NAME = "Vulnerability_3"
-PIPELINE_NAME = "Vulnerability-3-CICD-Pipeline"
+REPO_NAME = "python-calculator"
+PIPELINE_NAME = "Run unit tests"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 def start():
     resource_group = azure.core.ResourceGroup('resource-group', location="West Europe")
 
-    create_devops = CreateAzureDevops(
+    devops_project = CreateAzureDevops(
         PROJECT_NAME,
         PROJECT_DESCRIPTION,
         ORGANIZATION_NAME,
         resource_group
     )
 
-    create_devops.import_github_repo(
+    devops_project.import_github_repo(
         GITHUB_REPO_URL, 
         REPO_NAME
     )
 
-    vuln3_pipeline = create_devops.create_ci_cd_pipeline(PIPELINE_NAME)
+    devops_project.create_ci_cd_pipeline(PIPELINE_NAME)
 
-    devops_user = UserCreator.create_devops_user(
-        faker.name().replace('.', ' '),
+    low_privil_username = faker.name().replace('.', ' ')
+
+    devops_project.add_user(
+        low_privil_username,
         DEVOPS_USER1_PASSWORD
     )
 
-    custom_group = GroupCreator.create_group(
-        create_devops.project, 
-        GROUP_NAME
-    )
+    devops_project.add_group(GROUP_NAME)
     
     GroupCreator.add_user_to_group(
-        devops_user, 
-        custom_group
+        devops_project.users.get(low_privil_username), 
+        devops_project.groups.get(GROUP_NAME)
     )
 
     # Give custom_group read permissions to the devops project
     GroupCreator.modify_project_permission(
-        create_devops.project, 
-        custom_group,
+        devops_project.project, 
+        devops_project.groups.get(GROUP_NAME),
         permissions = {
             "GENERIC_READ": "Allow"
         }
     )
 
     GroupCreator.modify_repository_permissions(
-        create_devops.project,
-        custom_group,
-        create_devops.git_repo,
+        devops_project.project,
+        devops_project.groups.get(GROUP_NAME),
+        devops_project.git_repo,
         permissions = {
             "GenericRead": "Allow"
         }

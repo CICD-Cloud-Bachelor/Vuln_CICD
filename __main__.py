@@ -1,4 +1,4 @@
-from vulnerabilities.vuln3 import create_group_test
+from vulnerabilities.vuln3 import main
 
 
-create_group_test.start()
+main.start()

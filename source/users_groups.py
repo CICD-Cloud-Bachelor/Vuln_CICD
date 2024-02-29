@@ -5,16 +5,17 @@ import configparser
 import os
 from pulumi_azuread import User
 
+fake = Faker()
 config = configparser.ConfigParser()
 config.read('config.ini')
 DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
-    fake = Faker()
 
     def create_entra_user(
             name: str, 
-            password: str) -> User:
+            password: str
+        ) -> User:
         """
         Creates a user in Entra (Azure AD).
 
@@ -25,10 +26,13 @@ class UserCreator:
         Returns:
             None
         """
-        pulumi.log.info(f"Creating user in Entra (Azure AD): {name}")
-        entra_user = User(f"{name}",
+        login_name = f"{name.replace(' ', '.')}@{DOMAIN}"
+        pulumi.log.info(f"Creating user in Entra (Azure AD) with login: {login_name}")
+        
+        entra_user = User(
+            resource_name = name + "_" + os.urandom(5).hex(),
             display_name = name,
-            user_principal_name = f"{name.replace(' ', '.')}@{DOMAIN}",
+            user_principal_name = login_name,
             password = password,
             force_password_change = False # Set to True if you want to force a password change on first login
         )
@@ -37,35 +41,41 @@ class UserCreator:
 
     def create_devops_user(
             name: str, 
-            password: str) -> azuredevops.User:
+            password = None
+        ) -> azuredevops.User:
         """
         Creates a user in Azure DevOps.
 
         Args:
             name (str): The name of the user.
-            password (str): The password for the user.
+            password (str): The password for the user. If not provided, a random password will be generated.
 
         Returns:
             User: The created user object in Azure DevOps.
         """
-        entra_user = UserCreator.create_entra_user(name, password)
 
+        if password is None:
+            password = UserCreator.random_password()
+
+        entra_user = UserCreator.create_entra_user(name, password)
         pulumi.log.info(f"Creating user in Azure DevOps: {name}")
-        devops_user = azuredevops.User(f"{name}",
+        
+        devops_user = azuredevops.User(
+            resource_name = name + "_" + os.urandom(5).hex(),
             principal_name = entra_user.user_principal_name
         )
-
         return devops_user
 
-    def __randomPass(self) -> str:
-        return self.fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
+    def random_password() -> str:
+        return fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
 
 
 class GroupCreator:
 
     def create_group(
             project: azuredevops.Project, 
-            group_name: str) -> azuredevops.Group:
+            group_name: str
+        ) -> azuredevops.Group:
         """
         Creates an Azure DevOps group.
 
@@ -77,7 +87,7 @@ class GroupCreator:
             azuredevops.Group: The created Azure DevOps group.
         """
         pulumi.log.info(f"Creating Azure DevOps group: {group_name}")
-        group = azuredevops.Group(f"customGroup_{group_name}",
+        group = azuredevops.Group(f"customGroup_{group_name}_" + os.urandom(5).hex(),
             scope=project.id,
             display_name=group_name,
             description="Custom made permissions for devops"
@@ -86,7 +96,8 @@ class GroupCreator:
 
     def add_user_to_group(
             user: azuredevops.User, 
-            group: azuredevops.Group) -> None:
+            group: azuredevops.Group
+        ) -> None:
         """
         Adds a user to a group in Azure DevOps.
 
@@ -106,7 +117,8 @@ class GroupCreator:
     def modify_project_permission(
             project: azuredevops.Project, 
             group: azuredevops.Group, 
-            permissions: dict) -> None:
+            permissions: dict
+        ) -> None:
         """
         Modifies the project permissions for a specific group.
 
@@ -130,7 +142,8 @@ class GroupCreator:
             project: azuredevops.Project, 
             group: azuredevops.Group, 
             pipeline: azuredevops.BuildDefinition, 
-            permissions: dict) -> None:
+            permissions: dict
+        ) -> None:
         """
         Modifies the pipeline permissions for a specific group.
 
@@ -156,7 +169,8 @@ class GroupCreator:
             project: azuredevops.Project, 
             group: azuredevops.Group, 
             repository: azuredevops.Git, 
-            permissions: dict) -> None:
+            permissions: dict
+        ) -> None:
         """
         Modifies the git repository level permissions for a specific group. Applied to all branches.
 
@@ -183,7 +197,8 @@ class GroupCreator:
             group: azuredevops.Group, 
             repository: azuredevops.Git, 
             branch: str, 
-            permissions: dict) -> None:
+            permissions: dict
+        ) -> None:
         """
         Modifies the git branch level permissions for a specific group.
 
@@ -211,7 +226,7 @@ class GroupCreator:
         project: azuredevops.Project,
         group: azuredevops.Group,
         permissions: dict
-    ) -> None:
+        ) -> None:
         """
         Modifies the area permissions for a specific group.
 

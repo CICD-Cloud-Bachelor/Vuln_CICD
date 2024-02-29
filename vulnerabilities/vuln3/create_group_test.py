@@ -93,3 +93,5 @@ def start():
             "ViewBuildDefinition": "Allow" # Required to view the pipeline
         }
     )
+
+    user_john = create_devops.users.get("")
