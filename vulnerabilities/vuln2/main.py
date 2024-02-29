@@ -5,19 +5,19 @@ from source.users_groups import UserCreator, GroupCreator
 import configparser  
 
 def vulnerble_part(azure_devops, config):
-    devops_username = "Ola_Nordmann19"
+    devops_username = "Ola_Nordmann20"
     devops_password = "Passw0rd123"
     group_name = "Vulnerability_2_Group"
 
-    devops_user = UserCreator.create_devops_user(devops_username, devops_password)
-    custom_group = GroupCreator.create_group(azure_devops.project, group_name)
-    add_user_to_group = GroupCreator.add_user_to_group(devops_user, custom_group)
-    project_permission = GroupCreator.modify_project_permission(azure_devops.project, custom_group, permissions = {"GENERIC_WRITE": "Allow",
+    devops_user = azure_devops.add_user(devops_username, devops_password)
+    azure_devops.create_group(azure_devops.project, azure_devops.users.get(devops_username))
+    azure_devops.add_user_to_group(devops_user, azure_devops.groups.get(group_name))
+    azure_devops.modify_project_permission(azure_devops.project, azure_devops.groups.get(group_name), permissions = {"GENERIC_WRITE": "Allow",
                                                                                               "GENERIC_READ": "Allow",
                                                                                               "WORK_ITEM_MOVE": "Allow",
                                                                                               "WORK_ITEM_DELETE": "Allow"
                                                                                               })
-    area_permission = GroupCreator.modify_area_permissions(azure_devops.project, custom_group, permissions = {"GENERIC_READ": "Allow",
+    azure_devops.modify_area_permissions(azure_devops.project, azure_devops.groups.get(group_name), permissions = {"GENERIC_READ": "Allow",
                                                                                             "GENERIC_WRITE": "Allow",
                                                                                             "WORK_ITEM_READ": "Allow",
                                                                                             "WORK_ITEM_WRITE": "Allow"
@@ -28,7 +28,7 @@ def vulnerble_part(azure_devops, config):
         assigned_to = f"{devops_username}@{config['AZURE']['DOMAIN']}",
         description = "Gi bruker nytt passord",
         comments = ["Dette er en kommentar"],
-        depends_on = [azure_devops.project, devops_user, custom_group]
+        depends_on = [azure_devops.project, devops_user]
         )
 
 def start():
