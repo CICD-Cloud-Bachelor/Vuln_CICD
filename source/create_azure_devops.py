@@ -6,6 +6,7 @@ import os
 from pulumi import Config
 from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
 import configparser
+import random
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -132,7 +133,6 @@ class CreateAzureDevops:
                 )
             )
 
-<<<<<<< HEAD
     def create_work_item(
             self, 
             count: int
@@ -167,7 +167,5 @@ class CreateAzureDevops:
             )
             
             pulumi.export("work_item_id", work_item.id)
-=======
->>>>>>> Mathias
 
 

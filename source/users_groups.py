@@ -4,6 +4,8 @@ import pulumi_azuredevops as azuredevops
 import configparser
 import os
 from pulumi_azuread import User
+import docker
+import json 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -48,6 +50,7 @@ class UserCreator:
         Returns:
             User: The created user object in Azure DevOps.
         """
+
         entra_user = UserCreator.create_entra_user(name, password)
 
         pulumi.log.info(f"Creating user in Azure DevOps: {name}")
@@ -59,7 +62,6 @@ class UserCreator:
 
     def __randomPass(self) -> str:
         return self.fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
-
 
 class GroupCreator:
 
@@ -231,3 +233,42 @@ class GroupCreator:
             permissions=permissions
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/areapermissions/
         )
+
+class GenerateToken:
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
+
+    def create_token(self) -> None:
+        """
+        Creates an access token by logging in to Azure CLI using the provided username and password.
+        The access token is obtained from the Azure CLI container and printed to the console.
+        This token w
+        Args:
+            None
+        """
+        client = docker.from_env()
+        
+        image_name = "mcr.microsoft.com/azure-cli"
+        image = client.images.pull(image_name)
+
+        # Create a container from the pulled image
+        container = client.containers.create(image_name, command="tail -f /dev/null", detach=True)
+
+        # Start the containerq
+        container.start()
+
+        exec_login = container.exec_run(f'az login --username {self.username} --password {self.password} --allow-no-subscriptions')
+        get_token = container.exec_run(f'az account get-access-token')
+
+        output = get_token.output.decode('utf-8')
+
+        json_output = json.loads(output)
+
+        self.token = json_output["accessToken"]
+
+        container.stop()
+        container.remove()
+    
+    def get_token(self) -> str:
+        return self.token
