@@ -84,6 +84,16 @@ class RestAPI(ResourceProvider):
             project=inputs.get("project_name"),
             type=inputs.get("type")
         )
+
+        comments = [CommentCreate(text=comment) for comment in inputs.get("comments")]
+
+        for comment in comments:
+            work_item_client.add_comment(
+                request=comment,
+                project=inputs.get("project_name"),
+                work_item_id=work_item.id
+            )
+
         return CreateResult(id_="1", outs={"work item id": work_item.id})
 
     def create_wiki(
