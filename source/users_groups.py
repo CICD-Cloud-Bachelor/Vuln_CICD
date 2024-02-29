@@ -11,7 +11,6 @@ config.read('config.ini')
 DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
-
     def create_entra_user(
             name: str, 
             password: str
@@ -44,7 +43,7 @@ class UserCreator:
             password = None
         ) -> azuredevops.User:
         """
-        Creates a user in Azure DevOps.
+        Creates a user in Azure DevOps. Max 5 Users in free plan.
 
         Args:
             name (str): The name of the user.

@@ -1,6 +1,6 @@
 import pulumi
 from pulumi.dynamic import Resource, ResourceProvider, CreateResult
-import requests
+import requests, time
 
 class HttpPostProvider(ResourceProvider):
     def create(
@@ -8,15 +8,32 @@ class HttpPostProvider(ResourceProvider):
             inputs: dict
         ) -> CreateResult:
 
-        response = requests.post(
-            url=inputs['url'], 
+        if any(patch["path"] == "/fields/System.AssignedTo" for patch in inputs["json"]): time.sleep(60)
+        post_response = requests.post(
+            url=inputs['url'] + f"${inputs['type']}?api-version=5", 
             headers=inputs['headers'], 
             json=inputs['json'], 
             auth=tuple(inputs['auth'])
         )
+        pulumi.log.debug(f"HTTP POST request response: {post_response.text}")
 
-        pulumi.log.info(f"HTTP request response: {response.text}")
-        
+        if len(inputs["comments"]) > 0:
+            url = inputs["url"] + str(post_response.json().get("id")) + "?api-version=5"
+            for comment in inputs["comments"]:
+                response = requests.patch(
+                    url=url, 
+                    headers=inputs['headers'], 
+                    json=[
+                        {
+                            "op": "add",
+                            "path": "/fields/System.History", 
+                            "value": comment
+                        }
+                    ], 
+                    auth=tuple(inputs['auth'])
+                ) 
+                pulumi.log.debug(f"HTTP PATCH request response: {response.text}")
+
         return CreateResult(id_="1", outs={"response": response.text})
 
 class HttpPostResource(Resource):
@@ -27,9 +44,11 @@ class HttpPostResource(Resource):
             headers: dict, 
             json: list, 
             auth: str, 
-            opts=None
+            type: str,
+            comments: list[str],
+            opts=None,
         ) -> None:
-
+        
         super().__init__(
             provider=HttpPostProvider(), 
             name=name, 
@@ -38,6 +57,8 @@ class HttpPostResource(Resource):
                 "headers": headers,
                 "json": json,
                 "auth": auth,
+                "type": type,
+                "comments": comments
             }, 
             opts=opts
         )

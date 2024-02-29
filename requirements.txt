@@ -7,3 +7,4 @@ pulumi_azure_native
 pulumi_azuredevops
 pulumi_mysql
 requests
+azure-devops
