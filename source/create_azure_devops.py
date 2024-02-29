@@ -13,6 +13,7 @@ config.read('config.ini')
 ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
 PAT = config["AZURE"]["PAT"]
 USERNAME = config["AZURE"]["USERNAME"]
+DOMAIN = config["AZURE"]["DOMAIN"]
 
 class CreateAzureDevops:
     config = Config()
@@ -188,7 +189,138 @@ class CreateAzureDevops:
                 group_name
             )
             self.groups[group_name] = custom_group
-        
+    
+    def add_user_to_group(
+            self,
+            user: azuredevops.User, 
+            group: azuredevops.Group
+        ) -> None:
+        """
+        Adds a user to a group in Azure DevOps.
+
+        Args:
+            user (azuredevops.User): The user to be added.
+            group (azuredevops.Group): The group to add the user to.
+
+        Returns:
+            None
+        """
+        GroupCreator.add_user_to_group(
+            user, 
+            group
+        )
+    
+    def modify_project_permission(
+            self,
+            group: azuredevops.Group, 
+            permissions: dict
+        ) -> None:
+        """
+        Modifies the project permissions for a specific group.
+
+        Args:
+            group (azuredevops.Group): The group to modify permissions for.
+            permissions (dict): The permissions to assign to the group.
+
+        Returns:
+            None
+        """
+        GroupCreator.modify_project_permission(
+            self.project, 
+            group,
+            permissions
+        )
+    
+    def modify_repo_permission(
+            self,
+            group: azuredevops.Group, 
+            permissions: dict
+        ) -> None:
+        """
+        Modifies the repository permissions for a specific group.
+
+        Args:
+            group (azuredevops.Group): The group to modify permissions for.
+            permissions (dict): The permissions to assign to the group.
+
+        Returns:
+            None
+        """
+        GroupCreator.modify_repository_permissions(
+            self.project,
+            group,
+            self.git_repo,
+            permissions
+        )
+
+    def modify_pipeline_permission(
+            self,
+            group: azuredevops.Group, 
+            permissions: dict
+        ) -> None:
+        """
+        Modifies the pipeline permissions for a specific group.
+
+        Args:
+            group (azuredevops.Group): The group to modify permissions for.
+            permissions (dict): The permissions to assign to the group.
+
+        Returns:
+            None
+        """
+        GroupCreator.modify_pipeline_permissions(
+            self.project,
+            group,
+            self.ci_cd_pipeline,
+            permissions
+        )
+    
+    def modify_branch_permission(
+            self,
+            group: azuredevops.Group,
+            branch: str,
+            permissions: dict
+        ) -> None:
+        """
+        Modifies the branch permissions for a specific group.
+
+        Args:
+            group (azuredevops.Group): The group to modify permissions for.
+            branch (str): The name of the branch.
+            permissions (dict): The permissions to assign to the group.
+
+        Returns:
+            None
+        """
+        GroupCreator.modify_branch_permissions(
+            self.project,
+            group,
+            self.git_repo,
+            branch,
+            permissions
+        )
+    
+    def modify_area_permission(
+            self,
+            group: azuredevops.Group,
+            permissions: dict
+        ) -> None:
+        """
+        Modifies the area permissions for a specific group.
+
+        Args:
+            group (azuredevops.Group): The group to modify permissions for.
+            permissions (dict): The permissions to assign to the group.
+
+        Returns:
+            None
+        """
+        GroupCreator.modify_area_permissions(
+            self.project,
+            group,
+            permissions
+        )
+              
     def create_work_item(
             self,
             type: str,
