@@ -4,7 +4,6 @@ import pulumi_azuread as azuread
 import pulumi_azuredevops as azuredevops
 import configparser
 from faker import Faker
-from source.users_groups import UserCreator, GroupCreator
 from source.create_azure_devops import CreateAzureDevops
 from source.container import CreateContainer
 
@@ -40,31 +39,28 @@ def start():
 
     low_privil_username = faker.name().replace('.', ' ')
 
-    devops_project.add_user(
+    low_privil_user = devops_project.add_user(
         low_privil_username,
         DEVOPS_USER1_PASSWORD
     )
 
-    devops_project.add_group(GROUP_NAME)
+    custom_group = devops_project.add_group(GROUP_NAME)
     
-    GroupCreator.add_user_to_group(
-        devops_project.users.get(low_privil_username), 
-        devops_project.groups.get(GROUP_NAME)
+    devops_project.add_user_to_group(
+        low_privil_user, 
+        custom_group
     )
 
     # Give custom_group read permissions to the devops project
-    GroupCreator.modify_project_permission(
-        devops_project.project, 
-        devops_project.groups.get(GROUP_NAME),
+    devops_project.modify_project_permissions(
+        custom_group,
         permissions = {
             "GENERIC_READ": "Allow"
         }
     )
 
-    GroupCreator.modify_repository_permissions(
-        devops_project.project,
-        devops_project.groups.get(GROUP_NAME),
-        devops_project.git_repo,
+    devops_project.modify_repository_permissions(
+        custom_group,
         permissions = {
             "GenericRead": "Allow"
         }

@@ -65,7 +65,7 @@ class UserCreator:
         )
         return devops_user
 
-    def random_password() -> str:
+    def __random_password(self) -> str:
         return fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
 
 
