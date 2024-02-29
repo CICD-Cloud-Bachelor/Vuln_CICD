@@ -5,7 +5,7 @@ from source.users_groups import UserCreator, GroupCreator
 import configparser  
 
 def vulnerble_part(azure_devops, config):
-    devops_username = "Ola_Nordmann16"
+    devops_username = "Ola_Nordmann19"
     devops_password = "Passw0rd123"
     group_name = "Vulnerability_2_Group"
 
@@ -22,13 +22,12 @@ def vulnerble_part(azure_devops, config):
                                                                                             "WORK_ITEM_READ": "Allow",
                                                                                             "WORK_ITEM_WRITE": "Allow"
                                                                                                                     })
-
     azure_devops.create_work_item(
         type = "Epic",
         title = "En testepic",
         assigned_to = f"{devops_username}@{config['AZURE']['DOMAIN']}",
         description = "Gi bruker nytt passord",
-        comments = "Dette er en kommentar",
+        comments = ["Dette er en kommentar"],
         depends_on = [azure_devops.project, devops_user, custom_group]
         )
 

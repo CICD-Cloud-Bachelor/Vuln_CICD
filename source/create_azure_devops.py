@@ -4,14 +4,9 @@ import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 import os
 from pulumi import Config
-<<<<<<< HEAD
-from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
-import configparser
-import random
-=======
 from source.users_groups import UserCreator, GroupCreator
->>>>>>> Dev
 from source.rest_test import *
+import configparser, time
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -152,42 +147,6 @@ class CreateAzureDevops:
                 )
             )
 
-<<<<<<< HEAD
-    def create_work_item(
-            self, 
-            count: int
-        ) -> None:
-        pulumi.log.info(f"Creating {count} work items")
-
-        for _ in range(count):
-            # Work item details
-            # Randomly select a work item type from the predefined list
-            self.work_item_type = random.choice(["Epic", "Feature", "User Story", "Bug"])
-
-            # Randomly select a work item title based on the work item type
-            self.work_item_title = random.choice([
-                "Investigate production outage",
-                "Add new feature",
-                "Update documentation",
-                "Refactor code",
-                "Fix bug",
-                "Add tests",
-                "Update dependencies",
-                "Add new endpoint"
-            ]) 
-           
-            self.work_item_state = "New" 
-
-            # Create a new Azure DevOps work item in the provided project
-            work_item = azuredevops.Workitem("workItem_" + self.work_item_title + str(random.randint(1, 100000)),
-                project_id=self.project.id,
-                type=self.work_item_type,
-                title=self.work_item_title,
-                state=self.work_item_state
-            )
-            
-            pulumi.export("work_item_id", work_item.id)
-=======
     def add_user(
                 self,
                 name: str, 
@@ -195,7 +154,6 @@ class CreateAzureDevops:
             ) -> None:
             """
             Creates a user and adds it to the Azure DevOps instance.
->>>>>>> Dev
 
             Args:
                 name (str): The name of the user.
