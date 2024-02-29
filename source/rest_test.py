@@ -2,6 +2,8 @@ from pulumi.dynamic import Resource, ResourceProvider, CreateResult
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from azure.devops.v7_1.work_item_tracking.models import CommentCreate
+from azure.devops.v7_1.wiki.models import WikiCreateParametersV2
+from azure.devops.v7_1.wiki.models import WikiPageCreateOrUpdateParameters
 import configparser, random, time
 
 config = configparser.ConfigParser()
@@ -28,6 +30,10 @@ class RestAPI(ResourceProvider):
             return self.run_pipeline(inputs)
         elif action_type == "create_work_item":
             return self.create_work_item(inputs)
+        elif action_type == "create_wiki":
+            return self.create_wiki(inputs)
+        elif action_type == "create_wiki_page":
+            return self.create_wiki_page(inputs)
         else:
             raise Exception("Invalid action type")
 
@@ -67,7 +73,7 @@ class RestAPI(ResourceProvider):
             "/fields/System.Description": inputs.get("description")
         }
         time.sleep(60)
-        work_item = work_item_client.create_work_item(
+        work_item_client.create_work_item(
             document = [
                 {
                     "op": "add",
@@ -79,17 +85,43 @@ class RestAPI(ResourceProvider):
             type=inputs.get("type")
         )
 
-        comments = [CommentCreate(text=comment) for comment in inputs.get("comments")]
+    def create_wiki(
+            self,
+            inputs: dict
+        ) -> CreateResult:
+        wiki_params = WikiCreateParametersV2(
+            name=inputs.get("wiki_name"), 
+            project_id=inputs.get("project_id"), 
+            type='projectWiki'
+        )
 
-        for comment in comments:
-            work_item_client.add_comment(
-                request=comment,
-                project=inputs.get("project_name"),
-                work_item_id=work_item.id
-            )
+        wiki_client = self.connection.clients.get_wiki_client()
+        
+        new_wiki = wiki_client.create_wiki(
+            wiki_create_params=wiki_params, 
+            project=inputs.get("project_id")
+        )
 
-        return CreateResult(id_="1", outs={"work item id": work_item.id})
+        return CreateResult(id_="1", outs={"wiki id": new_wiki.id})
     
+    def create_wiki_page(
+            self,
+            inputs: dict
+        ) -> CreateResult:
+        wiki_client = self.connection.clients.get_wiki_client()
+
+        parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
+
+        wiki_client.create_or_update_page(
+            parameters=parameters,
+            project=inputs.get("project_id"),
+            wiki_identifier=inputs.get("wiki_name"),  # This could be the wiki name or ID
+            path=inputs.get("page_name"),
+            comment='Adding a new wiki page',  # Optional comment for the commit
+            version=None
+        )
+
+        return CreateResult(id_="1", outs={"wiki page created": True})
    
 
 index = 0

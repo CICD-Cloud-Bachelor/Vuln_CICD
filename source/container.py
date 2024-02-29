@@ -189,6 +189,50 @@ class DockerACR:
             str: The fully qualified domain name (FQDN) of the container.
 
         """
+        
+       # Create a virtual network
+        vnet = network.VirtualNetwork(
+            "myVNet",
+            resource_group_name=self.resource_group.name,
+            address_space=network.AddressSpaceArgs(
+                address_prefixes=["10.0.0.0/16"],
+            ),
+        )
+
+        # Create a network security group that allows access only from a specific IP
+        nsg = network.NetworkSecurityGroup(
+            "myNSG",
+            resource_group_name=self.resource_group.name,
+            security_rules=[
+                network.SecurityRuleArgs(
+                    name="AllowSpecificIP",
+                    priority=100,
+                    direction="Inbound",
+                    access="Allow",
+                    protocol="*",
+                    source_address_prefix="128.39.248.89",
+                    source_port_range="*",
+                    destination_address_prefix="*",
+                    destination_port_range="*",
+                ),
+            ],
+        )
+
+        # Corrected subnet creation with delegation for Azure Container Instances
+        subnet = network.Subnet(
+            "mySubnet",
+            resource_group_name=self.resource_group.name,
+            virtual_network_name=vnet.name,
+            address_prefix="10.0.0.0/24",
+            delegations=[network.DelegationArgs(
+                name="containerInstanceDelegation",
+                service_name="Microsoft.ContainerInstance/containerGroups"
+            )],
+            network_security_group=network.NetworkSecurityGroupArgs(
+                id=nsg.id,
+            ),
+        )
+
         pulumi.log.info(f"Starting container: {container_name}")
         
         container_group_name = container_name + "-group"
@@ -219,11 +263,19 @@ class DockerACR:
                 ),
             ],
             ip_address=containerinstance.IpAddressArgs(
-                ports=[containerinstance.PortArgs(protocol="TCP", port=p) for p in ports],
-                type="Public",
-                dns_name_label=f"{container_name}{DNS_LABEL}", # optional
+                ports=[
+                    containerinstance.PortArgs(
+                        protocol="TCP", 
+                        port=p
+                        ) for p in ports
+                ],
+                type="Private",
+                #dns_name_label=f"{container_name}{DNS_LABEL}", # optional
             ),
             restart_policy="OnFailure",
+            subnet_ids=[containerinstance.ContainerGroupSubnetIdArgs(
+                id=subnet.id,
+            )],
             opts=pulumi.ResourceOptions(depends_on=[self.task])
         )
 

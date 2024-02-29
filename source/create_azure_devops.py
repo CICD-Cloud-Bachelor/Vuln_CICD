@@ -47,6 +47,10 @@ class CreateAzureDevops:
         self.project = azuredevops.Project("project_" + os.urandom(5).hex(),
             name=self.project_name,
             description=self.description,
+            features={
+                "artifacts": "disabled",
+                "testplans": "disabled",
+            },
             visibility="private",
             work_item_template="Agile"  # Use the desired work item template
         )
@@ -139,7 +143,6 @@ class CreateAzureDevops:
             assigned_to: str,
             description: str,
             comments: list[str],
-            project_name: str,
             depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
@@ -151,8 +154,39 @@ class CreateAzureDevops:
                 "assigned_to": assigned_to,
                 "description": description,
                 "type": type,
-                "comments": comments,
-                "project_name": project_name
+                "comments": comments
             },
             opts=pulumi.ResourceOptions(depends_on=depends_on)
+        )
+
+    def create_wiki(
+            self,
+            wiki_name: str
+        ) -> None:
+        pulumi.log.info(f"Creating wiki")
+        RestWrapper(
+            action_type="create_wiki",
+            inputs={
+                "wiki_name": wiki_name,
+                "project_id": self.project.id
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
+    
+    def create_wiki_page(
+            self,
+            wiki_name: str,
+            page_name: str,
+            page_content: str
+        ) -> None:
+        pulumi.log.info(f"Creating wiki page")
+        RestWrapper(
+            action_type="create_wiki_page",
+            inputs={
+                "project_id": self.project.id,
+                "wiki_name": wiki_name,
+                "page_name": page_name,
+                "page_content": page_content
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
         )
