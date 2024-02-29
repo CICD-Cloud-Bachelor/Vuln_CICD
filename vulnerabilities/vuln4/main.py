@@ -25,31 +25,31 @@ CONTAINER_NAME = "mysql-container"
 
 
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-        registry_name=REGISTRY_NAME
-    )
-    
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME
-    )
-
-    connection_string = acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME, 
-        ports=[3306], 
-        cpu=1.0, 
-        memory=1.0
-    )
-    import pulumi
-    pulumi.export("connection_string", connection_string)   
-    
-    # azure_devops = CreateAzureDevops(
-    #     project_name=PROJECT_NAME, 
-    #     description=PROJECT_DESCRIPTION, 
-    #     organization_name=ORGANIZATION_NAME, 
-    #     resource_group=resource_group
+    # acr = DockerACR(
+    #     resource_group=resource_group, 
+    #     registry_name=REGISTRY_NAME
     # )
+    
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME
+    # )
+
+    # connection_string = acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME, 
+    #     ports=[3306], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
+    # import pulumi
+    # pulumi.export("connection_string", connection_string)   
+    
+    azure_devops = CreateAzureDevops(
+        project_name=PROJECT_NAME, 
+        description=PROJECT_DESCRIPTION, 
+        organization_name=ORGANIZATION_NAME, 
+        resource_group=resource_group
+    )
 
     # azure_devops.create_wiki(
     #     wiki_name="VULN4_WIKI"
@@ -90,10 +90,10 @@ def start(resource_group: azure.core.ResourceGroup):
     #     project=azure_devops.project, 
     #     group_name="Custom Group"
     # )
-    # devops_user = UserCreator.create_devops_user(
-    #     name="TOMMEN tomm",#faker.name().replace(".", " "),
-    #     password="Troll57Hoho69%MerryChristmas"
-    # )
+    devops_user = UserCreator.create_devops_user(
+        name="TOMMEN tommee",#faker.name().replace(".", " "),
+        password="Troll57Hoho69%MerryChristmas"
+    )
     # GroupCreator.add_user_to_group(devops_user, devops_group)
 
     # users = [
@@ -138,17 +138,17 @@ def start(resource_group: azure.core.ResourceGroup):
     #         "WORK_ITEM_READ": "Allow",
     #     }
     # )
-    # azure_devops.create_work_item(
-    #     type="Task",
-    #     title="Investigate production outage",
-    #     description="Investigate production outage",
-    #     assigned_to=devops_user.principal_name,
-    #     comments=[
-    #         "Correct", 
-    #         "Investigate production outage", 
-    #         "Investigate", 
-    #         "Fix production outage"
-    #     ],
-    #     depends_on=[devops_user, azure_devops.project]
-    # )
+    azure_devops.create_work_item(
+        type="Task",
+        title="Investigate production outage",
+        description="Investigate production outage",
+        assigned_to=devops_user.principal_name,
+        comments=[
+            "Correct", 
+            "Investigate production outage", 
+            "Investigate", 
+            "Fix production outage"
+        ],
+        depends_on=[devops_user, azure_devops.project]
+    )
   

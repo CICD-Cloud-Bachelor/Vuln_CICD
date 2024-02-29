@@ -73,7 +73,7 @@ class RestAPI(ResourceProvider):
             "/fields/System.Description": inputs.get("description")
         }
         time.sleep(60)
-        work_item_client.create_work_item(
+        work_item = work_item_client.create_work_item(
             document = [
                 {
                     "op": "add",
@@ -84,7 +84,12 @@ class RestAPI(ResourceProvider):
             project=inputs.get("project_name"),
             type=inputs.get("type")
         )
+<<<<<<< HEAD
         return CreateResult(id_="1", outs={"work item created": True})
+=======
+        return CreateResult(id_="1", outs={"work item id": work_item.id})
+
+>>>>>>> Dev
     def create_wiki(
             self,
             inputs: dict
