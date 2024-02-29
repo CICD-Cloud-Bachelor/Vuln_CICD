@@ -4,9 +4,14 @@ import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 import os
 from pulumi import Config
+<<<<<<< HEAD
 from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
 import configparser
 import random
+=======
+from source.rest_test import *
+import configparser, time
+>>>>>>> Dev
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -48,6 +53,10 @@ class CreateAzureDevops:
         self.project = azuredevops.Project("project_" + os.urandom(5).hex(),
             name=self.project_name,
             description=self.description,
+            features={
+                "artifacts": "disabled",
+                "testplans": "disabled",
+            },
             visibility="private",
             work_item_template="Agile"  # Use the desired work item template
         )
@@ -107,16 +116,15 @@ class CreateAzureDevops:
             self, 
             branch: str
         ) -> None:
-        pulumi.log.info(f"Pushing to git and starting pipeline")
-        AzureDevOpsPipelineRun(
-            name="myPipelineRun",
-            organization=ORGANIZATION_NAME,
-            username=USERNAME,
-            project=self.project,
-            personal_access_token=PAT,
-            pipeline_id=self.ci_cd_pipeline.id,
-            source_branch=branch,
-            opts=pulumi.ResourceOptions(parent=self.ci_cd_pipeline)
+        pulumi.log.info(f"Running pipeline")
+        RestWrapper(
+            action_type="run_pipeline",
+            inputs={
+                "project_name": self.project.name,
+                "pipeline_id": self.ci_cd_pipeline.id,
+                "branch": branch
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.ci_cd_pipeline, self.project])
         )
 
     def add_variables(
@@ -168,4 +176,57 @@ class CreateAzureDevops:
             
             pulumi.export("work_item_id", work_item.id)
 
+    def create_work_item(
+            self,
+            type: str,
+            title: str,
+            assigned_to: str,
+            description: str,
+            comments: list[str],
+            depends_on: list = []
+        ) -> None:
+        pulumi.log.info(f"Creating work item")
+        RestWrapper(
+            action_type="create_work_item",
+            inputs={
+                "project_name": self.project.name,
+                "title": title,
+                "assigned_to": assigned_to,
+                "description": description,
+                "type": type,
+                "comments": comments
+            },
+            opts=pulumi.ResourceOptions(depends_on=depends_on)
+        )
 
+    def create_wiki(
+            self,
+            wiki_name: str
+        ) -> None:
+        pulumi.log.info(f"Creating wiki")
+        RestWrapper(
+            action_type="create_wiki",
+            inputs={
+                "wiki_name": wiki_name,
+                "project_id": self.project.id
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
+    
+    def create_wiki_page(
+            self,
+            wiki_name: str,
+            page_name: str,
+            page_content: str
+        ) -> None:
+        pulumi.log.info(f"Creating wiki page")
+        RestWrapper(
+            action_type="create_wiki_page",
+            inputs={
+                "project_id": self.project.id,
+                "wiki_name": wiki_name,
+                "page_name": page_name,
+                "page_content": page_content
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
