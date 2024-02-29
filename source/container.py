@@ -194,57 +194,53 @@ class DockerACR:
         """
 
         global index
-        # Create a network security group
-        self.nsg = network.NetworkSecurityGroup(
-            f'pulumi-nsg-{index}',
-            resource_group_name=self.resource_group.name
+
+        # Create a Virtual Network
+        vnet = azure_native.network.VirtualNetwork(
+            f"pulumi-vnet-{index}",
+            resource_group_name=self.resource_group.name,
+            address_space=azure_native.network.AddressSpaceArgs(
+                address_prefixes=["10.0.0.0/16"],
+            ),
+        )
+        # Create a Subnet
+        subnet = azure_native.network.Subnet(
+            f"pulumi-subnet-{index}",
+            resource_group_name=self.resource_group.name,
+            virtual_network_name=vnet.name,
+            address_prefix="10.0.1.0/24",
         )
 
-        # Define a security rule to allow traffic from a specific IP address
-        self.rule = network.SecurityRule(
-            f"pulumi-nsg-rule-{index}",
-            network_security_group_name=self.nsg.name,
+        # Create a Network Security Group with an inbound security rule to only accept traffic from a specific public IP
+        nsg = azure_native.network.NetworkSecurityGroup(
+            f"pulumi-nsg-{index}",
             resource_group_name=self.resource_group.name,
+        )
+
+        # Add a security rule to allow traffic from a specific public IP
+        security_rule = azure_native.network.SecurityRule(
+            f"pulumi-secrule-{index}",
+            resource_group_name=self.resource_group.name,
+            network_security_group_name=nsg.name,
+            security_rule_name="AllowSpecificIP",
             priority=100,
-            direction='Inbound',
-            access='Allow',
-            protocol='Tcp',
-            source_port_range='*',
-            destination_port_range='*',
-            source_address_prefix=self.get_public_ip(),
-            destination_address_prefix='*',
-            description='Allow inbound traffic from a specific IP')
-
-        # Create a Virtual Network and Subnet, associating the NSG with the subnet
-        self.vnet = network.VirtualNetwork(
-            f'pulumi-vnet-{index}',
-            resource_group_name=self.resource_group.name,
-            address_space=network.AddressSpaceArgs(
-                address_prefixes=['10.0.0.0/16'],
-            )
+            direction="Inbound",
+            access="Allow",
+            protocol="*",
+            source_port_range="*",
+            destination_port_range="*",
+            source_address_prefix=self.get_public_ip(), 
+            destination_address_prefix="*",
+            description="Allow inbound from specific public IP",
         )
 
-        self.subnet = network.Subnet(
-            f'pulumi-subnet-{index}',
+        # Associate the NSG with the subnet
+        subnet_association = azure_native.network.SubnetNetworkSecurityGroupAssociation(
+            f"pulumi-subnetnsgassoc-{index}",
             resource_group_name=self.resource_group.name,
-            virtual_network_name=self.vnet.name,
-            address_prefix='10.0.0.0/24',
-            network_security_group=self.nsg
-        )
-
-        # Create a network profile for the container instance
-        self.network_profile = network.NetworkProfile(
-            f"pulumi-net-profile-{index}",
-            resource_group_name=self.resource_group.name,
-            container_network_interface_configurations=[network.ContainerNetworkInterfaceConfigurationArgs(
-                name=f'pulumi-container-nic-config-{index}',
-                ip_configurations=[network.IPConfigurationProfileArgs(
-                    name=f'pulumi-ip-config-{index}',
-                    subnet=network.SubnetArgs(
-                        id=self.subnet.id
-                    )
-                )]
-            )]
+            subnet_name=subnet.name,
+            virtual_network_name=vnet.name,
+            network_security_group_id=nsg.id,
         )
 
 
