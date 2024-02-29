@@ -84,7 +84,7 @@ class RestAPI(ResourceProvider):
             project=inputs.get("project_name"),
             type=inputs.get("type")
         )
-
+        return CreateResult(id_="1", outs={"work item created": True})
     def create_wiki(
             self,
             inputs: dict

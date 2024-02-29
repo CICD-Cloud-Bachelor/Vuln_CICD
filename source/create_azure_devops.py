@@ -4,14 +4,10 @@ import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 import os
 from pulumi import Config
-<<<<<<< HEAD
 from source.azure_devops_rest_api import AzureDevOpsPipelineRun, AzureDevOpsPipelineRunProvider
 import configparser
 import random
-=======
 from source.rest_test import *
-import configparser, time
->>>>>>> Dev
 
 config = configparser.ConfigParser()
 config.read('config.ini')
