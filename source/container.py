@@ -4,12 +4,12 @@ import pulumi_docker as docker
 import pulumi_azure_native as azure_native
 from pulumi_azure_native import containerinstance, resources
 from pulumi_azure_native import network, dbformysql
-import configparser
+import configparser, requests
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 DNS_LABEL = config["DOCKER"]["DNS_LABEL"]
-
+index = 0
 
 class CreateContainer:
     """
@@ -139,6 +139,9 @@ class DockerACR:
             )
         )
 
+    def get_public_ip(self) -> str:
+        return requests.get('https://api64.ipify.org').text
+
     def build_and_push_docker_image(
             self, 
             image_name: str #image name needs to be same as in github repo
@@ -189,53 +192,65 @@ class DockerACR:
             str: The fully qualified domain name (FQDN) of the container.
 
         """
-        
-       # Create a virtual network
-        vnet = network.VirtualNetwork(
-            "myVNet",
+
+        global index
+        # Create a network security group
+        self.nsg = network.NetworkSecurityGroup(
+            f'pulumi-nsg-{index}',
+            resource_group_name=self.resource_group.name
+        )
+
+        # Define a security rule to allow traffic from a specific IP address
+        self.rule = network.SecurityRule(
+            f"pulumi-nsg-rule-{index}",
+            network_security_group_name=self.nsg.name,
+            resource_group_name=self.resource_group.name,
+            priority=100,
+            direction='Inbound',
+            access='Allow',
+            protocol='Tcp',
+            source_port_range='*',
+            destination_port_range='*',
+            source_address_prefix=self.get_public_ip(),
+            destination_address_prefix='*',
+            description='Allow inbound traffic from a specific IP')
+
+        # Create a Virtual Network and Subnet, associating the NSG with the subnet
+        self.vnet = network.VirtualNetwork(
+            f'pulumi-vnet-{index}',
             resource_group_name=self.resource_group.name,
             address_space=network.AddressSpaceArgs(
-                address_prefixes=["10.0.0.0/16"],
-            ),
+                address_prefixes=['10.0.0.0/16'],
+            )
         )
 
-        # Create a network security group that allows access only from a specific IP
-        nsg = network.NetworkSecurityGroup(
-            "myNSG",
+        self.subnet = network.Subnet(
+            f'pulumi-subnet-{index}',
             resource_group_name=self.resource_group.name,
-            security_rules=[
-                network.SecurityRuleArgs(
-                    name="AllowSpecificIP",
-                    priority=100,
-                    direction="Inbound",
-                    access="Allow",
-                    protocol="*",
-                    source_address_prefix="128.39.248.89",
-                    source_port_range="*",
-                    destination_address_prefix="*",
-                    destination_port_range="*",
-                ),
-            ],
+            virtual_network_name=self.vnet.name,
+            address_prefix='10.0.0.0/24',
+            network_security_group=self.nsg
         )
 
-        # Corrected subnet creation with delegation for Azure Container Instances
-        subnet = network.Subnet(
-            "mySubnet",
+        # Create a network profile for the container instance
+        self.network_profile = network.NetworkProfile(
+            f"pulumi-net-profile-{index}",
             resource_group_name=self.resource_group.name,
-            virtual_network_name=vnet.name,
-            address_prefix="10.0.0.0/24",
-            delegations=[network.DelegationArgs(
-                name="containerInstanceDelegation",
-                service_name="Microsoft.ContainerInstance/containerGroups"
-            )],
-            network_security_group=network.NetworkSecurityGroupArgs(
-                id=nsg.id,
-            ),
+            container_network_interface_configurations=[network.ContainerNetworkInterfaceConfigurationArgs(
+                name=f'pulumi-container-nic-config-{index}',
+                ip_configurations=[network.IPConfigurationProfileArgs(
+                    name=f'pulumi-ip-config-{index}',
+                    subnet=network.SubnetArgs(
+                        id=self.subnet.id
+                    )
+                )]
+            )]
         )
+
 
         pulumi.log.info(f"Starting container: {container_name}")
         
-        container_group_name = container_name + "-group"
+        container_group_name = f"pulumi-containergroup-{container_name}-{index}"
         
         # Create a container group with a single container
         container_group = containerinstance.ContainerGroup(
@@ -269,13 +284,10 @@ class DockerACR:
                         port=p
                         ) for p in ports
                 ],
-                type="Private",
-                #dns_name_label=f"{container_name}{DNS_LABEL}", # optional
+                type="Public",
+                dns_name_label=f"{container_name}{DNS_LABEL}", # optional
             ),
             restart_policy="OnFailure",
-            subnet_ids=[containerinstance.ContainerGroupSubnetIdArgs(
-                id=subnet.id,
-            )],
             opts=pulumi.ResourceOptions(depends_on=[self.task])
         )
 
@@ -283,5 +295,5 @@ class DockerACR:
         fqdn = pulumi.Output.all(container_group.name, container_group.location).apply(
             lambda args: f"{container_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
         )
-
+        index += 1
         return fqdn
