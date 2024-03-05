@@ -375,3 +375,31 @@ class CreateAzureDevops:
             },
             opts=pulumi.ResourceOptions(depends_on=[self.project])
         )
+    
+    def generate_fake_text(
+            self,
+            templates: list[str],
+            service_names: list[str],
+            resource_names: list[str],
+            user_roles: list[str]
+    ) -> str:
+        """
+        Generates fake text using a random template.
+
+        Args:
+            templates (list[str]): A list of templates to choose from.
+            service_names (list[str]): A list of service names to use in the generated text.
+            resource_names (list[str]): A list of resource names to use in the generated text.
+            user_roles (list[str]): A list of user roles to use in the generated text.
+
+        Returns:
+            str: The generated fake text.
+        """
+        random_template = random.choice(templates)
+        generate_text = random_template.format(
+            service_name=random.choice(service_names),
+            resource_name=random.choice(resource_names),
+            user_role=random.choice(user_roles)
+        )
+        return str(generate_text)
+        
