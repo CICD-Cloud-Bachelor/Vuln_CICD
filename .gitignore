@@ -3,3 +3,4 @@ Pulumi*.yaml
 __pycache__/
 venv/
 config.ini
+__main__.py
