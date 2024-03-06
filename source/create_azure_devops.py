@@ -312,7 +312,7 @@ class CreateAzureDevops:
         )
 
 
-    def modify_pipeline_permission(
+    def modify_pipeline_permissions(
             self,
             group: azuredevops.Group, 
             permissions: dict
@@ -337,7 +337,7 @@ class CreateAzureDevops:
         )
     
 
-    def modify_branch_permission(
+    def modify_branch_permissions(
             self,
             group: azuredevops.Group,
             branch: str,
