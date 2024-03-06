@@ -60,11 +60,6 @@ def start(resource_group: azure.core.ResourceGroup):
         page_content="This is a test page",
         page_name="TestPage"
     )
-    azure_devops.create_wiki_page(
-        wiki_name="VULN4_WIKI",
-        page_content="New page",
-        page_name="Info"
-    )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
@@ -110,7 +105,7 @@ def start(resource_group: azure.core.ResourceGroup):
             group=group
         )
 
-    azure_devops.modify_project_permission(
+    azure_devops.modify_project_permissions(
         group=group, 
         permissions={
             "GENERIC_READ": "Allow",
@@ -123,7 +118,7 @@ def start(resource_group: azure.core.ResourceGroup):
             "ViewBuildDefinition": "Allow"
         }
     )
-    azure_devops.modify_repo_permission(
+    azure_devops.modify_repository_permissions(
         group=group, 
         permissions={
             "GenericRead": "Allow"
