@@ -20,8 +20,7 @@ REPO_NAME = "python-calculator"
 PIPELINE_NAME = "Run unit tests"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
-def start():
-    resource_group = azure.core.ResourceGroup('resource-group', location="West Europe")
+def start(resource_group: azure.core.ResourceGroup):
 
     devops_project = CreateAzureDevops(
         PROJECT_NAME,
