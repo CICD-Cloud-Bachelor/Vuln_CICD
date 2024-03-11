@@ -55,16 +55,18 @@ def start(resource_group: azure.core.ResourceGroup):
         github_repo_url=GITHUB_REPO_URL, 
         repo_name=REPO_NAME
     )
-    azure_devops.add_variables(
-        {
+
+
+    azure_devops.create_pipeline(
+        name=PIPELINE_NAME,
+        variables={
             "FTP_HOST": "a2",#connection_string, 
             "FTP_USER": "ftpshared", 
             "FTP_PASS": "MAsds8ASDsadm82988"
-        }
+        },
+        branch="main",
+        run=True
     )
-    azure_devops.create_ci_cd_pipeline(PIPELINE_NAME)
-    azure_devops.run_pipeline(
-        branch="main"
-    )
+
 
     

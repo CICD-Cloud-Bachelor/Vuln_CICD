@@ -94,16 +94,40 @@ class CreateAzureDevops:
         pulumi.export("repository_web_url", self.git_repo.web_url)
 
 
-    def create_ci_cd_pipeline(
-            self, 
-            name: str
-        ) -> azuredevops.BuildDefinition:
+    def create_pipeline(
+        self, 
+        name: str,
+        run: bool,
+        branch: str,
+        variables: dict = None
+    ) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 
         Args:
-            name (str): The name of the CI/CD pipeline.
+            name (str): The name of the pipeline.
+            run (bool): Indicates whether to run the pipeline after creation.
+            branch (str): The branch to associate with the pipeline.
+            variables (dict, optional): A dictionary of variables to add to the pipeline definition. 
+                Each key-value pair represents a variable name and its corresponding value. 
+                Defaults to None.
+
+        Returns:
+            azuredevops.BuildDefinition: The created CI/CD pipeline.
+
         """
+        pulumi.log.info("Adding variables to pipeline definition")
+        if variables is not None:    
+            pipeline_variables = []
+            for identifier, value in variables.items():
+                pipeline_variables.append(
+                    azuredevops.BuildDefinitionVariableArgs(
+                        name=identifier,
+                        secret_value=value,
+                        is_secret=True,
+                    )
+                )
+
         pulumi.log.info("Creating CI/CD Pipeline")
         
         self.ci_cd_pipeline = azuredevops.BuildDefinition(
@@ -119,51 +143,22 @@ class CreateAzureDevops:
                 "useYaml": True  # Enable continuous integration trigger using YAML
             },
             agent_pool_name="Azure Pipelines",
-            variables=self.variables or []
+            variables=pipeline_variables or []
         )
-        return self.ci_cd_pipeline
-        
-
-    def run_pipeline(
-            self, 
-            branch: str
-        ) -> None:
-        pulumi.log.info(f"Running pipeline")
-        RestWrapper(
-            action_type="run_pipeline",
-            inputs={
-                "project_name": self.project.name,
-                "pipeline_id": self.ci_cd_pipeline.id,
-                "branch": branch
-            },
-            opts=pulumi.ResourceOptions(depends_on=[self.ci_cd_pipeline, self.project])
-        )
-
-
-    def add_variables(
-            self, 
-            variables: dict
-        ) -> None:
-        """
-        Adds variables to the build definition. Needs to be ran before creating the pipeline.
-
-        Args:
-            variables (dict): A dictionary containing the variables to be added. The keys represent the variable names,
-                              and the values represent the secret values.
-
-        Returns:
-            None
-        """
-        self.variables = []
-        for identifier, value in variables.items():
-            self.variables.append(
-                azuredevops.BuildDefinitionVariableArgs(
-                    name=identifier,
-                    secret_value=value,
-                    is_secret=True,
-                )
+        if run:
+            pulumi.log.info(f"Running pipeline")
+            RestWrapper(
+                action_type="run_pipeline",
+                inputs={
+                    "project_name": self.project.name,
+                    "pipeline_id": self.ci_cd_pipeline.id,
+                    "branch": branch
+                },
+                opts=pulumi.ResourceOptions(depends_on=[self.ci_cd_pipeline, self.project])
             )
 
+        return self.ci_cd_pipeline
+    
 
     def __create_entra_user(
             self,
