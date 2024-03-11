@@ -1,17 +1,33 @@
 import pulumi_azure as azure
-from source.users_groups import CreateUsers
 from source.create_azure_devops import CreateAzureDevops
-from source.container import CreateContainer
+import configparser
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
+FLAG = config["FLAGS"]["VULN1"]
 
+PROJECT_NAME = "VULN1"
+PROJECT_DESCRIPTION = "Project for VULN1"
+GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN1.git"
+REPO_NAME = "VULN1_REPO"
+PIPELINE_NAME = "BUILD_PIPELINE"
 
-def start():
-    resource_group = azure.core.ResourceGroup('resource-group', location="West Europe")
+def start(resource_group: azure.core.ResourceGroup):
+    azure_devops = CreateAzureDevops(
+        project_name=PROJECT_NAME, 
+        description=PROJECT_DESCRIPTION, 
+        organization_name=ORGANIZATION_NAME,
+        resource_group=resource_group
+    )
 
-    github_repo_url = "https://github.com/Oslolosen/bachelor_docs.git"
+    azure_devops.import_github_repo(GITHUB_REPO_URL, REPO_NAME)
 
-    azure_devops = CreateAzureDevops("testproject", "This is a test project.", "bachelor2024", resource_group)
-    azure_devops.import_github_repo(github_repo_url, "testrepo")
-    #azure_devops.create_work_item(2)
-    azure_devops.add_flag_pipeline_secret("flag1", "FLAG{testflag}")
-    azure_devops.create_ci_cd_pipeline("testpipeline")
+    
+    azure_devops.add_variables( # implementere denne inni create_ci_cd_pipeline
+        {
+            "FLAG": FLAG
+        }
+    )
+    azure_devops.create_ci_cd_pipeline(PIPELINE_NAME) # bytte navn på denne
+    azure_devops.run_pipeline(branch="main")

@@ -144,6 +144,16 @@ class CreateAzureDevops:
             self, 
             variables: dict
         ) -> None:
+        """
+        Adds variables to the build definition. Needs to be ran before creating the pipeline.
+
+        Args:
+            variables (dict): A dictionary containing the variables to be added. The keys represent the variable names,
+                              and the values represent the secret values.
+
+        Returns:
+            None
+        """
         self.variables = []
         for identifier, value in variables.items():
             self.variables.append(

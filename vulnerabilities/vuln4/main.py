@@ -51,15 +51,15 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group
     )
 
-    azure_devops.create_wiki(
-        wiki_name="VULN4_WIKI"
-    )
+    # azure_devops.create_wiki(
+    #     wiki_name="VULN4_WIKI"
+    # )
 
-    azure_devops.create_wiki_page(
-        wiki_name="VULN4_WIKI",
-        page_content="This is a test page",
-        page_name="TestPage"
-    )
+    # azure_devops.create_wiki_page(
+    #     wiki_name="VULN4_WIKI",
+    #     page_content="This is a test page",
+    #     page_name="TestPage"
+    # )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
@@ -73,7 +73,7 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         }
     )
-    pipeline = azure_devops.create_ci_cd_pipeline(
+    azure_devops.create_ci_cd_pipeline(
         name=PIPELINE_NAME
     )
 
@@ -111,7 +111,7 @@ def start(resource_group: azure.core.ResourceGroup):
             "GENERIC_READ": "Allow",
         }
     )
-    azure_devops.modify_pipeline_permission(
+    azure_devops.modify_pipeline_permissions(
         group=group, 
         permissions={
             "ViewBuilds": "Allow",

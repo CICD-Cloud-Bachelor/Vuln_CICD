@@ -67,11 +67,4 @@ def start(resource_group: azure.core.ResourceGroup):
         branch="main"
     )
 
-    workitem = WorkItem(
-        organization_name=ORGANIZATION_NAME, 
-        project_name=PROJECT_NAME, 
-        depends_on=azure_devops.project
-    )
-    workitem.create_random_work_items(20)
-
-
+    
