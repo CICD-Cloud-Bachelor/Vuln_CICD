@@ -6,13 +6,13 @@ from vulnerabilities.vuln5 import main as vuln5
 
 from pulumi import Config
 
-config = Config("azure-native")
-location = config.get("location")
+config = Config("azuredevops")
+location = config.require("location")
 resource_group = azure.core.ResourceGroup('resource-group', location=location)
 
 
 
-vuln1.start(resource_group)
+#vuln1.start(resource_group)
 
 #vuln4.start(resource_group)
 #vuln5.start(resource_group)

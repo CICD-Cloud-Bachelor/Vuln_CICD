@@ -8,15 +8,10 @@ from pulumi import Config
 from pulumi_azuread import User as EntraUser
 from source.users_groups import UserCreator, GroupCreator
 from source.rest_test import *
-import configparser, time
+import time
+from source.config import *
 
 fake = Faker()
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-PAT = config["AZURE"]["PAT"]
-USERNAME = config["AZURE"]["USERNAME"]
-DOMAIN = config["AZURE"]["DOMAIN"]
 
 class CreateAzureDevops:
     config = Config()
@@ -100,7 +95,7 @@ class CreateAzureDevops:
         run: bool,
         branch: str,
         variables: dict = None
-    ) -> azuredevops.BuildDefinition:
+        ) -> azuredevops.BuildDefinition:
         """
         Creates a CI/CD pipeline in Azure DevOps.
 

@@ -1,13 +1,8 @@
 import pulumi_azure as azure
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-from source.workitem import WorkItem
 import configparser
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-REGISTRY_NAME = config["DOCKER"]["REGISTRY_NAME"]
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
+from source.config import *
 
 PROJECT_NAME = "VULN5"
 PROJECT_DESCRIPTION = "Project for VULN5"

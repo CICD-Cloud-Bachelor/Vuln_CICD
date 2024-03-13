@@ -1,14 +1,11 @@
 from faker import Faker
 import pulumi
 import pulumi_azuredevops as azuredevops
-import configparser
+from source.config import *
 import os
 from pulumi_azuread import User
 
 fake = Faker()
-config = configparser.ConfigParser()
-config.read('config.ini')
-DOMAIN = config["AZURE"]["DOMAIN"]
 
 class UserCreator:
     def create_entra_user(

@@ -2,8 +2,6 @@ import pulumi_azure as azure
 import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-from source.workitem import WorkItem
-from source.users_groups import GroupCreator, UserCreator
 import configparser
 from faker import Faker
 
@@ -65,21 +63,18 @@ def start(resource_group: azure.core.ResourceGroup):
         github_repo_url=GITHUB_REPO_URL, 
         repo_name=REPO_NAME
     )
-    azure_devops.add_variables(
-        {
+
+    azure_devops.create_pipeline(
+        name=PIPELINE_NAME,
+        variables={
             "CONNECTION_STRING": connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
-        }
-    )
-    azure_devops.create_ci_cd_pipeline(
-        name=PIPELINE_NAME
-    )
-
-    azure_devops.run_pipeline(
-        branch="main"
-    )
+        },
+        branch="main",
+        run=True
+    ) 
 
     group = azure_devops.add_group(
         group_name="Custom Group"

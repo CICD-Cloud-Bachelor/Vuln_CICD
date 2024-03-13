@@ -5,13 +5,8 @@ from azure.devops.v7_1.work_item_tracking.models import CommentCreate
 from azure.devops.v7_1.wiki.models import WikiCreateParametersV2
 from azure.devops.v7_1.wiki.models import WikiPageCreateOrUpdateParameters
 import configparser, random, time
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-USERNAME = config["AZURE"]["USERNAME"]
-PAT = config["AZURE"]["PAT"]
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
+import pulumi
+from source.config import *
 
 
 class RestAPI(ResourceProvider):
