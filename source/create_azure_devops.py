@@ -6,9 +6,7 @@ import os
 from faker import Faker
 from pulumi import Config
 from pulumi_azuread import User as EntraUser
-from source.users_groups import UserCreator, GroupCreator
 from source.rest_test import *
-import time
 from source.config import *
 
 fake = Faker()

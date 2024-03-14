@@ -1,9 +1,0 @@
-name: userstest
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: A minimal Python Pulumi program
-config:
-  azuredevops:location: westeurope
-  azuredevops:personalAccessToken: ubfraghzuzpg5tvtk3laeiqfqd4vm5owi2a3w3rzrdpqif4ubama

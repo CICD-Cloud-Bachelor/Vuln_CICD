@@ -23,22 +23,22 @@ CONTAINER_NAME = "mysql-container"
 
 
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-        registry_name=REGISTRY_NAME
-    )
+    # acr = DockerACR(
+    #     resource_group=resource_group, 
+    #     registry_name=REGISTRY_NAME
+    # )
     
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME
-    )
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME
+    # )
 
-    connection_string = acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME, 
-        ports=[3306], 
-        cpu=1.0, 
-        memory=1.0
-    )
+    # connection_string = acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME, 
+    #     ports=[3306], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
     #import pulumi
     #pulumi.export("connection_string", connection_string)   
     
@@ -67,7 +67,7 @@ def start(resource_group: azure.core.ResourceGroup):
     azure_devops.create_pipeline(
         name=PIPELINE_NAME,
         variables={
-            "CONNECTION_STRING": connection_string, 
+            "CONNECTION_STRING": "a",#connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"

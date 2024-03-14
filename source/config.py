@@ -2,10 +2,12 @@ import pulumi
 import configparser
 
 pulumi_config = pulumi.Config("azuredevops")
-PAT = pulumi_config.require("personalAccessToken")
-LOCATION = pulumi_config.require("location")
+pulumi_azure_native_config = pulumi.Config("azure-native")
+PAT = pulumi_config.get("personalAccessToken")
+LOCATION = pulumi_azure_native_config.require("location")
 
-config = configparser.ConfigParser().read('config.ini')
+config = configparser.ConfigParser()
+config.read('config.ini')
 USERNAME = config["AZURE"]["USERNAME"]
 ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
 DOMAIN = config["AZURE"]["PRINCIPLE_NAME"]
