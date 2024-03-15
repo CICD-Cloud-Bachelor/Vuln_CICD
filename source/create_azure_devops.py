@@ -3,6 +3,7 @@ import pulumi_azuredevops as azuredevops
 import pulumi_azure_native as azure_native
 import pulumi_azure as azure
 import os
+import json
 from pulumi import Config
 from source.users_groups import UserCreator, GroupCreator
 from source.rest_test import *
@@ -40,6 +41,7 @@ class CreateAzureDevops:
         self.users = {}
         self.groups = {}
         self.variables = None
+        self.has_called_workitem = False
         self.__create_project()
 
 
@@ -320,7 +322,43 @@ class CreateAzureDevops:
             group,
             permissions
         )
-              
+    
+    def generate_random_work_items(
+            self,
+            assigned_to: str,
+            amount: int,
+        ) -> None:
+        pulumi.log.info(f"Generating random work items")
+
+        with open("vulnerabilities/vuln2/work_item_dataset.json", "r") as file:
+            work_item_dataset = json.load(file)
+        
+        templates = work_item_dataset["templates"]
+        service_names = work_item_dataset["service_names"]
+        resource_names = work_item_dataset["resource_names"]
+        user_roles = work_item_dataset["user_roles"]
+
+        for i in range(amount):
+            description = self.generate_fake_text(templates, service_names, resource_names, user_roles)
+            title = description.split()[0]
+            type = random.choice(["Task", "Bug", "Feature", "Epic", "Issue"])
+            RestWrapper(
+                action_type="create_work_item",
+                inputs={
+                    "project_name": self.project.name,
+                    "title": title,
+                    "assigned_to": assigned_to,
+                    "description": description,
+                    "type": type,
+                    "comments": [],
+                    "has_called_workitem": self.has_called_workitem
+                },
+                opts=pulumi.ResourceOptions(depends_on=[self.project])
+            )
+
+            if not self.has_called_workitem:
+                self.has_called_workitem = True
+
     def create_work_item(
             self,
             type: str,
@@ -331,6 +369,7 @@ class CreateAzureDevops:
             depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
+
         RestWrapper(
             action_type="create_work_item",
             inputs={
@@ -339,7 +378,7 @@ class CreateAzureDevops:
                 "assigned_to": assigned_to,
                 "description": description,
                 "type": type,
-                "comments": comments
+                "comments": comments,
             },
             opts=pulumi.ResourceOptions(depends_on=depends_on)
         )
@@ -362,9 +401,13 @@ class CreateAzureDevops:
             self,
             wiki_name: str,
             page_name: str,
-            page_content: str
+            markdown_file_path: str
         ) -> None:
         pulumi.log.info(f"Creating wiki page")
+
+        with open(markdown_file_path, "r") as markdown_file:
+            page_content = markdown_file.read()
+
         RestWrapper(
             action_type="create_wiki_page",
             inputs={

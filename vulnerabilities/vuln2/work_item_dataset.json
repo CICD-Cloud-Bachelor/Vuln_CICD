@@ -1,0 +1,35 @@
+{
+    "templates": [
+        "Cannot access Azure Virtual Machine named {resource_name}.",
+        "Experiencing latency issues with Azure {service_name}.",
+        "{resource_name} failed to deploy.",
+        "Need additional permissions in Azure Active Directory for {user_role}.",
+        "How do I configure {service_name} for high availability?",
+        "Requesting increase in quota for {service_name}.",
+        "Azure {service_name} is showing unexpected charges.",
+        "Connectivity issues between Azure VPN Gateway and {resource_name}.",
+        "Data recovery needed for Azure Blob Storage account named {resource_name}.",
+        "Trouble setting up Azure AD Connect for {resource_name}."
+    ],
+    "service_names": [
+        "Virtual Networks",
+        "SQL Database",
+        "Function App",
+        "Kubernetes Service",
+        "Blob Storage"
+    ],
+    "resource_names": [
+        "ResourceGroup1",
+        "MyAzureVM",
+        "StorageAccount",
+        "SQLServerDB",
+        "WebAppService"
+    ],
+    "user_roles": [
+        "developer",
+        "project manager",
+        "data scientist",
+        "system administrator",
+        "network engineer"
+    ]
+}

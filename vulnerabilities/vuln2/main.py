@@ -55,49 +55,13 @@ def generate_wiki_page(azure_devops):
     
     azure_devops.create_wiki("IT_Department")
 
-    with open("vulnerabilities/vuln2/wiki_page.md", "r") as file:
-        azure_devops.create_wiki_page("IT_Department", "IT_Department", file.read())
-
+    azure_devops.create_wiki_page("IT_Department", "IT_Department", "vulnerabilities/vuln2/wiki_page.md")
 
 def generate_work_items(azure_devops):
     work_item_title = "Important - create the new user to project"
     work_item_description = f"We need to add a new user to the important project. The user name is {vuln_username}."
                                 
     work_item_comment = ["Set the password in accordance with the IT department's policy, as usual."]
-
-    templates = [
-        "Cannot access Azure Virtual Machine named {resource_name}.",
-        "Experiencing latency issues with Azure {service_name}.",
-        "{resource_name} failed to deploy.",
-        "Need additional permissions in Azure Active Directory for {user_role}.",
-        "How do I configure {service_name} for high availability?",
-        "Requesting increase in quota for {service_name}.",
-        "Azure {service_name} is showing unexpected charges.",
-        "Connectivity issues between Azure VPN Gateway and {resource_name}.",
-        "Data recovery needed for Azure Blob Storage account named {resource_name}.",
-        "Trouble setting up Azure AD Connect for {resource_name}."
-    ]
-    
-    # Words to fill into the templates
-    service_names = ["Virtual Networks", "SQL Database", "Function App", "Kubernetes Service", "Blob Storage"]
-    resource_names = ["ResourceGroup1", "MyAzureVM", "StorageAccount", "SQLServerDB", "WebAppService"]
-    user_roles = ["developer", "project manager", "data scientist", "system administrator", "network engineer"]
-
-    for i in range(10):
-        
-        description = azure_devops.generate_fake_text(templates, service_names, resource_names, user_roles)
-        tile = f"{description.split()[0]} issue"
-
-        pulumi.debug(f"{description}")
-
-        azure_devops.create_work_item(
-            type = "Task",
-            title = tile,
-            assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
-            description = description,
-            comments = [None],
-            depends_on = [azure_devops.project]
-            )
 
     azure_devops.create_work_item(
         type = "Task",
@@ -108,6 +72,23 @@ def generate_work_items(azure_devops):
         depends_on = [azure_devops.project]
         )
 
+    azure_devops.generate_random_work_items(
+        assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        amount=30,
+    )
+
+    work_item_title = "Remove user from project"
+    work_item_description = f"We need to remove the user {vuln_username} from the the important project. This is due that the user has finished the job."
+                                
+    azure_devops.create_work_item(
+        type = "Task",
+        title = work_item_title,
+        assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        description = work_item_description,
+        comments = [],
+        depends_on = [azure_devops.project]
+        )
+    
 def start():
 
     global config
