@@ -4,6 +4,8 @@ import pulumi_azuredevops as azuredevops
 import configparser
 import os
 from pulumi_azuread import User
+import docker
+import json 
 
 fake = Faker()
 config = configparser.ConfigParser()
@@ -67,7 +69,6 @@ class UserCreator:
 
     def __random_password(self) -> str:
         return fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
-
 
 class GroupCreator:
 

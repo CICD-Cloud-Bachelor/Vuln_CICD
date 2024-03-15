@@ -1,3 +1,4 @@
+import pulumi
 from pulumi.dynamic import Resource, ResourceProvider, CreateResult
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
@@ -12,10 +13,12 @@ config.read('config.ini')
 USERNAME = config["AZURE"]["USERNAME"]
 PAT = config["AZURE"]["PAT"]
 ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-
+amount_of_called_workitems = 0
+has_been_called = False
 
 class RestAPI(ResourceProvider):
     def create(self, inputs: dict) -> CreateResult:
+        self.has_called_workitem = False
         credentials = BasicAuthentication(
             username=USERNAME, 
             password=PAT
@@ -65,14 +68,22 @@ class RestAPI(ResourceProvider):
             self,
             inputs: dict
         ) -> CreateResult:
+
+        global amount_of_called_workitems
+        global has_been_called
+
         work_item_client = self.connection.clients.get_work_item_tracking_client()
 
+        if not has_been_called:
+            time.sleep(60)
+            has_been_called = True
+        
         fields = {
             "/fields/System.Title": inputs.get("title"),
             "/fields/System.AssignedTo": inputs.get("assigned_to"),
             "/fields/System.Description": inputs.get("description")
         }
-        time.sleep(60)
+
         work_item = work_item_client.create_work_item(
             document = [
                 {
@@ -85,14 +96,16 @@ class RestAPI(ResourceProvider):
             type=inputs.get("type")
         )
 
-        comments = [CommentCreate(text=comment) for comment in inputs.get("comments")]
+        if len(inputs.get("comments")) != 0:
+            
+            comments = [CommentCreate(text=comment) for comment in inputs.get("comments")]  
 
-        for comment in comments:
-            work_item_client.add_comment(
-                request=comment,
-                project=inputs.get("project_name"),
-                work_item_id=work_item.id
-            )
+            for comment in comments:
+                work_item_client.add_comment(
+                    request=comment,
+                    project=inputs.get("project_name"),
+                    work_item_id=work_item.id
+                )
 
         return CreateResult(id_="1", outs={"work item id": work_item.id})
 
@@ -122,6 +135,8 @@ class RestAPI(ResourceProvider):
         wiki_client = self.connection.clients.get_wiki_client()
 
         parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
+
+        time.sleep(60)
 
         wiki_client.create_or_update_page(
             parameters=parameters,
