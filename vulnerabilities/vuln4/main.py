@@ -4,13 +4,9 @@ from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 import configparser
 from faker import Faker
-
+from source.config import ORGANIZATION_NAME, REGISTRY_NAME
 
 faker = Faker()
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-REGISTRY_NAME = config["DOCKER"]["REGISTRY_NAME"]
 
 PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
@@ -19,8 +15,6 @@ REPO_NAME = "VULN4_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME = "mysqldb"
 CONTAINER_NAME = "mysql-container"
-
-
 
 def start(resource_group: azure.core.ResourceGroup):
     # acr = DockerACR(
@@ -76,22 +70,22 @@ def start(resource_group: azure.core.ResourceGroup):
         run=True
     ) 
 
-    # group = azure_devops.add_group(
-    #     group_name="Custom Group"
-    # )
-    # user = azure_devops.add_user(
-    #     name=faker.name().replace(".", ""),
-    #     password="Troll57Hoho69%MerryChristmas"
-    # )
-    # azure_devops.add_user_to_group(
-    #     user=user,
-    #     group=group
-    # )
+    group = azure_devops.add_group(
+        group_name="Custom Group"
+    )
+    user = azure_devops.add_user(
+        name=faker.name().replace(".", ""),
+        password="Troll57Hoho69%MerryChristmas"
+    )
+    azure_devops.add_user_to_group(
+        user=user,
+        group=group
+    )
 
     # users = [
     #     azure_devops.add_user(
     #         name=faker.name().replace(".", "")
-    #     ) for _ in range(3)
+    #     ) for _ in range(2)
     # ]
 
     # for user in users:

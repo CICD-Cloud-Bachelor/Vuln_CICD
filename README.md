@@ -29,3 +29,13 @@ This error is given in Azure DevOps when running a pipeline if no parallelism ha
 ```
 No hosted parallelism has been purchased or granted. To request a free parallelism grant, please fill out the following form https://aka.ms/azpipelines-parallelism-request
 ```
+
+### Can't add user in Azure DevOps
+If you receive this error, then you need to enable external guest access in your Azure DevOps organization access.
+```
+Creating user entitlement: Adding user entitlement: (5101) You are trying to invite a user from outside your directory, but the security setting of this organization doesn't allow it.
+```
+Go to your organization, then enable external guest access likt this:
+```
+Organization Settings -> Security -> Policies -> User Policies -> External guest access
+```

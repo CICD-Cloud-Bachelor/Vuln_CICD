@@ -206,7 +206,8 @@ class CreateAzureDevops:
             
             devops_user = azuredevops.User(
                 resource_name = name + "_" + os.urandom(5).hex(),
-                principal_name = entra_user.user_principal_name
+                principal_name = entra_user.user_principal_name,
+                opts=pulumi.ResourceOptions(depends_on=[entra_user])
             )
 
             self.users[name] = devops_user
