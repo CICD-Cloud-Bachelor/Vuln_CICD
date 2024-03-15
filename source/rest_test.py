@@ -6,7 +6,7 @@ from azure.devops.v7_1.wiki.models import WikiCreateParametersV2
 from azure.devops.v7_1.wiki.models import WikiPageCreateOrUpdateParameters
 import configparser, random, time
 import pulumi
-from source.config import *
+from source.config import USERNAME, PAT, ORGANIZATION_NAME
 
 
 class RestAPI(ResourceProvider):

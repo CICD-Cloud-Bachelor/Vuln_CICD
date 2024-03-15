@@ -1,5 +1,25 @@
 # Vuln_CICD
 
+## Install
+
+```
+git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git .
+pulumi new python --name "mypulumiproject" --generate-only --force
+git restore .
+
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+
+pulumi stack select dev
+pulumi config set azure-native:location westeurope
+pulumi config set azuredevops:personalAccessToken $PAT --plaintext
+pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/bachelorcicd2024
+```
+
+
+
 ## Common problems
 
 ### Can't run pipeline
