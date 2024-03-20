@@ -18,7 +18,10 @@ pulumi config set azuredevops:personalAccessToken $PAT --plaintext
 pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/bachelorcicd2024
 ```
 
-
+## Configure `az` cli
+```
+az devops configure --defaults organization=https://dev.azure.com/bachelor2024
+```
 
 ## Common problems
 

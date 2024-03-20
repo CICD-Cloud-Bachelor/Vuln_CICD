@@ -82,49 +82,49 @@ def start(resource_group: azure.core.ResourceGroup):
         group=group
     )
 
-    # users = [
-    #     azure_devops.add_user(
-    #         name=faker.name().replace(".", "")
-    #     ) for _ in range(2)
-    # ]
+    users = [
+        azure_devops.add_user(
+            name=faker.name().replace(".", "")
+        ) for _ in range(2)
+    ]
 
-    # for user in users:
-    #     azure_devops.add_user_to_group(
-    #         user=user,
-    #         group=group
-    #     )
+    for user in users:
+        azure_devops.add_user_to_group(
+            user=user,
+            group=group
+        )
 
-    # azure_devops.modify_project_permissions(
-    #     group=group, 
-    #     permissions={
-    #         "GENERIC_READ": "Allow",
-    #     }
-    # )
-    # azure_devops.modify_pipeline_permissions(
-    #     group=group, 
-    #     permissions={
-    #         "ViewBuilds": "Allow",
-    #         "ViewBuildDefinition": "Allow"
-    #     }
-    # )
-    # azure_devops.modify_repository_permissions(
-    #     group=group, 
-    #     permissions={
-    #         "GenericRead": "Allow"
-    #     }
-    # )
+    azure_devops.modify_project_permissions(
+        group=group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+        }
+    )
+    azure_devops.modify_pipeline_permissions(
+        group=group, 
+        permissions={
+            "ViewBuilds": "Allow",
+            "ViewBuildDefinition": "Allow"
+        }
+    )
+    azure_devops.modify_repository_permissions(
+        group=group, 
+        permissions={
+            "GenericRead": "Allow"
+        }
+    )
     
-    # azure_devops.create_work_item(
-    #     type="Task",
-    #     title="Investigate production outage",
-    #     description="Investigate production outage",
-    #     assigned_to=user.principal_name,
-    #     comments=[
-    #         "Correct", 
-    #         "Investigate production outage", 
-    #         "Investigate", 
-    #         "Fix production outage"
-    #     ],
-    #     depends_on=[user, azure_devops.project]
-    # )
+    azure_devops.create_work_item(
+        type="Task",
+        title="Investigate production outage",
+        description="Investigate production outage",
+        assigned_to=user.principal_name,
+        comments=[
+            "Correct", 
+            "Investigate production outage", 
+            "Investigate", 
+            "Fix production outage"
+        ],
+        depends_on=[user, azure_devops.project]
+    )
   
