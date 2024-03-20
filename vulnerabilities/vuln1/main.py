@@ -23,11 +23,12 @@ def start(resource_group: azure.core.ResourceGroup):
 
     azure_devops.import_github_repo(GITHUB_REPO_URL, REPO_NAME)
 
-    
-    azure_devops.add_variables( # implementere denne inni create_ci_cd_pipeline
-        {
+    azure_devops.create_pipeline(
+        name=PIPELINE_NAME,
+        variables={
             "FLAG": FLAG
-        }
-    )
-    azure_devops.create_ci_cd_pipeline(PIPELINE_NAME) # bytte navn på denne
-    azure_devops.run_pipeline(branch="main")
+        },
+        branch="main",
+        run=True
+    ) 
+    

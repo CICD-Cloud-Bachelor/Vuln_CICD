@@ -4,11 +4,9 @@ import pulumi_docker as docker
 import pulumi_azure_native as azure_native
 from pulumi_azure_native import containerinstance, resources
 from pulumi_azure_native import network, dbformysql
-import configparser, requests
+import requests
+from source.config import *
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-DNS_LABEL = config["DOCKER"]["DNS_LABEL"]
 index = 0
 
 class CreateContainer:

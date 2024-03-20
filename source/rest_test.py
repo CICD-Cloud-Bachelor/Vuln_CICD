@@ -6,15 +6,9 @@ from azure.devops.v7_1.work_item_tracking.models import CommentCreate
 from azure.devops.v7_1.wiki.models import WikiCreateParametersV2
 from azure.devops.v7_1.wiki.models import WikiPageCreateOrUpdateParameters
 import configparser, random, time
+import pulumi
+from source.config import USERNAME, PAT, ORGANIZATION_NAME
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-USERNAME = config["AZURE"]["USERNAME"]
-PAT = config["AZURE"]["PAT"]
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-amount_of_called_workitems = 0
-has_been_called = False
 
 class RestAPI(ResourceProvider):
     def create(self, inputs: dict) -> CreateResult:

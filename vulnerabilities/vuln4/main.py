@@ -2,17 +2,11 @@ import pulumi_azure as azure
 import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-from source.workitem import WorkItem
-from source.users_groups import GroupCreator, UserCreator
 import configparser
 from faker import Faker
-
+from source.config import ORGANIZATION_NAME, REGISTRY_NAME
 
 faker = Faker()
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-REGISTRY_NAME = config["DOCKER"]["REGISTRY_NAME"]
 
 PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
@@ -22,25 +16,23 @@ PIPELINE_NAME = "testpipeline"
 IMAGE_NAME = "mysqldb"
 CONTAINER_NAME = "mysql-container"
 
-
-
 def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-        registry_name=REGISTRY_NAME
-    )
+    # acr = DockerACR(
+    #     resource_group=resource_group, 
+    #     registry_name=REGISTRY_NAME
+    # )
     
-    acr_string = acr.build_and_push_docker_image(
-        image_name=IMAGE_NAME
-    )
+    # acr_string = acr.build_and_push_docker_image(
+    #     image_name=IMAGE_NAME
+    # )
 
-    connection_string = acr.start_container(
-        docker_acr_image_name=acr_string, 
-        container_name=CONTAINER_NAME, 
-        ports=[3306], 
-        cpu=1.0, 
-        memory=1.0
-    )
+    # connection_string = acr.start_container(
+    #     docker_acr_image_name=acr_string, 
+    #     container_name=CONTAINER_NAME, 
+    #     ports=[3306], 
+    #     cpu=1.0, 
+    #     memory=1.0
+    # )
     #import pulumi
     #pulumi.export("connection_string", connection_string)   
     
@@ -65,21 +57,18 @@ def start(resource_group: azure.core.ResourceGroup):
         github_repo_url=GITHUB_REPO_URL, 
         repo_name=REPO_NAME
     )
-    azure_devops.add_variables(
-        {
-            "CONNECTION_STRING": connection_string, 
+
+    azure_devops.create_pipeline(
+        name=PIPELINE_NAME,
+        variables={
+            "CONNECTION_STRING": "a",#connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
-        }
-    )
-    azure_devops.create_ci_cd_pipeline(
-        name=PIPELINE_NAME
-    )
-
-    azure_devops.run_pipeline(
-        branch="main"
-    )
+        },
+        branch="main",
+        run=True
+    ) 
 
     group = azure_devops.add_group(
         group_name="Custom Group"
@@ -96,7 +85,7 @@ def start(resource_group: azure.core.ResourceGroup):
     users = [
         azure_devops.add_user(
             name=faker.name().replace(".", "")
-        ) for _ in range(3)
+        ) for _ in range(2)
     ]
 
     for user in users:
