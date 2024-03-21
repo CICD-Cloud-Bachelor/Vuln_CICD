@@ -355,34 +355,16 @@ class CreateAzureDevops:
         Returns:
             None
         """
-        GroupCreator.modify_branch_permissions(
-            self.project,
-            group,
-            self.git_repo,
-            branch,
-            permissions
+        pulumi.log.info("Modifying git branch permissions for group")
+        azuredevops.GitPermissions("branchPermissions_" + os.urandom(5).hex(),
+            project_id=self.project.id,
+            principal=group.id,
+            repository_id=self.git_repo.id,
+            branch_name=branch,
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
         )
     
-    def modify_area_permission(
-            self,
-            group: azuredevops.Group,
-            permissions: dict
-        ) -> None:
-        """
-        Modifies the area permissions for a specific group.
-
-        Args:
-            group (azuredevops.Group): The group to modify permissions for.
-            permissions (dict): The permissions to assign to the group.
-
-        Returns:
-            None
-        """
-        GroupCreator.modify_area_permissions(
-            self.project,
-            group,
-            permissions
-        )
     
     def generate_random_work_items(
             self,
