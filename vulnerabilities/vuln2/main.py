@@ -26,7 +26,7 @@ def generate_users(azure_devops):
     azure_devops.add_user(it_department_username, it_departemnt_password)
     azure_devops.add_group(it_department_group_name)
     azure_devops.add_user_to_group(azure_devops.users.get(it_department_username), azure_devops.groups.get(it_department_group_name))
-    azure_devops.modify_project_permission(azure_devops.groups.get(it_department_group_name), permissions = {"GENERIC_READ": "Allow",
+    azure_devops.modify_project_permissions(azure_devops.groups.get(it_department_group_name), permissions = {"GENERIC_READ": "Allow",
                                                                                                             "GENERIC_WRITE": "Allow",
                                                                                                             "WORK_ITEM_READ": "Allow",
                                                                                                             "WORK_ITEM_WRITE": "Allow"
@@ -99,7 +99,7 @@ def start():
 
     global config
 
-    resource_group = azure.core.ResourceGroup('resource-group', location="West Europe")
+    resource_group = azure.core.ResourceGroup('magnusme_resource-group', location="West Europe")
     
     config = configparser.ConfigParser()
 

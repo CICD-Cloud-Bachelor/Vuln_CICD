@@ -1,4 +1,3 @@
-import pulumi
 from pulumi.dynamic import Resource, ResourceProvider, CreateResult
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
