@@ -9,6 +9,13 @@ import configparser, random, time
 import pulumi
 from source.config import USERNAME, PAT, ORGANIZATION_NAME
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+USERNAME = config["AZURE"]["USERNAME"]
+PAT = config["AZURE"]["PAT"]
+ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
+has_been_called = False
 
 class RestAPI(ResourceProvider):
     def create(self, inputs: dict) -> CreateResult:
@@ -63,7 +70,6 @@ class RestAPI(ResourceProvider):
             inputs: dict
         ) -> CreateResult:
 
-        global amount_of_called_workitems
         global has_been_called
 
         work_item_client = self.connection.clients.get_work_item_tracking_client()
@@ -75,7 +81,7 @@ class RestAPI(ResourceProvider):
         fields = {
             "/fields/System.Title": inputs.get("title"),
             "/fields/System.AssignedTo": inputs.get("assigned_to"),
-            "/fields/System.Description": inputs.get("description")
+            "/fields/System.Description": inputs.get("description"),
         }
 
         work_item = work_item_client.create_work_item(
@@ -100,6 +106,34 @@ class RestAPI(ResourceProvider):
                     project=inputs.get("project_name"),
                     work_item_id=work_item.id
                 )
+
+        if inputs.get("state") != "New":
+            inputs.update({"work_item_id": work_item.id})
+            self.update_work_item_state(inputs, work_item_client)
+
+        return CreateResult(id_="1", outs={"work item id": work_item.id})
+
+    def update_work_item_state(
+            self,
+            inputs: dict,
+            work_item_client
+        ) -> CreateResult:
+        
+        fields = {
+            "/fields/System.State": inputs.get("state")
+        }
+
+        work_item = work_item_client.update_work_item(
+            document = [
+                {
+                    "op": "add",
+                    "path": path,
+                    "value": value
+                } for path, value in fields.items()
+            ],
+            project=inputs.get("project_name"),
+            id=inputs.get("work_item_id")
+        )
 
         return CreateResult(id_="1", outs={"work item id": work_item.id})
 
