@@ -391,7 +391,7 @@ class CreateAzureDevops:
         ) -> None:
         pulumi.log.info(f"Generating random work items")
 
-        with open("templates/work_items/work_item_dataset.json", "r") as file:
+        with open("vulnerabilities/vuln2/work_item_dataset.json", "r") as file:
             work_item_dataset = json.load(file)
         
         templates = work_item_dataset["templates"]
@@ -400,12 +400,9 @@ class CreateAzureDevops:
         user_roles = work_item_dataset["user_roles"]
 
         for i in range(amount):
-            title, description = self.generate_fake_text(templates, service_names, resource_names, user_roles)
+            description = self.generate_fake_text(templates, service_names, resource_names, user_roles)
+            title = description.split()[0]
             type = random.choice(["Task", "Bug", "Feature", "Epic", "Issue"])
-            state = random.choice(["New", "Active", "Closed"])
-
-            comment = ["Work item has been closed as this has been resolved."] if state == "Closed" else []
-
             RestWrapper(
                 action_type="create_work_item",
                 inputs={
@@ -414,11 +411,14 @@ class CreateAzureDevops:
                     "assigned_to": assigned_to,
                     "description": description,
                     "type": type,
-                    "state": state,
-                    "comments": comment
+                    "comments": [],
+                    "has_called_workitem": self.has_called_workitem
                 },
                 opts=pulumi.ResourceOptions(depends_on=[self.project])
             )
+
+            if not self.has_called_workitem:
+                self.has_called_workitem = True
 
     def create_work_item(
             self,
@@ -427,7 +427,6 @@ class CreateAzureDevops:
             assigned_to: str,
             description: str,
             comments: list[str],
-            state: str = "New",
             depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
@@ -441,7 +440,6 @@ class CreateAzureDevops:
                 "description": description,
                 "type": type,
                 "comments": comments,
-                "state": state
             },
             opts=pulumi.ResourceOptions(depends_on=depends_on)
         )
@@ -504,13 +502,10 @@ class CreateAzureDevops:
             str: The generated fake text.
         """
         random_template = random.choice(templates)
-        title = random_template["title"]
-        template_text = random_template["template"]
-
-        generate_text = template_text.format(
+        generate_text = random_template.format(
             service_name=random.choice(service_names),
             resource_name=random.choice(resource_names),
             user_role=random.choice(user_roles)
         )
-        return title, generate_text
+        return str(generate_text)
         

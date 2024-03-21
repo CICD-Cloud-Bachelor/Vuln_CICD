@@ -55,13 +55,13 @@ def generate_wiki_page(azure_devops):
     
     azure_devops.create_wiki("IT_Department")
 
-    azure_devops.create_wiki_page("IT_Department", "IT_Department", "templates/wiki_pages/wiki_page_vuln2.md")
+    azure_devops.create_wiki_page("IT_Department", "IT_Department", "vulnerabilities/vuln2/wiki_page.md")
 
 def generate_work_items(azure_devops):
     work_item_title = "Important - create the new user to project"
     work_item_description = f"We need to add a new user to the important project. The user name is {vuln_username}."
                                 
-    work_item_comment = ["Set the password in accordance with the IT department's policy, as usual.", "Work item has been closed as this has been resolved."]
+    work_item_comment = ["Set the password in accordance with the IT department's policy, as usual."]
 
     azure_devops.create_work_item(
         type = "Task",
@@ -69,13 +69,12 @@ def generate_work_items(azure_devops):
         assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
         description = work_item_description,
         comments = work_item_comment,
-        state="Closed",
         depends_on = [azure_devops.project]
         )
 
     azure_devops.generate_random_work_items(
         assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
-        amount=60,
+        amount=30,
     )
 
     work_item_title = "Remove user from project"
@@ -87,13 +86,8 @@ def generate_work_items(azure_devops):
         assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
         description = work_item_description,
         comments = [],
-        depends_on = [azure_devops.project],
+        depends_on = [azure_devops.project]
         )
-    
-    azure_devops.generate_random_work_items(
-        assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
-        amount=38,
-    )
     
 def start():
 
@@ -105,8 +99,8 @@ def start():
 
     config.read('config.ini')
 
-    project_name = "IT Department Project"
-    project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
+    project_name = "Vulnerability_2"
+    project_descrition = "Test for å lage wiki"
     organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
     azure_devops = CreateAzureDevops(project_name, project_descrition, organization_name, resource_group)
@@ -115,7 +109,7 @@ def start():
 
     generate_work_items(azure_devops)
 
-    #generate_wiki_page(azure_devops)
+    generate_wiki_page(azure_devops)
 
 
 
