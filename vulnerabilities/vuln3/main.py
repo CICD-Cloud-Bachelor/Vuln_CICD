@@ -1,11 +1,8 @@
 import pulumi
 import pulumi_azure as azure
-import pulumi_azuread as azuread
-import pulumi_azuredevops as azuredevops
 import configparser
 from faker import Faker
 from source.create_azure_devops import CreateAzureDevops
-from source.container import CreateContainer
 
 faker = Faker()
 config = configparser.ConfigParser()
