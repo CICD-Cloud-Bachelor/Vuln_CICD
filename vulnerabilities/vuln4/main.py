@@ -4,7 +4,7 @@ from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 import configparser
 from faker import Faker
-from source.config import ORGANIZATION_NAME, REGISTRY_NAME
+from source.config import ORGANIZATION_NAME, REGISTRY_NAME,CONTAINER_PATH
 
 faker = Faker()
 
@@ -14,7 +14,6 @@ GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
 REPO_NAME = "VULN4_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME = "mysqldb"
-CONTAINER_NAME = "mysql-container"
 
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(
@@ -22,7 +21,7 @@ def start(resource_group: azure.core.ResourceGroup):
     )
 
     connection_string = acr.start_container(
-        filepath="source/docker_images/mysqldb",
+        image_name=IMAGE_NAME,
         ports=[3306], 
         cpu=1.0, 
         memory=1.0

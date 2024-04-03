@@ -89,27 +89,27 @@ class DockerACR:
             container_access_type="container"
         )
 
-    def __upload_file_to_blob(self, filepath: str) -> None:
+    def __upload_file_to_blob(self, image_name: str) -> None:
         global index
         self.__create_tar_archive(
-            filepath=filepath
+            image_name=image_name
         )
         self.blob_storage = azure.storage.Blob(
             resource_name=f"blobStoragePulumiBachelor2024{index}",
-            name=f"{filepath.split('/')[-1]}.tar", # the filename
+            name=f"{image_name}.tar", # the filename
             storage_account_name=self.storage_account.name,
             storage_container_name=self.storage_container.name,
             type="Block",
-            source=pulumi.FileAsset(f"{filepath}.tar")
+            source=pulumi.FileAsset(f"{CONTAINER_PATH}/{image_name}.tar")
         )
         self.__remove_tar_archive(
-            filepath=filepath
+            image_name=image_name
         )
         
     
     def __build_and_push_docker_image(
         self, 
-        image_name: str #image name needs to be same as in GitHub repo
+        image_name: str #image name needs to be same as the folder name
         ) -> str:
         pulumi.log.info(f"Running Docker Compose for image: {image_name}")
 
@@ -137,62 +137,48 @@ class DockerACR:
 
     def __create_tar_archive(
         self,
-        filepath: str
+        image_name: str
         ) -> None:
-        pulumi.log.info(f"Creating {filepath}/{filepath.split('/')[-1]}.tar")
-        with tarfile.open(f"{filepath}/{filepath.split('/')[-1]}.tar", "w") as tar:
-            for name in os.listdir(filepath):
-                tar.add(f"{filepath}/{name}")
+        pulumi.log.info(f"Creating {CONTAINER_PATH}/{image_name}.tar")
+        with tarfile.open(f"{CONTAINER_PATH}/{image_name}.tar", "w") as tar:
+            for name in os.listdir(CONTAINER_PATH):
+                tar.add(f"{CONTAINER_PATH}/{name}")
     
     def __remove_tar_archive(
             self, 
-            filepath: str
+            image_name: str
         ) -> None:
-        for file in os.listdir(filepath):
+        pulumi.log.info(f"Removing {CONTAINER_PATH}/{image_name}.tar")
+        for file in os.listdir(CONTAINER_PATH):
             pulumi.log.info(f"Removing {file}")
             if file.endswith(".tar"):
-                os.remove(f"{filepath}/{file}")
+                os.remove(f"{CONTAINER_PATH}/{file}")
 
     def start_container(
             self, 
-            filepath: str,
+            image_name: str,
             ports: list[int], 
             cpu: float, 
             memory: float
         ) -> str:
-        """
-        Starts a container in a container group.
-
-        Args:
-            docker_acr_image_name (str): The name of the Docker image.
-            container_name (str): The name of the container.
-            ports (list[int]): The list of ports to expose.
-            cpu (float): The CPU resource limit for the container.
-            memory (float): The memory resource limit for the container.
-
-        Returns:
-            str: The fully qualified domain name (FQDN) of the container.
-
-        """
         global index
-        container_name = filepath.split("/")[-1]
         self.__upload_file_to_blob(
-            filepath=filepath
+            image_name=image_name
         )
 
         docker_acr_image_name = self.__build_and_push_docker_image(
-            image_name=container_name
+            image_name=image_name
         )
 
-        pulumi.log.info(f"Starting container: {container_name}")
+        pulumi.log.info(f"Starting container: {image_name}")
         
         container_group = containerinstance.ContainerGroup(
-            resource_name=f"pulumi-containergroup-{container_name}-{index}",
+            resource_name=f"pulumi-containergroup-{image_name}-{index}",
             resource_group_name=self.resource_group.name,
             os_type="Linux",  # or "Windows"
             containers=[
                 containerinstance.ContainerArgs(
-                    name=container_name,
+                    name=image_name,
                     image=docker_acr_image_name,
                     resources=containerinstance.ResourceRequirementsArgs(
                         requests=containerinstance.ResourceRequestsArgs(
@@ -218,7 +204,7 @@ class DockerACR:
                         ) for p in ports
                 ],
                 type="Public",
-                dns_name_label=f"{container_name}{DNS_LABEL}",
+                dns_name_label=f"{image_name}{DNS_LABEL}",
             ),
             restart_policy="OnFailure",
             opts=pulumi.ResourceOptions(depends_on=[self.task])
@@ -228,7 +214,7 @@ class DockerACR:
             container_group.name, 
             container_group.location
         ).apply(
-            lambda args: f"{container_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
+            lambda args: f"{image_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
         )
         index += 1
         return fqdn

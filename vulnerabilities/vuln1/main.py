@@ -1,11 +1,8 @@
 import pulumi_azure as azure
 from source.create_azure_devops import CreateAzureDevops
 import configparser
+from source.config import ORGANIZATION_NAME, FLAG1
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
-FLAG = config["FLAGS"]["VULN1"]
 
 PROJECT_NAME = "VULN1"
 PROJECT_DESCRIPTION = "Project for VULN1"
@@ -26,7 +23,7 @@ def start(resource_group: azure.core.ResourceGroup):
     azure_devops.create_pipeline(
         name=PIPELINE_NAME,
         variables={
-            "FLAG": FLAG
+            "FLAG": FLAG1
         },
         branch="main",
         run=True
