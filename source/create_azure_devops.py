@@ -111,6 +111,7 @@ class CreateAzureDevops:
             azuredevops.BuildDefinition: The created CI/CD pipeline.
 
         """
+        pipeline_variables = None
         pulumi.log.info("Adding variables to pipeline definition")
         if variables is not None:    
             pipeline_variables = []

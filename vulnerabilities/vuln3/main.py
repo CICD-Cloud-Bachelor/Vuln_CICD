@@ -31,7 +31,11 @@ def start(resource_group: azure.core.ResourceGroup):
         REPO_NAME
     )
 
-    devops_project.create_ci_cd_pipeline(PIPELINE_NAME)
+    devops_project.create_pipeline(
+        PIPELINE_NAME,
+        run=False,
+        branch="dev"
+    )
 
     low_privil_username = faker.name().replace('.', ' ')
 
