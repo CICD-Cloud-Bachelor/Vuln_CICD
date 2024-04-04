@@ -102,9 +102,9 @@ class DockerACR:
             type="Block",
             source=pulumi.FileAsset(f"{CONTAINER_PATH}/{image_name}.tar")
         )
-        self.__remove_tar_archive(
-            image_name=image_name
-        )
+        # self.__remove_tar_archive(
+        #     image_name=image_name
+        # )
         
     
     def __build_and_push_docker_image(
@@ -141,8 +141,9 @@ class DockerACR:
         ) -> None:
         pulumi.log.info(f"Creating {CONTAINER_PATH}/{image_name}.tar")
         with tarfile.open(f"{CONTAINER_PATH}/{image_name}.tar", "w") as tar:
-            for name in os.listdir(CONTAINER_PATH):
-                tar.add(f"{CONTAINER_PATH}/{name}")
+            for name in os.listdir(f"{CONTAINER_PATH}/{image_name}"):
+                pulumi.log.info(f"Adding {name} to archive")
+                tar.add(f"{CONTAINER_PATH}/{image_name}/{name}", arcname=name)
     
     def __remove_tar_archive(
             self, 
@@ -155,66 +156,82 @@ class DockerACR:
                 os.remove(f"{CONTAINER_PATH}/{file}")
 
     def start_container(
-            self, 
-            image_name: str,
-            ports: list[int], 
-            cpu: float, 
-            memory: float
-        ) -> str:
-        global index
-        self.__upload_file_to_blob(
-            image_name=image_name
-        )
+                self, 
+                image_name: str, # must be the name of a folder in the "CONTAINER_PATH" folder
+                ports: list[int], 
+                cpu: float, 
+                memory: float
+            ) -> str:
+            """
+            Starts a container with the specified image name, ports, CPU, and memory.
 
-        docker_acr_image_name = self.__build_and_push_docker_image(
-            image_name=image_name
-        )
+            Args:
+                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image.
+                ports (list[int]): A list of port numbers to expose on the container.
+                cpu (float): The CPU allocation for the container.
+                memory (float): The memory allocation (in GB) for the container.
 
-        pulumi.log.info(f"Starting container: {image_name}")
-        
-        container_group = containerinstance.ContainerGroup(
-            resource_name=f"pulumi-containergroup-{image_name}-{index}",
-            resource_group_name=self.resource_group.name,
-            os_type="Linux",  # or "Windows"
-            containers=[
-                containerinstance.ContainerArgs(
-                    name=image_name,
-                    image=docker_acr_image_name,
-                    resources=containerinstance.ResourceRequirementsArgs(
-                        requests=containerinstance.ResourceRequestsArgs(
-                            cpu=cpu,
-                            memory_in_gb=memory,
+            Returns:
+                str: The fully qualified domain name (FQDN) of the container.
+
+            Raises:
+                None
+
+            """
+            global index
+            self.__upload_file_to_blob(
+                image_name=image_name
+            )
+
+            docker_acr_image_name = self.__build_and_push_docker_image(
+                image_name=image_name
+            )
+
+            pulumi.log.info(f"Starting container: {image_name}")
+            
+            container_group = containerinstance.ContainerGroup(
+                resource_name=f"pulumi-containergroup-{image_name}-{index}",
+                resource_group_name=self.resource_group.name,
+                os_type="Linux",  # or "Windows"
+                containers=[
+                    containerinstance.ContainerArgs(
+                        name=image_name,
+                        image=docker_acr_image_name,
+                        resources=containerinstance.ResourceRequirementsArgs(
+                            requests=containerinstance.ResourceRequestsArgs(
+                                cpu=cpu,
+                                memory_in_gb=memory,
+                            ),
                         ),
+                        ports=[containerinstance.ContainerPortArgs(port=p) for p in ports],
                     ),
-                    ports=[containerinstance.ContainerPortArgs(port=p) for p in ports],
-                ),
-            ],
-            image_registry_credentials=[
-                containerinstance.ImageRegistryCredentialArgs(
-                    server=self.registry.login_server.apply(lambda server: server),
-                    username=self.credentials.apply(lambda creds: creds.username),
-                    password=self.credentials.apply(lambda creds: creds.passwords[0].value),
-                ),
-            ],
-            ip_address=containerinstance.IpAddressArgs(
-                ports=[
-                    containerinstance.PortArgs(
-                        protocol="TCP", 
-                        port=p
-                        ) for p in ports
                 ],
-                type="Public",
-                dns_name_label=f"{image_name}{DNS_LABEL}",
-            ),
-            restart_policy="OnFailure",
-            opts=pulumi.ResourceOptions(depends_on=[self.task])
-        )
-        # Construct the FQDN
-        fqdn = pulumi.Output.all(
-            container_group.name, 
-            container_group.location
-        ).apply(
-            lambda args: f"{image_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
-        )
-        index += 1
-        return fqdn
+                image_registry_credentials=[
+                    containerinstance.ImageRegistryCredentialArgs(
+                        server=self.registry.login_server.apply(lambda server: server),
+                        username=self.credentials.apply(lambda creds: creds.username),
+                        password=self.credentials.apply(lambda creds: creds.passwords[0].value),
+                    ),
+                ],
+                ip_address=containerinstance.IpAddressArgs(
+                    ports=[
+                        containerinstance.PortArgs(
+                            protocol="TCP", 
+                            port=p
+                            ) for p in ports
+                    ],
+                    type="Public",
+                    dns_name_label=f"{image_name}{DNS_LABEL}",
+                ),
+                restart_policy="OnFailure",
+                opts=pulumi.ResourceOptions(depends_on=[self.task])
+            )
+            # Construct the FQDN
+            fqdn = pulumi.Output.all(
+                container_group.name, 
+                container_group.location
+            ).apply(
+                lambda args: f"{image_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
+            )
+            index += 1
+            return fqdn
