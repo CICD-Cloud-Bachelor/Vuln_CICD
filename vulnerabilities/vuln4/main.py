@@ -58,7 +58,7 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        run=True
+        #run=True
     ) 
 
     group = azure_devops.add_group(
@@ -111,10 +111,8 @@ def start(resource_group: azure.core.ResourceGroup):
         description="Investigate production outage",
         assigned_to=user.principal_name,
         comments=[
-            "Correct", 
-            "Investigate production outage", 
-            "Investigate", 
-            "Fix production outage"
+            "Investigating",
+            "Fixed" 
         ],
         depends_on=[user, azure_devops.project]
     )
