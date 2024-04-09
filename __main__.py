@@ -1,4 +1,5 @@
 import pulumi_azure as azure
+import pulumi
 from pulumi import Config
 from vulnerabilities.vuln3 import main as vuln3
 
