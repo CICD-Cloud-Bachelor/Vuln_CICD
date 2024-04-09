@@ -10,8 +10,6 @@ REPO_NAME = "VULN5_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
-CONTAINER_NAME1 = "ftpserver-container"
-CONTAINER_NAME2 = "ftppoller-container"
 
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(

@@ -33,4 +33,5 @@ COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
 RUN chmod +x /usr/local/bin/configure_vsftpd.sh
 
 # Run the script when the container starts
-CMD ["/usr/local/bin/configure_vsftpd.sh"]
+#CMD ["vsftpd", "/etc/vsftpd.conf"]
+CMD ["sh", "/usr/local/bin/configure_vsftpd.sh"]
