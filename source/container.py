@@ -238,7 +238,7 @@ class DockerACR:
             return fqdn
 
 class CtfdContainer:
-    def init(self):
+    def __init__(self):
         self.ctfd_path = "source/docker_images/CTFd"
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 

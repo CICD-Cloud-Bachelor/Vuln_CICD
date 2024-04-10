@@ -28,6 +28,9 @@ fi
 # Initialize database
 flask db upgrade
 
+# Import ctfd_export.zip that contains the challenges preconfigured
+python3 manage.py import_ctf ctfd_export.zip
+
 # Start CTFd
 echo "Starting CTFd"
 exec gunicorn 'CTFd:create_app()' \
