@@ -1,8 +1,10 @@
 import pulumi_azure as azure
 import pulumi
-from pulumi import Config
 from vulnerabilities.vuln3 import main as vuln3
+from source.container import CtfdContainer
 
-resource_group = azure.core.ResourceGroup('resource-group_mo', location="West Europe")
+#resource_group = azure.core.ResourceGroup('resource-group_mo', location="West Europe")
 
-vuln3.start(resource_group)
+#vuln3.start(resource_group)
+
+ctfd = CtfdContainer()
