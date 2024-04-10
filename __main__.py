@@ -8,4 +8,6 @@ resource_group = azure.core.ResourceGroup('resource-group_mo', location="West Eu
 vuln3.start(resource_group)
 
 # Start ctfd container 
+#
 ctfd = CtfdContainer()
+#

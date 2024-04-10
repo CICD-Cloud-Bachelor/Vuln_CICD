@@ -238,6 +238,15 @@ class DockerACR:
             return fqdn
 
 class CtfdContainer:
+    """
+    Represents a CTFd container.
+
+    This class provides methods to create the CTFd container using docker-compose.
+    Create an instance of this class to start the CTFd container locally.
+    
+    Requires Docker engine and Docker Compose to be installed.
+    """
+
     def __init__(self):
         self.ctfd_path = "source/docker_images/CTFd"
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
@@ -245,6 +254,7 @@ class CtfdContainer:
     def __run_docker_compose(self, command: list[str]):
         """
         Runs a docker-compose command and prints its output.
+
         :param command: List of the command parts, e.g., ['up', '-d'] for 'docker-compose up -d'.
         """
         # Ensure the command is prefixed with 'docker-compose'
