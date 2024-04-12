@@ -248,7 +248,7 @@ class CtfdContainer:
     """
 
     def __init__(self):
-        self.ctfd_path = "source/docker_images/CTFd"
+        self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):
