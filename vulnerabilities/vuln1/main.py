@@ -1,6 +1,5 @@
 import pulumi_azure as azure
 from source.create_azure_devops import CreateAzureDevops
-import configparser
 from source.config import ORGANIZATION_NAME, FLAG1
 
 
