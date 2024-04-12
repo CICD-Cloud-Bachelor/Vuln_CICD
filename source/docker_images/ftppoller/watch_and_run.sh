@@ -8,6 +8,7 @@ PREV_HASH=""
 while true; do
   # Download s.zip file
   curl -s --ftp-pasv -o $LOCAL_ZIP $REMOTE_FTP
+  
   # Calculate hash of the downloaded file to see if it has changed
   NEW_HASH=$(md5sum $LOCAL_ZIP | cut -d ' ' -f 1)
   
