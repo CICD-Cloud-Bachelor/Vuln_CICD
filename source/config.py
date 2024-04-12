@@ -1,10 +1,4 @@
-#import pulumi
 import configparser
-
-#pulumi_config = pulumi.Config("azuredevops")
-#pulumi_azure_native_config = pulumi.Config("azure-native")
-#PAT = pulumi_config.require("personalAccessToken")
-#LOCATION = pulumi_azure_native_config.require("location")
 
 config = configparser.ConfigParser()
 config.read('config.ini')
