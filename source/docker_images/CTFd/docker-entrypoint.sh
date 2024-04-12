@@ -28,8 +28,10 @@ fi
 # Initialize database
 flask db upgrade
 
-# Import ctfd_export.zip that contains the challenges preconfigured
-python3 manage.py import_ctf ctfd_export.zip
+# Import ctfd_export.zip that contains the preconfigured challenges
+if [ -f ctfd_export.zip ]; then
+    python3 manage.py import_ctf ctfd_export.zip
+fi
 
 # Start CTFd
 echo "Starting CTFd"

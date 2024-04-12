@@ -73,7 +73,7 @@ CTFd/uploads
 .vagrant
 
 # CTFd Exports
-*.zip
+
 
 # JS
 node_modules/
