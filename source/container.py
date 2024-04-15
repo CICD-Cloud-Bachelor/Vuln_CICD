@@ -284,10 +284,8 @@ class CtfdContainer:
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
         in the CTFd export zip file. It then runs the docker-compose command to start the container.
         """
-        #self.ctfd_export_path = "source/docker_images/CTFd/ctfd_export.zip"
-        self.ctfd_path = "source/docker_images/CTFd/"
-        self.__replace_chall_flags_and_descriptions(self.ctfd_path)
         self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
+        self.__replace_chall_flags_and_descriptions(self.ctfd_path)
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):
