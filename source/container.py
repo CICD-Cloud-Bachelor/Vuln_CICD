@@ -277,8 +277,6 @@ class CtfdContainer:
     # The default ctfd_export.zip has 5 challenges configured, with their id being 1-5 respectively.
     #####
 
-    ctfd_export_path = "source/docker_images/CTFd/ctfd_export.zip"
-
     def __init__(self):
         """
         Initializes a new instance of the CtfdContainer class.
@@ -286,8 +284,9 @@ class CtfdContainer:
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
         in the CTFd export zip file. It then runs the docker-compose command to start the container.
         """
-        self.ctfd_path = "source/docker_images/CTFd"
-        self.__replace_chall_flags_and_descriptions(self.ctfd_export_path)
+        #self.ctfd_export_path = "source/docker_images/CTFd/ctfd_export.zip"
+        self.ctfd_path = "source/docker_images/CTFd/"
+        self.__replace_chall_flags_and_descriptions(self.ctfd_path)
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):
@@ -321,6 +320,15 @@ class CtfdContainer:
         """
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
             zip_ref.extractall(extraction_dir)
+
+    def __zip_dir(self, dir: str, zip_file: str) -> None:
+        """
+        Zips a directory and its contents.
+
+        :param dir: The path to the directory.
+        :param zip_file: The path to the zip file to create.
+        """
+        shutil.make_archive(zip_file, 'zip', dir)
 
     def __delete_dir(self, dir: str) -> None:
         """
@@ -377,24 +385,27 @@ class CtfdContainer:
             chall_entry["description"] = description
         return chall_dict
     
-    def __replace_chall_flags_and_descriptions(self, ctfd_export_path: str):
+    def __replace_chall_flags_and_descriptions(self, ctfd_path: str):
         """
         Replaces the challenge flags and descriptions in the CTFd export zip file.
 
         :param ctfd_export_path: The path to the CTFd export zip file.
         """
-        temp_dir = "ctfd_temp_dir/"
-        db_path = "ctfd_temp_dir/db/"
+        pulumi.log.info("Replacing challenge flags and descriptions in CTFd export")
+        temp_dir = "ctfd_export_temp_dir/"
+        db_path = "ctfd_export_temp_dir/db/"
 
+        ctfd_export_path = ctfd_path + "ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
-        flags_dict = self.__read_json(db_path + "flags.json")
-        challs_dict = self.__read_json(db_path + "challenges.json")
+        old_flags = self.__read_json(db_path + "flags.json")
+        old_challs = self.__read_json(db_path + "challenges.json")
 
-        new_flags_dict = self.__replace_flags(flags_dict, flags)
-        new_challs_dict = self.__replace_descriptions(challs_dict, descriptions)
+        new_flags_dict = self.__replace_flags(old_flags, flags)
+        new_challs_dict = self.__replace_descriptions(old_challs, descriptions)
 
         self.__write_json(db_path + "flags.json", new_flags_dict)
         self.__write_json(db_path + "challenges.json", new_challs_dict)
 
+        self.__zip_dir(temp_dir, ctfd_path + "ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)
