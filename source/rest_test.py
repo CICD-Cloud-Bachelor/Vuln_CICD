@@ -79,7 +79,6 @@ class RestAPI(ResourceProvider):
         
         fields = {
             "/fields/System.Title": inputs.get("title"),
-            "/fields/System.AssignedTo": inputs.get("assigned_to"),
             "/fields/System.Description": inputs.get("description"),
         }
 

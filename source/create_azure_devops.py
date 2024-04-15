@@ -264,7 +264,8 @@ class CreateAzureDevops:
             members=[user.descriptor]
         )
     
-
+        
+    
     def modify_project_permissions(
             self,
             group: azuredevops.Group, 
@@ -312,6 +313,30 @@ class CreateAzureDevops:
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
         )
 
+    def modify_area_permissions(
+        self,
+        group: azuredevops.Group,
+        permissions: dict
+        ) -> None:
+        """
+        Modifies the area permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying area permissions for group")
+        azuredevops.AreaPermissions("areaPermissions_" + os.urandom(5).hex(),
+            project_id=self.project.id,
+            principal=group.id,
+            path="/",
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/areapermissions/
+        )
 
     def modify_pipeline_permissions(
             self,
@@ -399,7 +424,6 @@ class CreateAzureDevops:
                     "state": state,
                     "comments": comment
                 },
-                opts=pulumi.ResourceOptions(depends_on=[self.project])
             )
 
     def create_work_item(
@@ -410,7 +434,6 @@ class CreateAzureDevops:
             description: str,
             comments: list[str],
             state: str = "New",
-            depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
 
@@ -424,8 +447,7 @@ class CreateAzureDevops:
                 "type": type,
                 "comments": comments,
                 "state": state
-            },
-            opts=pulumi.ResourceOptions(depends_on=depends_on)
+            }
         )
 
 
