@@ -28,24 +28,50 @@ descriptions = [
 # The default ctfd_export.zip has 5 challenges configured, with their id being 1-5 respectively.
 #####
 
-zip_file = "source/docker_images/CTFd/ctfd_export.zip"
-extract_dir = "ctfd_temp_dir/"
+def unzip_file(zip_file: str, extraction_dir: str) -> None:
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(extraction_dir)
 
-with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-    zip_ref.extractall(extract_dir)
+def delete_dir(dir: str) -> None:
+    shutil.rmtree(dir)
 
+def read_json(file: str) -> dict:
+    with open(file, 'r') as f:
+        data = json.load(f)
+    return data
 
-json_file = extract_dir + "db/" + "flags.json"
-with open(json_file, 'r') as f:
-    data = json.load(f)
+def write_json(file: str, data: dict) -> None:
+    with open(file, 'w') as f:
+        json.dump(data, f)
 
-print(data["results"])
+def replace_flags(flag_dict: dict, flags: list) -> None:              
+    for flag_entry in flag_dict["results"]:
+        index = flag_entry["id"] - 1
+        flag = flags[index]
+        flag_entry["content"] = flag
+    return flag_dict
 
-# Replace the placeholder flags with the actual flags
-for flagentry in data["results"]:
-    index = flagentry["id"] - 1
-    flag = flags[index]
-    flagentry["content"] = flag
+def replace_descriptions(chall_dict: dict, descriptions: list) -> None:
+    for chall_entry in chall_dict["results"]:
+        index = chall_entry["id"] - 1
+        description = descriptions[index]
+        chall_entry["description"] = description
+    return chall_dict
 
-print(data["results"])
-shutil.rmtree(extract_dir)
+if __name__ == "__main__":
+    zip_file = "source/docker_images/CTFd/ctfd_export.zip"
+    temp_dir = "ctfd_temp_dir/"
+    db_path = "ctfd_temp_dir/db/"
+
+    unzip_file(zip_file, temp_dir)
+
+    flags_dict = read_json(db_path + "flags.json")
+    challs_dict = read_json(db_path + "challenges.json")
+
+    new_flags_dict = replace_flags(flags_dict, flags)
+    new_challs_dict = replace_descriptions(challs_dict, descriptions)
+
+    write_json(db_path + "flags.json", new_flags_dict)
+    write_json(db_path + "challenges.json", new_challs_dict)
+    
+    delete_dir(temp_dir)

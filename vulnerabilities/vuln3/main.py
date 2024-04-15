@@ -12,10 +12,13 @@ ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
 PROJECT_NAME = "Vulnerability 3"
 PROJECT_DESCRIPTION = "Insufficient Credential Hygiene"
 GROUP_NAME = "Custom Permissions Group"
-GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"
-REPO_NAME = "python-calculator"
+#GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"
+GITHUB_REPO_URL = "https://github.com/flis5/MatchingGameBlazor.git"
+#REPO_NAME = "python-calculator"
+REPO_NAME = "MatchingGameBlazor"
 PIPELINE_NAME = "Run unit tests"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
+GITHUB_PAT = config["GITHUB"]["PAT"]
 
 def start(resource_group: azure.core.ResourceGroup):
 
@@ -28,41 +31,43 @@ def start(resource_group: azure.core.ResourceGroup):
 
     devops_project.import_github_repo(
         GITHUB_REPO_URL, 
-        REPO_NAME
+        REPO_NAME,
+        is_public=True,
+        pat=GITHUB_PAT
     )
 
-    devops_project.create_pipeline(
-        PIPELINE_NAME,
-        run=False,
-        branch="dev"
-    )
+    # devops_project.create_pipeline(
+    #     PIPELINE_NAME,
+    #     run=False,
+    #     branch="dev"
+    # )
 
-    low_privil_username = faker.name().replace('.', ' ')
+    # low_privil_username = faker.name().replace('.', ' ')
 
-    low_privil_user = devops_project.add_user(
-        low_privil_username,
-        DEVOPS_USER1_PASSWORD
-    )
+    # low_privil_user = devops_project.add_user(
+    #     low_privil_username,
+    #     DEVOPS_USER1_PASSWORD
+    # )
 
-    custom_group = devops_project.add_group(GROUP_NAME)
+    # custom_group = devops_project.add_group(GROUP_NAME)
     
-    devops_project.add_user_to_group(
-        low_privil_user, 
-        custom_group
-    )
+    # devops_project.add_user_to_group(
+    #     low_privil_user, 
+    #     custom_group
+    # )
 
-    # Give custom_group read permissions to the devops project
-    devops_project.modify_project_permissions(
-        custom_group,
-        permissions = {
-            "GENERIC_READ": "Allow"
-        }
-    )
+    # # Give custom_group read permissions to the devops project
+    # devops_project.modify_project_permissions(
+    #     custom_group,
+    #     permissions = {
+    #         "GENERIC_READ": "Allow"
+    #     }
+    # )
 
-    devops_project.modify_repository_permissions(
-        custom_group,
-        permissions = {
-            "GenericRead": "Allow"
-        }
-    )
+    # devops_project.modify_repository_permissions(
+    #     custom_group,
+    #     permissions = {
+    #         "GenericRead": "Allow"
+    #     }
+    # )
 

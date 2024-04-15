@@ -7,10 +7,32 @@ from pulumi_azure_native import network, dbformysql
 import requests, os
 import tarfile
 import subprocess
+import shutil
+import json
+import zipfile
+import configparser
 from source.config import *
 
 index = 0
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+FLAG1 = config["FLAGS"]["VULN1"]
+FLAG2 = config["FLAGS"]["VULN2"]
+FLAG3 = config["FLAGS"]["VULN3"]
+FLAG4 = config["FLAGS"]["VULN4"]
+FLAG5 = config["FLAGS"]["VULN5"]
+
+flags = [FLAG1, FLAG2, FLAG3, FLAG4, FLAG5]
+
+descriptions = [
+    "SQL Injection",
+    "Cross-Site Scripting (XSS)",
+    "Cross-Site Request Forgery (CSRF)",
+    "Remote Code Execution (RCE)",
+    "Command Injection"
+]
 
 class DockerACR:
     """
@@ -241,14 +263,31 @@ class CtfdContainer:
     """
     Represents a CTFd container.
 
-    This class provides methods to create the CTFd container using docker-compose.
-    Create an instance of this class to start the CTFd container locally.
-    
-    Requires Docker engine and Docker Compose to be installed.
+    This class provides methods to manage a CTFd container, including initializing the container,
+    running docker-compose commands, and replacing challenge flags and descriptions.
+
+    Attributes:
+        ctfd_export_path (str): The path to the CTFd export zip file.
+        ctfd_path (str): The path to the CTFd directory.
     """
 
+    #####
+    # A heads up - The code assumes the ctfd_export template has the challenges set up with placeholder flags.
+    # This is so that the flags json file has an entry for the respective challenges.
+    # The default ctfd_export.zip has 5 challenges configured, with their id being 1-5 respectively.
+    #####
+
+    ctfd_export_path = "source/docker_images/CTFd/ctfd_export.zip"
+
     def __init__(self):
+        """
+        Initializes a new instance of the CtfdContainer class.
+
+        This method sets the ctfd_path attribute and replaces challenge flags and descriptions
+        in the CTFd export zip file. It then runs the docker-compose command to start the container.
+        """
         self.ctfd_path = "source/docker_images/CTFd"
+        self.__replace_chall_flags_and_descriptions(self.ctfd_export_path)
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):
@@ -272,3 +311,90 @@ class CtfdContainer:
         else:
             print("Error executing docker compose")
             print(stderr.decode())
+
+    def __unzip_file(self, zip_file: str, extraction_dir: str) -> None:
+        """
+        Extracts a zip file to the specified directory.
+
+        :param zip_file: The path to the zip file.
+        :param extraction_dir: The directory to extract the files to.
+        """
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            zip_ref.extractall(extraction_dir)
+
+    def __delete_dir(self, dir: str) -> None:
+        """
+        Deletes a directory and its contents.
+
+        :param dir: The path to the directory.
+        """
+        shutil.rmtree(dir)
+
+    def __read_json(self, file: str) -> dict:
+        """
+        Reads a JSON file and returns its contents as a dictionary.
+
+        :param file: The path to the JSON file.
+        :return: The contents of the JSON file as a dictionary.
+        """
+        with open(file, 'r') as f:
+            data = json.load(f)
+        return data
+
+    def __write_json(self, file: str, data: dict) -> None:
+        """
+        Writes a dictionary to a JSON file.
+
+        :param file: The path to the JSON file.
+        :param data: The dictionary to write to the file.
+        """
+        with open(file, 'w') as f:
+            json.dump(data, f)
+
+    def __replace_flags(self, flag_dict: dict, flags: list) -> None:              
+        """
+        Replaces the flags in the flag dictionary with the provided flags.
+
+        :param flag_dict: The flag dictionary.
+        :param flags: The list of flags to replace the existing flags with.
+        """
+        for flag_entry in flag_dict["results"]:
+            index = flag_entry["id"] - 1
+            flag = flags[index]
+            flag_entry["content"] = flag
+        return flag_dict
+
+    def __replace_descriptions(self, chall_dict: dict, descriptions: list) -> None:
+        """
+        Replaces the descriptions in the challenge dictionary with the provided descriptions.
+
+        :param chall_dict: The challenge dictionary.
+        :param descriptions: The list of descriptions to replace the existing descriptions with.
+        """
+        for chall_entry in chall_dict["results"]:
+            index = chall_entry["id"] - 1
+            description = descriptions[index]
+            chall_entry["description"] = description
+        return chall_dict
+    
+    def __replace_chall_flags_and_descriptions(self, ctfd_export_path: str):
+        """
+        Replaces the challenge flags and descriptions in the CTFd export zip file.
+
+        :param ctfd_export_path: The path to the CTFd export zip file.
+        """
+        temp_dir = "ctfd_temp_dir/"
+        db_path = "ctfd_temp_dir/db/"
+
+        self.__unzip_file(ctfd_export_path, temp_dir)
+
+        flags_dict = self.__read_json(db_path + "flags.json")
+        challs_dict = self.__read_json(db_path + "challenges.json")
+
+        new_flags_dict = self.__replace_flags(flags_dict, flags)
+        new_challs_dict = self.__replace_descriptions(challs_dict, descriptions)
+
+        self.__write_json(db_path + "flags.json", new_flags_dict)
+        self.__write_json(db_path + "challenges.json", new_challs_dict)
+
+        self.__delete_dir(temp_dir)
