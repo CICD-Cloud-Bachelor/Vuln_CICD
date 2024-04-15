@@ -98,7 +98,7 @@ class DockerACR:
     
     def __create_storage_account_and_container(self) -> None:
         self.storage_account = azure.storage.Account(
-            resource_name="storageAccountPulumiBachelor2024",
+            resource_name=f"storageAccountPulumiBachelor2024{index}",
             name=STORAGE_ACCOUNT_NAME,
             resource_group_name=self.resource_group.name,
             location=self.resource_group.location,
@@ -106,7 +106,7 @@ class DockerACR:
             account_replication_type="LRS"
         )
         self.storage_container = azure.storage.Container(
-            resource_name="storageContainerPulumiBachelor2024",
+            resource_name=f"storageContainerPulumiBachelor2024{index}",
             name=STORAGE_CONTAINER_NAME,
             storage_account_name=self.storage_account.name,
             container_access_type="container"
@@ -287,6 +287,7 @@ class CtfdContainer:
         #self.ctfd_export_path = "source/docker_images/CTFd/ctfd_export.zip"
         self.ctfd_path = "source/docker_images/CTFd/"
         self.__replace_chall_flags_and_descriptions(self.ctfd_path)
+        self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):

@@ -1,13 +1,14 @@
 #!/bin/sh
 
 # FTP server URL including the path to s.zip
-REMOTE_FTP="ftp://ftpshared:MAsds8ASDsadm82988@ftppoller-containerpulumibachelorproject.westeurope.azurecontainer.io/home/ftpshared/ftp/s.zip"
+REMOTE_FTP="ftp://ftpshared:MAsds8ASDsadm82988@ftppollerpulumibachelorproject.westeurope.azurecontainer.io/home/ftpshared/ftp/s.zip"
 LOCAL_ZIP="/ftp/s.zip"
 PREV_HASH=""
 
 while true; do
   # Download s.zip file
   curl -s --ftp-pasv -o $LOCAL_ZIP $REMOTE_FTP
+  
   # Calculate hash of the downloaded file to see if it has changed
   NEW_HASH=$(md5sum $LOCAL_ZIP | cut -d ' ' -f 1)
   

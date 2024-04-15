@@ -3,7 +3,7 @@ FROM ubuntu:latest
 
 # Install necessary packages
 RUN apt update && \
-    apt install -y --no-install-recommends curl unzip && \
+    apt install -y --no-install-recommends curl unzip ftp && \
     rm -rf /var/lib/apt/lists/*
 
 # Add your script to the container
