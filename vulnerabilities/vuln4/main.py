@@ -1,10 +1,8 @@
 import pulumi_azure as azure
-import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-import configparser
 from faker import Faker
-from source.config import ORGANIZATION_NAME, REGISTRY_NAME
+from source.config import ORGANIZATION_NAME
 
 faker = Faker()
 
@@ -14,25 +12,18 @@ GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
 REPO_NAME = "VULN4_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME = "mysqldb"
-CONTAINER_NAME = "mysql-container"
 
 def start(resource_group: azure.core.ResourceGroup):
-    # acr = DockerACR(
-    #     resource_group=resource_group, 
-    #     registry_name=REGISTRY_NAME
-    # )
-    
-    # acr_string = acr.build_and_push_docker_image(
-    #     image_name=IMAGE_NAME
-    # )
+    acr = DockerACR(
+        resource_group=resource_group, 
+    )
 
-    # connection_string = acr.start_container(
-    #     docker_acr_image_name=acr_string, 
-    #     container_name=CONTAINER_NAME, 
-    #     ports=[3306], 
-    #     cpu=1.0, 
-    #     memory=1.0
-    # )
+    connection_string = acr.start_container(
+        image_name=IMAGE_NAME,
+        ports=[3306], 
+        cpu=1.0, 
+        memory=1.0
+    )
     #import pulumi
     #pulumi.export("connection_string", connection_string)   
     
@@ -43,15 +34,15 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group
     )
 
-    # azure_devops.create_wiki(
-    #     wiki_name="VULN4_WIKI"
-    # )
+    azure_devops.create_wiki(
+        wiki_name="VULN4_WIKI"
+    )
 
-    # azure_devops.create_wiki_page(
-    #     wiki_name="VULN4_WIKI",
-    #     page_content="This is a test page",
-    #     page_name="TestPage"
-    # )
+    azure_devops.create_wiki_page(
+        wiki_name="VULN4_WIKI",
+        page_name="Dev",
+        markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
+    )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
@@ -61,13 +52,13 @@ def start(resource_group: azure.core.ResourceGroup):
     azure_devops.create_pipeline(
         name=PIPELINE_NAME,
         variables={
-            "CONNECTION_STRING": "a",#connection_string, 
+            "CONNECTION_STRING": connection_string, 
             "DATABASE": "prod", 
             "USERNAME": "root", 
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        run=True
+        #run=True
     ) 
 
     group = azure_devops.add_group(
@@ -120,10 +111,8 @@ def start(resource_group: azure.core.ResourceGroup):
         description="Investigate production outage",
         assigned_to=user.principal_name,
         comments=[
-            "Correct", 
-            "Investigate production outage", 
-            "Investigate", 
-            "Fix production outage"
+            "Investigating",
+            "Fixed" 
         ],
         depends_on=[user, azure_devops.project]
     )

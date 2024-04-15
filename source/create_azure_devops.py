@@ -50,7 +50,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
         self.project = azuredevops.Project(
-            resource_name="project_" + os.urandom(5).hex(),
+            resource_name="project",
             name=self.project_name,
             description=self.description,
             features={
@@ -65,7 +65,9 @@ class CreateAzureDevops:
     def import_github_repo(
             self, 
             github_repo_url: str, 
-            repo_name: str
+            repo_name: str,
+            is_public: bool,
+            pat = None
         ) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
@@ -74,6 +76,17 @@ class CreateAzureDevops:
             github_repo_url (str): The URL of the GitHub repository to import.
             repo_name (str): The name of the repository in Azure DevOps.
         """
+        github_service_endpoint = None
+        if is_public:
+            github_service_endpoint=azuredevops.ServiceEndpointGitHub(
+                "github_service_endpoint",
+                project_id=self.project.id,
+                service_endpoint_name="github_connection",
+                auth_personal=azuredevops.ServiceEndpointGitHubAuthPersonalArgs(
+                    personal_access_token = pat
+                )
+            )
+
         pulumi.log.info(f"Importing GitHub repository: {github_repo_url}")
         self.git_repo = azuredevops.Git(
             resource_name="gitRepo_" + os.urandom(5).hex(),
@@ -83,7 +96,8 @@ class CreateAzureDevops:
             initialization=azuredevops.GitInitializationArgs(
                 init_type="Import",
                 source_type="Git",
-                source_url=github_repo_url
+                source_url=github_repo_url,
+                service_connection_id=github_service_endpoint.id or None
             )
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
@@ -111,6 +125,7 @@ class CreateAzureDevops:
             azuredevops.BuildDefinition: The created CI/CD pipeline.
 
         """
+        pipeline_variables = None
         pulumi.log.info("Adding variables to pipeline definition")
         if variables is not None:    
             pipeline_variables = []

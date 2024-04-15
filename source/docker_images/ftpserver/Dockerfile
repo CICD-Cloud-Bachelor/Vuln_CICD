@@ -24,7 +24,7 @@ RUN adduser --disabled-password --gecos "" ftpshared && \
 COPY vsftpd.conf /etc/vsftpd.conf
 
 # Expose the FTP command port and the single data port
-EXPOSE 21 10000
+EXPOSE 20/tcp 21/tcp 40000-40009/tcp
 
 # Add the script to the image
 COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
@@ -33,4 +33,5 @@ COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
 RUN chmod +x /usr/local/bin/configure_vsftpd.sh
 
 # Run the script when the container starts
+#CMD ["vsftpd", "/etc/vsftpd.conf"]
 CMD ["/usr/local/bin/configure_vsftpd.sh"]

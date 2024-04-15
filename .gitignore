@@ -4,3 +4,5 @@ __pycache__/
 venv/
 config.ini
 __main__.py
+*.tar
+ctfd_temp_dir/
