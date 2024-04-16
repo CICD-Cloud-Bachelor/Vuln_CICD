@@ -66,7 +66,7 @@ class CreateAzureDevops:
             self, 
             github_repo_url: str, 
             repo_name: str,
-            is_public: bool,
+            is_private: bool,
             pat = None
         ) -> None:
         """
@@ -77,7 +77,7 @@ class CreateAzureDevops:
             repo_name (str): The name of the repository in Azure DevOps.
         """
         github_service_endpoint = None
-        if is_public:
+        if is_private:
             github_service_endpoint=azuredevops.ServiceEndpointGitHub(
                 "github_service_endpoint",
                 project_id=self.project.id,
@@ -97,7 +97,7 @@ class CreateAzureDevops:
                 init_type="Import",
                 source_type="Git",
                 source_url=github_repo_url,
-                service_connection_id=github_service_endpoint.id or None
+                #service_connection_id=github_service_endpoint.id or None
             )
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
