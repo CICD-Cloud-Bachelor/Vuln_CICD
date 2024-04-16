@@ -1,37 +1,46 @@
-# Use a base image with a Linux distribution, e.g., Ubuntu
-FROM ubuntu:latest
+FROM delfer/alpine-ftp-server
 
-# Install vsftpd
-RUN apt-get update && apt-get install -y vsftpd curl
+ENV USERS="ftpshared|MAsds8ASDsadm82988|/home/ftpshared/"
+ENV ADDRESS="ftpserverpulumibachelorproject.westeurope.azurecontainer.io"
+ENV MIN_PORT=40000
+ENV MAX_PORT=40003
 
-# Create the secure_chroot_dir
-RUN mkdir -p /var/run/vsftpd/empty && \
-    chown root:root /var/run/vsftpd/empty && \
-    chmod 755 /var/run/vsftpd/empty
+EXPOSE 21 40000-40003
 
-# Avoid issues with special characters in the password
-RUN echo "ftpshared:MAsds8ASDsadm82988" > /password.txt
+# # Use a base image with a Linux distribution, e.g., Ubuntu
+# FROM ubuntu:latest
 
-# Create FTP user, set the password, create FTP directory, and make it non-writable
-RUN adduser --disabled-password --gecos "" ftpshared && \
-    chpasswd < /password.txt && \
-    rm /password.txt && \
-    mkdir -p /home/ftpshared/ftp && \
-    chown ftpshared:ftpshared /home/ftpshared/ftp && \
-    chmod 755 /home/ftpshared/ftp
+# # Install vsftpd
+# RUN apt-get update && apt-get install -y vsftpd curl
 
-# Configure vsftpd
-COPY vsftpd.conf /etc/vsftpd.conf
+# # Create the secure_chroot_dir
+# RUN mkdir -p /var/run/vsftpd/empty && \
+#     chown root:root /var/run/vsftpd/empty && \
+#     chmod 755 /var/run/vsftpd/empty
 
-# Expose the FTP command port and the single data port
-EXPOSE 20/tcp 21/tcp 40000-40009/tcp
+# # Avoid issues with special characters in the password
+# RUN echo "ftpshared:MAsds8ASDsadm82988" > /password.txt
 
-# Add the script to the image
-COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
+# # Create FTP user, set the password, create FTP directory, and make it non-writable
+# RUN adduser --disabled-password --gecos "" ftpshared && \
+#     chpasswd < /password.txt && \
+#     rm /password.txt && \
+#     mkdir -p /home/ftpshared/ftp && \
+#     chown ftpshared:ftpshared /home/ftpshared/ftp && \
+#     chmod 755 /home/ftpshared/ftp
 
-# Make the script executable
-RUN chmod +x /usr/local/bin/configure_vsftpd.sh
+# # Configure vsftpd
+# COPY vsftpd.conf /etc/vsftpd.conf
 
-# Run the script when the container starts
-#CMD ["/usr/local/bin/configure_vsftpd.sh"]
-CMD ["vsftpd", "/etc/vsftpd.conf"]
+# # Expose the FTP command port and the single data port
+# EXPOSE 20/tcp 21/tcp 40000-40009/tcp
+
+# # Add the script to the image
+# COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
+
+# # Make the script executable
+# RUN chmod +x /usr/local/bin/configure_vsftpd.sh
+
+# # Run the script when the container starts
+# #CMD ["/usr/local/bin/configure_vsftpd.sh"]
+# CMD ["vsftpd", "/etc/vsftpd.conf"]

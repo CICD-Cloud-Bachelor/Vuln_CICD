@@ -75,6 +75,7 @@ class DockerACR:
         return requests.get('https://api64.ipify.org').text
     
     def __create_storage_account_and_container(self) -> None:
+        global index
         self.storage_account = azure.storage.Account(
             resource_name=f"storageAccountPulumiBachelor2024-{index}",
             name=STORAGE_ACCOUNT_NAME + str(index),
@@ -120,7 +121,7 @@ class DockerACR:
             registry_name=self.registry.name,
             resource_group_name=self.resource_group.name,
             run_request=azure_native.containerregistry.DockerBuildRequestArgs(
-                source_location=f"https://{self.storage_account.name}.blob.core.windows.net/{self.storage_container.name}/{image_name}.tar",
+                source_location=f"https://{STORAGE_ACCOUNT_NAME}{index}.blob.core.windows.net/{STORAGE_CONTAINER_NAME}{index}/{image_name}.tar",
                 docker_file_path="Dockerfile",
                 image_names=[f"image/{image_name}:{self.IMAGE_TAG}"],
                 is_push_enabled=True,
@@ -167,7 +168,7 @@ class DockerACR:
             Starts a container with the specified image name, ports, CPU, and memory.
 
             Args:
-                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image.
+                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image. Must mot contain underscore or any special chars. Keep it one word.
                 ports (list[int]): A list of port numbers to expose on the container.
                 cpu (float): The CPU allocation for the container.
                 memory (float): The memory allocation (in GB) for the container.

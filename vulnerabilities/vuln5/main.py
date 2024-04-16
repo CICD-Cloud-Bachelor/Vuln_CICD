@@ -16,19 +16,19 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group, 
     )
 
-    connection_string = acr.start_container(
-        image_name=IMAGE_NAME1,
-        ports=[21, 10000],
-        cpu=1.0,
-        memory=1.0
-    )
-
-    # acr.start_container(
-    #     image_name=IMAGE_NAME2,
-    #     ports=[21, 10000],
+    # connection_string = acr.start_container(
+    #     image_name=IMAGE_NAME1,
+    #     ports=[21] + [*range(40000, 40004)],
     #     cpu=1.0,
     #     memory=1.0
     # )
+
+    acr.start_container(
+        image_name=IMAGE_NAME2,
+        ports=[21],
+        cpu=1.0,
+        memory=1.0
+    )
 
     # azure_devops = CreateAzureDevops(
     #     project_name=PROJECT_NAME, 
@@ -39,7 +39,8 @@ def start(resource_group: azure.core.ResourceGroup):
 
     # azure_devops.import_github_repo(
     #     github_repo_url=GITHUB_REPO_URL, 
-    #     repo_name=REPO_NAME
+    #     repo_name=REPO_NAME,
+    #     is_private=False
     # )
 
     # azure_devops.create_pipeline(
@@ -52,6 +53,3 @@ def start(resource_group: azure.core.ResourceGroup):
     #     branch="main",
     #     run=True
     # )
-
-
-    
