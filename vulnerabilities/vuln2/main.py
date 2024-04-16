@@ -4,6 +4,7 @@ import pulumi_azure as azure
 import random as ra
 from source.create_azure_devops import CreateAzureDevops
 import configparser  
+from source.container import DockerACR
 
 def generate_users(azure_devops, vuln_azure_devops):
     
@@ -22,32 +23,27 @@ def generate_users(azure_devops, vuln_azure_devops):
     vuln_password = "Complex!Start2024$PassW0rd#"
     vuln_group = "Vulnerability_2_Group"
     
-    azure_devops.add_user(it_department_username, it_departemnt_password)
-    azure_devops.add_group(it_department_group_name)
-    azure_devops.add_user_to_group(azure_devops.users.get(it_department_username), azure_devops.groups.get(it_department_group_name))
-    azure_devops.modify_project_permissions(azure_devops.groups.get(it_department_group_name), permissions = {"GENERIC_READ": "Allow",
-                                                                                                              "GENERIC_WRITE": "Allow",
-                                                                                                              "WORK_ITEM_MOVE": "Allow",
-                                                                                                              "WORK_ITEM_DELETE": "Allow"
-                                                                                                            })
+    it_user = azure_devops.add_user(it_department_username, it_departemnt_password)
+    it_group = azure_devops.add_group(it_department_group_name)
+    azure_devops.add_user_to_group(it_user, it_group)
+    azure_devops.modify_project_permissions(it_group, permissions = {"GENERIC_READ": "Allow",
+                                                                      "GENERIC_WRITE": "Allow"
+                                                                    })
                                                                                                    
     
     vuln_azure_devops.add_user(vuln_username, vuln_password)
     vuln_azure_devops.add_group(vuln_group)
     vuln_azure_devops.add_user_to_group(vuln_azure_devops.users.get(vuln_username), vuln_azure_devops.groups.get(vuln_group))
     vuln_azure_devops.modify_project_permissions(vuln_azure_devops.groups.get(vuln_group), permissions = {"GENERIC_READ": "Allow",
-                                                                                                           "GENERIC_WRITE": "Allow",
-                                                                                                           "WORK_ITEM_MOVE": "Allow",
-                                                                                                           "WORK_ITEM_DELETE": "Allow"
+                                                                                                           "GENERIC_WRITE": "Allow"
                                                                                                         })
 
 def generate_wiki_page(azure_devops, vuln_azure_devops):
-    
-    azure_devops.create_wiki("IT Department")
-    azure_devops.create_wiki_page("IT Department", "IT Department", "templates/wiki_pages/wiki_page_vuln2_IT.md")
 
-    vuln_azure_devops.create_wiki("Super Secret Development")
-    vuln_azure_devops.create_wiki_page("Super Secret Development", "Super Secret Development", "templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
+    ##Understrek på navnet er muligens feil
+    azure_devops.create_wiki_with_content("IT_Department_Wiki", "IT_Department", "templates/wiki_pages/wiki_page_vuln2_IT.md")
+
+    vuln_azure_devops.create_wiki_with_content("Super_Secret_Wiki", "Super_Secret", "templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
 
 def generate_work_items(azure_devops):
     work_item_title = "Important - create the new user to project"
@@ -85,6 +81,24 @@ def generate_work_items(azure_devops):
     #    amount=38,
     #)
 
+def init_docker_acr(resource_group):
+    
+    IMAGENAME = "vulnapplication"
+
+    acr = DockerACR(
+        resource_group=resource_group, 
+    )
+
+    connection_string = acr.start_container(
+        image_name=IMAGENAME,
+        ports=[8080],
+        cpu=1.0,
+        memory=1.0
+    )
+
+    pulumi.export("connection_string", connection_string)
+
+
 def start():
 
     global config
@@ -94,14 +108,14 @@ def start():
     config = configparser.ConfigParser()
 
     config.read('config.ini')
-
-    project_name = "IT_Department"
+    
+    project_name = "IT_Department_Project"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
     organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
     azure_devops = CreateAzureDevops(project_name, project_descrition, organization_name, resource_group)
 
-    vuln_project_name = "Super Secret Development"
+    vuln_project_name = "Super_Secret_Project"
     vuln_project_description = "This project is so secret that not even the IT department should know about it."
 
     vuln_azure_devops = CreateAzureDevops(vuln_project_name, vuln_project_description, organization_name, resource_group)
@@ -111,6 +125,8 @@ def start():
     generate_work_items(azure_devops)
 
     generate_wiki_page(azure_devops, vuln_azure_devops)
+
+    init_docker_acr(resource_group)
 
     
 

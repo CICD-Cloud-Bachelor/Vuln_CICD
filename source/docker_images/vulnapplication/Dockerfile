@@ -19,8 +19,8 @@ RUN echo 'upload_max_filesize = 10M' >> /usr/local/etc/php/conf.d/uploads.ini
 # Copy the application source code to /var/www/html
 COPY . /var/www/html
 
-# Expose port 80 to access the container
-EXPOSE 9001
+# Expose port 8080 to access the container
+EXPOSE 80
 
 # Start Apache server in the foreground
 CMD ["apache2-foreground"]

@@ -37,6 +37,8 @@ class RestAPI(ResourceProvider):
             return self.create_wiki(inputs)
         elif action_type == "create_wiki_page":
             return self.create_wiki_page(inputs)
+        elif action_type == "create_wiki_with_content":
+            return self.create_wiki_with_content(inputs)
         else:
             raise Exception("Invalid action type")
 
@@ -136,6 +138,46 @@ class RestAPI(ResourceProvider):
 
         return CreateResult(id_="1", outs={"work item id": work_item.id})
 
+    def create_wiki_with_content(self,
+                                 inputs: dict
+                                ) -> CreateResult:
+        
+        ## You must have underscore on the wiki name atm
+        global has_been_called
+
+        wiki_params = WikiCreateParametersV2(
+            name=inputs.get("wiki_name"), 
+            project_id=inputs.get("project_id"), 
+            type='projectWiki'
+        )
+
+        wiki_client = self.connection.clients.get_wiki_client()
+
+        new_wiki = wiki_client.create_wiki(
+            wiki_create_params=wiki_params, 
+            project=inputs.get("project_id")
+        )
+
+        #if not has_been_called:
+        #    time.sleep(60)
+        #    has_been_called = True
+
+        CreateResult(id_="1", outs={"wiki id": new_wiki.id})
+
+        parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
+
+        wiki_client.create_or_update_page(
+            parameters=parameters,
+            project=inputs.get("project_id"),
+            wiki_identifier=inputs.get("wiki_name"),  # This could be the wiki name or ID
+            path=inputs.get("page_name"),
+            comment='Adding a new wiki page',  # Optional comment for the commit
+            version=None
+        )
+
+        return CreateResult(id_="1", outs={"wiki page created": True})
+
+
     def create_wiki(
             self,
             inputs: dict
@@ -145,8 +187,6 @@ class RestAPI(ResourceProvider):
             project_id=inputs.get("project_id"), 
             type='projectWiki'
         )
-
-        time.sleep(60)
 
         wiki_client = self.connection.clients.get_wiki_client()
         
@@ -164,8 +204,6 @@ class RestAPI(ResourceProvider):
         wiki_client = self.connection.clients.get_wiki_client()
 
         parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
-
-        time.sleep(60)
 
         wiki_client.create_or_update_page(
             parameters=parameters,

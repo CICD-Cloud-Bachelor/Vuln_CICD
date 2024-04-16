@@ -14,6 +14,6 @@ from pulumi import Config
 #ctf = test_container.CtfdContainer()
 
 #vuln1.start(resource_group)
-vuln5.start(resource_group)
+vuln2.start()
 #vuln4.start(resource_group)
 #vuln5.start(resource_group)

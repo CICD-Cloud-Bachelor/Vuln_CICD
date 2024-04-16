@@ -39,7 +39,8 @@ def start(resource_group: azure.core.ResourceGroup):
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
-        repo_name=REPO_NAME
+        repo_name=REPO_NAME,
+        is_private=False
     )
 
     azure_devops.create_pipeline(
