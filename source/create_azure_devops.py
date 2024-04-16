@@ -50,7 +50,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
         self.project = azuredevops.Project(
-            resource_name="project",
+            resource_name=f"project{os.urandom(5).hex()}",
             name=self.project_name,
             description=self.description,
             features={

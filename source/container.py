@@ -394,7 +394,7 @@ class CtfdContainer:
         temp_dir = "ctfd_export_temp_dir/"
         db_path = "ctfd_export_temp_dir/db/"
 
-        ctfd_export_path = ctfd_path + "ctfd_export.zip"
+        ctfd_export_path = ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
         old_flags = self.__read_json(db_path + "flags.json")
@@ -406,5 +406,5 @@ class CtfdContainer:
         self.__write_json(db_path + "flags.json", new_flags_dict)
         self.__write_json(db_path + "challenges.json", new_challs_dict)
 
-        self.__zip_dir(temp_dir, ctfd_path + "ctfd_export") # shutil adds .zip to the filename
+        self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)

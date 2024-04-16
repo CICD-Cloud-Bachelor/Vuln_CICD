@@ -79,6 +79,7 @@ class RestAPI(ResourceProvider):
         
         fields = {
             "/fields/System.Title": inputs.get("title"),
+            "/fields/System.AssignedTo": inputs.get("assigned_to"),
             "/fields/System.Description": inputs.get("description"),
         }
 
@@ -144,6 +145,8 @@ class RestAPI(ResourceProvider):
             project_id=inputs.get("project_id"), 
             type='projectWiki'
         )
+
+        time.sleep(60)
 
         wiki_client = self.connection.clients.get_wiki_client()
         

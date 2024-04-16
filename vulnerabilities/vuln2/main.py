@@ -3,7 +3,6 @@ from faker import Faker
 import pulumi_azure as azure
 import random as ra
 from source.create_azure_devops import CreateAzureDevops
-from source.users_groups import UserCreator, GroupCreator
 import configparser  
 
 def generate_users(azure_devops, vuln_azure_devops):
@@ -31,26 +30,24 @@ def generate_users(azure_devops, vuln_azure_devops):
                                                                                                               "WORK_ITEM_MOVE": "Allow",
                                                                                                               "WORK_ITEM_DELETE": "Allow"
                                                                                                             })
-    #azure_devops.modify_area_permissions(azure_devops.groups.get(it_department_group_name), permissions = {"GENERIC_READ": "Allow",
-    #                                                                                                       "Generic_Write": "Allow",
-    #                                                                                                       "WORK_ITEM_MOVE": "Allow"
-    #                                                                                                        })    
+                                                                                                   
     
     vuln_azure_devops.add_user(vuln_username, vuln_password)
     vuln_azure_devops.add_group(vuln_group)
     vuln_azure_devops.add_user_to_group(vuln_azure_devops.users.get(vuln_username), vuln_azure_devops.groups.get(vuln_group))
-    vuln_azure_devops.modify_project_permissions(vuln_azure_devops.groups.get(vuln_group), permissions = {"GENERIC_WRITE": "Allow"
-                                                                                              })
-    vuln_azure_devops.modify_area_permissions(vuln_azure_devops.groups.get(vuln_group), permissions = {"GENERIC_READ": "Allow"
-                                                                                                                    })
+    vuln_azure_devops.modify_project_permissions(vuln_azure_devops.groups.get(vuln_group), permissions = {"GENERIC_READ": "Allow",
+                                                                                                           "GENERIC_WRITE": "Allow",
+                                                                                                           "WORK_ITEM_MOVE": "Allow",
+                                                                                                           "WORK_ITEM_DELETE": "Allow"
+                                                                                                        })
 
 def generate_wiki_page(azure_devops, vuln_azure_devops):
     
-    azure_devops.create_wiki("IT_Department")
-    azure_devops.create_wiki_page("IT_Department", "IT_Department", "templates/wiki_pages/wiki_page_vuln2_IT.md")
+    azure_devops.create_wiki("IT Department")
+    azure_devops.create_wiki_page("IT Department", "IT Department", "templates/wiki_pages/wiki_page_vuln2_IT.md")
 
-    vuln_azure_devops.create_wiki("Super_Secret_Project")
-    vuln_azure_devops.create_wiki_page("Super_Secret_Project", "Super_Secret_Project", "templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
+    vuln_azure_devops.create_wiki("Super Secret Development")
+    vuln_azure_devops.create_wiki_page("Super Secret Development", "Super Secret Development", "templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
 
 def generate_work_items(azure_devops):
     work_item_title = "Important - create the new user to project"
@@ -87,7 +84,7 @@ def generate_work_items(azure_devops):
     #    assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
     #    amount=38,
     #)
-    
+
 def start():
 
     global config
@@ -98,13 +95,13 @@ def start():
 
     config.read('config.ini')
 
-    project_name = "IT Department Project"
+    project_name = "IT_Department"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
     organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
     azure_devops = CreateAzureDevops(project_name, project_descrition, organization_name, resource_group)
 
-    vuln_project_name = "Super Secret Project"
+    vuln_project_name = "Super Secret Development"
     vuln_project_description = "This project is so secret that not even the IT department should know about it."
 
     vuln_azure_devops = CreateAzureDevops(vuln_project_name, vuln_project_description, organization_name, resource_group)
