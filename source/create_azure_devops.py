@@ -50,7 +50,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
         self.project = azuredevops.Project(
-            resource_name="project",
+            resource_name=f"project_{os.urandom(5).hex()}",
             name=self.project_name,
             description=self.description,
             features={
@@ -67,7 +67,7 @@ class CreateAzureDevops:
             github_repo_url: str, 
             repo_name: str,
             is_private: bool,
-            pat = None
+            pat: str = None
         ) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
@@ -78,14 +78,15 @@ class CreateAzureDevops:
         """
         github_service_endpoint = None
         if is_private:
-            github_service_endpoint=azuredevops.ServiceEndpointGitHub(
-                "github_service_endpoint",
-                project_id=self.project.id,
-                service_endpoint_name="github_connection",
-                auth_personal=azuredevops.ServiceEndpointGitHubAuthPersonalArgs(
-                    personal_access_token = pat
-                )
-            )
+            github_repo_url = github_repo_url.replace("https://", f"https://{pat}@")
+            # github_service_endpoint=azuredevops.ServiceEndpointGitHub(
+            #     "github_service_endpoint",
+            #     project_id=self.project.id,
+            #     service_endpoint_name="github_connection",
+            #     auth_personal=azuredevops.ServiceEndpointGitHubAuthPersonalArgs(
+            #         personal_access_token = pat
+            #     )
+            # )
 
         pulumi.log.info(f"Importing GitHub repository: {github_repo_url}")
         self.git_repo = azuredevops.Git(
@@ -97,7 +98,7 @@ class CreateAzureDevops:
                 init_type="Import",
                 source_type="Git",
                 source_url=github_repo_url,
-                #service_connection_id=github_service_endpoint.id or None
+                #service_connection_id=github_service_endpoint.id if is_private else None
             )
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
