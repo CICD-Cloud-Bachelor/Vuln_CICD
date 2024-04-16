@@ -50,7 +50,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
         self.project = azuredevops.Project(
-            resource_name="project",
+            resource_name=f"project{os.urandom(5).hex()}",
             name=self.project_name,
             description=self.description,
             features={
@@ -279,7 +279,8 @@ class CreateAzureDevops:
             members=[user.descriptor]
         )
     
-
+        
+    
     def modify_project_permissions(
             self,
             group: azuredevops.Group, 
@@ -327,6 +328,30 @@ class CreateAzureDevops:
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
         )
 
+    def modify_area_permissions(
+        self,
+        group: azuredevops.Group,
+        permissions: dict
+        ) -> None:
+        """
+        Modifies the area permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying area permissions for group")
+        azuredevops.AreaPermissions("areaPermissions_" + os.urandom(5).hex(),
+            project_id=self.project.id,
+            principal=group.id,
+            path="/",
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/areapermissions/
+        )
 
     def modify_pipeline_permissions(
             self,
@@ -414,7 +439,6 @@ class CreateAzureDevops:
                     "state": state,
                     "comments": comment
                 },
-                opts=pulumi.ResourceOptions(depends_on=[self.project])
             )
 
     def create_work_item(
@@ -425,7 +449,6 @@ class CreateAzureDevops:
             description: str,
             comments: list[str],
             state: str = "New",
-            depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
 
@@ -439,10 +462,31 @@ class CreateAzureDevops:
                 "type": type,
                 "comments": comments,
                 "state": state
-            },
-            opts=pulumi.ResourceOptions(depends_on=depends_on)
+            }
         )
 
+    def create_wiki_with_content(
+            self,
+            wiki_name: str,
+            page_name: str,
+            markdown_file_path: str
+        ) -> None:
+
+        pulumi.log.info(f"Creating wiki")
+
+        with open(markdown_file_path, "r") as markdown_file:
+            page_content = markdown_file.read()
+
+        RestWrapper(
+            action_type="create_wiki_with_content",
+            inputs={
+                "project_id": self.project.id,
+                "wiki_name": wiki_name,
+                "page_name": page_name,
+                "page_content": page_content
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
 
     def create_wiki(
             self,
