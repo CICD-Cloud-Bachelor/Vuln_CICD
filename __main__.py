@@ -10,7 +10,7 @@ from source.config import LOCATION
 
 
 
-ctfd = CtfdContainer()
+#ctfd = CtfdContainer()
 
 resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
@@ -19,7 +19,7 @@ resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 #vuln1.start(resource_group)
 
 #vuln3.start(resource_group)
-#vuln5.start(resource_group)
+vuln5.start(resource_group)
 
 
 
