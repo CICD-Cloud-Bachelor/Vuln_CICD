@@ -10,29 +10,12 @@ import subprocess
 import shutil
 import json
 import zipfile
-import configparser
 from source.config import *
 
 index = 0
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-FLAG1 = config["FLAGS"]["VULN1"]
-FLAG2 = config["FLAGS"]["VULN2"]
-FLAG3 = config["FLAGS"]["VULN3"]
-FLAG4 = config["FLAGS"]["VULN4"]
-FLAG5 = config["FLAGS"]["VULN5"]
-
 flags = [FLAG1, FLAG2, FLAG3, FLAG4, FLAG5]
-
-descriptions = [
-    "SQL Injection",
-    "Cross-Site Scripting (XSS)",
-    "Cross-Site Request Forgery (CSRF)",
-    "Remote Code Execution (RCE)",
-    "Command Injection"
-]
+descriptions = [CHALL1, CHALL2, CHALL3, CHALL4, CHALL5]
 
 class DockerACR:
     """
@@ -294,6 +277,7 @@ class CtfdContainer:
 
         :param command: List of the command parts, e.g., ['up', '-d'] for 'docker-compose up -d'.
         """
+        pulumi.log.info("Starting CTFd container")
         # Ensure the command is prefixed with 'docker-compose'
         docker_compose_cmd = ['docker-compose'] + command
 
@@ -384,7 +368,7 @@ class CtfdContainer:
             chall_entry["description"] = description
         return chall_dict
     
-    def __replace_chall_flags_and_descriptions(self, ctfd_path: str):
+    def __replace_chall_flags_and_descriptions(self, ctfd_path: str) -> None:
         """
         Replaces the challenge flags and descriptions in the CTFd export zip file.
 
@@ -394,7 +378,7 @@ class CtfdContainer:
         temp_dir = "ctfd_export_temp_dir/"
         db_path = "ctfd_export_temp_dir/db/"
 
-        ctfd_export_path = ctfd_path + "ctfd_export.zip"
+        ctfd_export_path = ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
         old_flags = self.__read_json(db_path + "flags.json")
@@ -406,5 +390,5 @@ class CtfdContainer:
         self.__write_json(db_path + "flags.json", new_flags_dict)
         self.__write_json(db_path + "challenges.json", new_challs_dict)
 
-        self.__zip_dir(temp_dir, ctfd_path + "ctfd_export") # shutil adds .zip to the filename
+        self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)
