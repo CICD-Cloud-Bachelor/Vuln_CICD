@@ -18,32 +18,58 @@ def generate_users(azure_devops, vuln_azure_devops):
     it_department_username = f"IT_Department{ra.randint(1, 1000)}"
     it_departemnt_password = "##&#ssKKJnklss883630s"
     it_department_group_name = "IT_Department_Group"
-
+    
+    it_user = azure_devops.add_user(
+        name=it_department_username,
+        password=it_departemnt_password
+        )
+    it_group = azure_devops.add_group(
+        group_name=it_department_group_name
+        )   
+    azure_devops.add_user_to_group(
+        user=it_user,
+        group=it_group
+        )
+    azure_devops.modify_project_permissions(
+        group=it_group, 
+        permissions = {"GENERIC_READ": "Allow",
+                        "GENERIC_WRITE": "Allow"
+                        })
+                                                                                                   
     vuln_username = faker.name().replace(" ", "_")  
     vuln_password = "Complex!Start2024$PassW0rd#"
-    vuln_group = "Vulnerability_2_Group"
-    
-    it_user = azure_devops.add_user(it_department_username, it_departemnt_password)
-    it_group = azure_devops.add_group(it_department_group_name)
-    azure_devops.add_user_to_group(it_user, it_group)
-    azure_devops.modify_project_permissions(it_group, permissions = {"GENERIC_READ": "Allow",
-                                                                      "GENERIC_WRITE": "Allow"
-                                                                    })
-                                                                                                   
-    
-    vuln_azure_devops.add_user(vuln_username, vuln_password)
-    vuln_azure_devops.add_group(vuln_group)
-    vuln_azure_devops.add_user_to_group(vuln_azure_devops.users.get(vuln_username), vuln_azure_devops.groups.get(vuln_group))
-    vuln_azure_devops.modify_project_permissions(vuln_azure_devops.groups.get(vuln_group), permissions = {"GENERIC_READ": "Allow",
-                                                                                                           "GENERIC_WRITE": "Allow"
-                                                                                                        })
+    vuln_group_name = "Vulnerability_2_Group"
+
+    vuln_user = vuln_azure_devops.add_user(
+        name=vuln_username,
+        password=vuln_password
+        )
+    vuln_group = vuln_azure_devops.add_group(
+        group_name=vuln_group_name
+        )
+    vuln_azure_devops.add_user_to_group(
+        user=vuln_user,
+        group=vuln_group
+        )
+    vuln_azure_devops.modify_project_permissions(
+        group=vuln_group,
+        permissions = {"GENERIC_READ": "Allow",
+                        "GENERIC_WRITE": "Allow"
+                        })
 
 def generate_wiki_page(azure_devops, vuln_azure_devops):
 
     ##Understrek på navnet er muligens feil
-    azure_devops.create_wiki_with_content("IT_Department_Wiki", "IT_Department", "templates/wiki_pages/wiki_page_vuln2_IT.md")
+    azure_devops.create_wiki_with_content(
+        wiki_name="IT_Department_Wiki",
+        page_name="IT_Department",
+        markdown_file_path="templates/wiki_pages/wiki_page_vuln2_IT.md"
+        )
 
-    vuln_azure_devops.create_wiki_with_content("Super_Secret_Wiki", "Super_Secret", "templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
+    vuln_azure_devops.create_wiki_with_content(
+        wiki_name="Super_Secret_Wiki",
+        page_name="Super_Secret",
+        markdown_file_path="templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
 
 def generate_work_items(azure_devops):
     work_item_title = "Important - create the new user to project"
@@ -81,6 +107,20 @@ def generate_work_items(azure_devops):
     #    amount=38,
     #)
 
+def import_gitrepo_to_project(azure_devops, vuln_azure_devops):
+    
+        azure_devops.import_github_repo(
+            github_repo_url="",
+            repo_name="IT_Department_Development",
+            is_private=False
+        )
+
+        vuln_azure_devops.import_github_repo(
+            github_repo_url="",
+            repo_name="Super Secret Admin Panel",
+            is_private=False
+        )
+
 def init_docker_acr(resource_group):
     
     IMAGENAME = "vulnapplication"
@@ -91,7 +131,7 @@ def init_docker_acr(resource_group):
 
     connection_string = acr.start_container(
         image_name=IMAGENAME,
-        ports=[8080],
+        ports=[80],
         cpu=1.0,
         memory=1.0
     )
@@ -122,11 +162,13 @@ def start():
 
     generate_users(azure_devops, vuln_azure_devops)
 
-    generate_work_items(azure_devops)
+    
 
-    generate_wiki_page(azure_devops, vuln_azure_devops)
+    #generate_work_items(azure_devops)
 
-    init_docker_acr(resource_group)
+    #generate_wiki_page(azure_devops, vuln_azure_devops)
+
+    #init_docker_acr(resource_group)
 
     
 
