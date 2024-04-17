@@ -10,19 +10,3 @@ resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 vuln3.start(resource_group)
 
-#ctfd = CtfdContainer()
-
-resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
-
-
-
-#vuln1.start(resource_group)
-
-#vuln3.start(resource_group)
-vuln5.start(resource_group)
-
-
-
-
-
-#vuln4.start(resource_group)

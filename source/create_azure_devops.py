@@ -198,6 +198,8 @@ class CreateAzureDevops:
         )
 
         self.entra_users[name] = entra_user
+        pulumi.export("login_username", login_name)
+        pulumi.export("login_password", password)
         return entra_user
     
 
