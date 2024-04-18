@@ -32,10 +32,10 @@ class CtfdContainer:
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
         in the CTFd export zip file. It then runs the docker-compose command to start the container.
         """
-        self.entra_username = username
+        self.login_name = f"{username.replace(' ', '.')}@{DOMAIN}"
         self.entra_password = password
         self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
-        self.__replace_chall_flags_and_descriptions(self.ctfd_path)
+        self.__replace_ctfd_export_flags_and_descriptions(self.ctfd_path)
         self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
 
     def __run_docker_compose(self, command: list[str]):
@@ -110,33 +110,33 @@ class CtfdContainer:
         with open(file, 'w') as f:
             json.dump(data, f)
 
-    def __replace_flags(self, flag_dict: dict, flags: list) -> None:              
+    def __replace_flags(self, flag_json: dict) -> None:              
         """
         Replaces the flags in the flag dictionary with the provided flags.
 
         :param flag_dict: The flag dictionary.
-        :param flags: The list of flags to replace the existing flags with.
+        :param flags: The dict of flags to replace the existing flags with.
         """
-        for flag_entry in flag_dict["results"]:
-            index = flag_entry["id"] - 1
-            flag = flags[index]
-            flag_entry["content"] = flag
-        return flag_dict
+        for flag_entry in flag_json["results"]:
+            index = flag_entry["id"]
+            vuln = "vuln" + str(index)
+            flag_entry["content"] = FLAGS[vuln]
+        return flag_json
 
-    def __replace_descriptions(self, chall_dict: dict, descriptions: list) -> None:
+    def __replace_descriptions(self, chall_dict: dict, descriptions: dict) -> None:
         """
         Replaces the descriptions in the challenge dictionary with the provided descriptions.
 
         :param chall_dict: The challenge dictionary.
-        :param descriptions: The list of descriptions to replace the existing descriptions with.
+        :param descriptions: The dict of descriptions to replace the existing descriptions with.
         """
         for chall_entry in chall_dict["results"]:
-            index = chall_entry["id"] - 1
-            description = descriptions[index]
-            chall_entry["description"] = description
+            index = chall_entry["id"]
+            vuln = "vuln" + str(index)
+            chall_entry["description"] = descriptions[vuln]
         return chall_dict
     
-    def __get_descriptions(self) -> dict:
+    def __get_vuln_descriptions(self) -> dict:
         
         vuln_folders = [folder for folder in os.listdir('vulnerabilities/') if folder.startswith('vuln')]
         number_of_vulns = len(vuln_folders)
@@ -146,15 +146,14 @@ class CtfdContainer:
             vuln_modules.append(f"vulnerabilities.vuln{i+1}.main")
 
         descriptions = {}
-
         for module_name in vuln_modules:
-            module = importlib.import_module(module_name)
-            vuln = module.__name__.replace("vulnerabilities.", "").replace(".main", "")
-            descriptions[vuln] = module.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.entra_username}\nPassword: {self.entra_password}\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
+            vuln = importlib.import_module(module_name)
+            vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
+            descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\nPassword: {self.entra_password}\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
             
         return descriptions
     
-    def __replace_chall_flags_and_descriptions(self, ctfd_path: str) -> None:
+    def __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None:
         """
         Replaces the challenge flags and descriptions in the CTFd export zip file.
 
@@ -167,15 +166,16 @@ class CtfdContainer:
         ctfd_export_path = ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
-        old_flags = self.__read_json(db_path + "flags.json")
-        old_challs = self.__read_json(db_path + "challenges.json")
+        flags_json = self.__read_json(db_path + "flags.json")
+        challs_json = self.__read_json(db_path + "challenges.json")
 
-        descriptions = self.__get_descriptions()
-        new_flags_dict = self.__replace_flags(old_flags, flags)
-        new_challs_dict = self.__replace_descriptions(old_challs, descriptions)
+        descriptions = self.__get_vuln_descriptions()
 
-        self.__write_json(db_path + "flags.json", new_flags_dict)
-        self.__write_json(db_path + "challenges.json", new_challs_dict)
+        new_flags_json = self.__replace_flags(flags_json)
+        new_challs_json = self.__replace_descriptions(challs_json, descriptions)
+
+        self.__write_json(db_path + "flags.json", new_flags_json)
+        self.__write_json(db_path + "challenges.json", new_challs_json)
 
         self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)

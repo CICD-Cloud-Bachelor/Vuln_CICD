@@ -13,13 +13,11 @@ GITHUB_PAT                  = config["GITHUB"]["PAT"]
 DNS_LABEL                   = config["DOCKER"]["DNS_LABEL"]
 REGISTRY_NAME               = config["DOCKER"]["REGISTRY_NAME"]
 CONTAINER_PATH              = config["DOCKER"]["CONTAINER_PATH"]
-FLAG1                       = config["FLAGS"]["VULN1"]
-FLAG2                       = config["FLAGS"]["VULN2"]
-FLAG3                       = config["FLAGS"]["VULN3"]
-FLAG4                       = config["FLAGS"]["VULN4"]
-FLAG5                       = config["FLAGS"]["VULN5"]
-CHALL1                      = config["CHALLENGES"]["CHALL1"]
-CHALL2                      = config["CHALLENGES"]["CHALL2"]
-CHALL3                      = config["CHALLENGES"]["CHALL3"]
-CHALL4                      = config["CHALLENGES"]["CHALL4"]
-CHALL5                      = config["CHALLENGES"]["CHALL5"]
+FLAGS = {}
+DESCRIPTIONS = {}
+
+for flag in config.items("FLAGS"):
+    FLAGS[flag[0]] = flag[1]
+
+for desc in config.items("CHALLENGES"):
+    DESCRIPTIONS[desc[0]] = desc[1]

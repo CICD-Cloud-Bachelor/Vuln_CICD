@@ -6,8 +6,6 @@ from pulumi_azure_native import containerinstance, resources
 from pulumi_azure_native import network, dbformysql
 import requests, os
 import tarfile
-import subprocess
-import importlib
 from source.config import *
 
 index = 0

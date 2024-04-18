@@ -8,14 +8,14 @@ from faker import Faker
 
 faker = Faker()
 username = faker.name().replace('.', ' ')
-password = "Troll57Hoho69%MerryChristmas"
+password = CreateAzureDevops.random_password()
 
-resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
+# resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 
-entra_user = CreateAzureDevops.create_entra_user(username, password)
+# entra_user = CreateAzureDevops.create_entra_user(username, password)
 
-vuln3.start(resource_group, entra_user)
+# vuln3.start(resource_group, entra_user)
 
 ctfd = CtfdContainer(username, password)
 

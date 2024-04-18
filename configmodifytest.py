@@ -1,13 +1,11 @@
 import configparser
 import importlib
 import os
+from source.config import *
 
 login = "admin"
 password = "admin"
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME           = config["AZURE"]["ORGANIZATION_NAME"]
 
 vuln_folders = [folder for folder in os.listdir('vulnerabilities/') if folder.startswith('vuln')]
 number_of_vulns = len(vuln_folders)
@@ -23,12 +21,7 @@ for module_name in vuln_modules:
     vuln = module.__name__.replace("vulnerabilities.", "").replace(".main", "")
     descriptions[vuln] = module.CHALLENGE_DESCRIPTION + f'\n\nLogin: {login}\nPassword: {password}\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
     
-for desc in descriptions:
-    print(descriptions[desc])
-# for i in range(len(descriptions)):
-#             key = "CHALL" + str(i + 1)
-#             descriptions[i] += f'\n\nLogin: {login}\nPassword: {password}\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
-#             config.set("CHALLENGES", key, descriptions[i])
+print(descriptions)
 
 # with open('config.ini', 'w') as configfile:
 #     config.write(configfile)
