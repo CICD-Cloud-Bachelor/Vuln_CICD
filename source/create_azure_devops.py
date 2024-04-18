@@ -41,7 +41,6 @@ class CreateAzureDevops:
         self.has_called_workitem = False
         self.__create_project()
 
-
     def __create_project(
             self
         ) -> None:
@@ -410,6 +409,7 @@ class CreateAzureDevops:
             self,
             assigned_to: str,
             amount: int,
+            file_path: str=None
         ) -> None:
         pulumi.log.info(f"Generating random work items")
 
@@ -449,6 +449,7 @@ class CreateAzureDevops:
             description: str,
             comments: list[str],
             state: str = "New",
+            depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
 
@@ -462,7 +463,8 @@ class CreateAzureDevops:
                 "type": type,
                 "comments": comments,
                 "state": state
-            }
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project]+depends_on)
         )
 
     def create_wiki_with_content(

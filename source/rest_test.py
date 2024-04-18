@@ -81,9 +81,11 @@ class RestAPI(ResourceProvider):
         
         fields = {
             "/fields/System.Title": inputs.get("title"),
-            "/fields/System.AssignedTo": inputs.get("assigned_to"),
             "/fields/System.Description": inputs.get("description"),
         }
+
+        if inputs.get("assigned_to") != None:
+            fields.append({"/fields/System.AssignedTo": inputs.get("assigned_to")})
 
         work_item = work_item_client.create_work_item(
             document = [
