@@ -1,13 +1,11 @@
 import pulumi
 import pulumi_azure as azure
-import configparser
+import pulumi_azuredevops as azuredevops
 from faker import Faker
 from source.create_azure_devops import CreateAzureDevops
+from source.config import *
 
 faker = Faker()
-config = configparser.ConfigParser()
-config.read('config.ini')
-ORGANIZATION_NAME = config["AZURE"]["ORGANIZATION_NAME"]
 
 PROJECT_NAME = "Vulnerability 3"
 PROJECT_DESCRIPTION = "Insufficient Credential Hygiene"
@@ -18,15 +16,25 @@ REPO_NAME = "python-calculator"
 # REPO_NAME = "MatchingGameBlazor"
 PIPELINE_NAME = "Run unit tests"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
-GITHUB_PAT = config["GITHUB"]["PAT"]
 
-def start(resource_group: azure.core.ResourceGroup):
+CHALLENGE_DESCRIPTION = """
+Credentials... Hold them safe, or else you might have to look for a needle in a haystack
+"""
+
+def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User):
 
     devops_project = CreateAzureDevops(
         PROJECT_NAME,
         PROJECT_DESCRIPTION,
         ORGANIZATION_NAME,
         resource_group
+    )
+
+    low_privil_username = faker.name().replace('.', ' ')
+
+    low_privil_user = devops_project.add_user(
+        low_privil_username,
+        DEVOPS_USER1_PASSWORD
     )
 
     # devops_project.import_github_repo(
@@ -41,13 +49,6 @@ def start(resource_group: azure.core.ResourceGroup):
     #     run=False,
     #     branch="dev"
     # )
-
-    low_privil_username = faker.name().replace('.', ' ')
-
-    low_privil_user = devops_project.add_user(
-        low_privil_username,
-        DEVOPS_USER1_PASSWORD
-    )
 
     # custom_group = devops_project.add_group(GROUP_NAME)
     
@@ -71,5 +72,5 @@ def start(resource_group: azure.core.ResourceGroup):
     #     }
     # )
 
-    pulumi.export("low_privil_user_name", low_privil_user.principal_name)
+    #pulumi.export("low_privil_user_name", low_privil_user.principal_name)
 

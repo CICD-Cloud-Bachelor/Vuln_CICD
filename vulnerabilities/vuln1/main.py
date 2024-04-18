@@ -9,6 +9,12 @@ GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN1.git"
 REPO_NAME = "VULN1_REPO"
 PIPELINE_NAME = "BUILD_PIPELINE"
 
+CHALLENGE_DESCRIPTION = """
+Dette er første challenge jippi!!
+Den er veldig morro og du kommer til å like den
+Denne er veldig enkel
+"""
+
 def start(resource_group: azure.core.ResourceGroup):
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 

@@ -11,6 +11,12 @@ PIPELINE_NAME = "testpipeline"
 IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
 
+CHALLENGE_DESCRIPTION = """
+Dette er femte challenge jippi!!
+Den er veldig morro og du kommer til å like den
+Denne er veldig enkel
+"""
+
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(
         resource_group=resource_group, 
