@@ -13,7 +13,7 @@ def generate_users(azure_devops, vuln_azure_devops):
 
     faker = Faker()
 
-    it_department_username = f"IT_Department{ra.randint(1, 1000)}"
+    it_department_username = f"IT_Department_Account{ra.randint(1, 1000)}"
     it_departemnt_password = "##&#ssKKJnklss883630s"
     it_department_group_name = "IT_Department_Group"
     
@@ -42,17 +42,32 @@ def generate_users(azure_devops, vuln_azure_devops):
         name=vuln_username,
         password=vuln_password
         )
+
     vuln_group = vuln_azure_devops.add_group(
         group_name=vuln_group_name
         )
+    
+    vuln_azure_devops.add_user_to_default_group(
+        user=vuln_user,
+        default_group_name="Readers"
+        )
+
     vuln_azure_devops.add_user_to_group(
         user=vuln_user,
         group=vuln_group
         )
+
     vuln_azure_devops.modify_project_permissions(
         group=vuln_group,
         permissions = {"GENERIC_READ": "Allow",
                         "GENERIC_WRITE": "Allow"
+                        })
+    
+    vuln_azure_devops.modify_area_permissions(
+        group=vuln_group,
+        permissions= {"GENERIC_READ": "Allow",
+                      "GENERIC_WRITE": "Allow",
+                      "WORK_ITEM_READ": "Allow"  
                         })
 
     vuln_azure_devops.modify_pipeline_permissions(
@@ -193,7 +208,7 @@ def start():
 
     config.read('config.ini')
     
-    project_name = "IT_Department_Project"
+    project_name = "IT_Department"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
     organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
@@ -220,9 +235,9 @@ def start():
 
     generate_users(azure_devops, vuln_azure_devops)
 
-    #generate_work_items_IT(azure_devops)
+    generate_work_items_IT(azure_devops)
 
-    #generate_wiki_page(azure_devops, vuln_azure_devops
+    generate_wiki_page(azure_devops, vuln_azure_devops)
 
     init_docker_acr(resource_group)
 

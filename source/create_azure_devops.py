@@ -256,7 +256,23 @@ class CreateAzureDevops:
             self.groups[group_name] = devops_group
             return devops_group
     
+    def add_user_to_default_group(
+            self,
+            user: azuredevops.User,
+            default_group_name: str
+        ) -> None:
+        pulumi.log.info(f"Adding user to default group: {default_group_name}")
 
+        default_group = azuredevops.get_group_output(
+            project_id=self.project.id,
+            name=default_group_name
+        )
+
+        azuredevops.GroupMembership("groupMembership_" + os.urandom(5).hex(),
+            group=default_group.descriptor,
+            members=[user.descriptor]
+        )
+        
     def add_user_to_group(
             self,
             user: azuredevops.User, 
@@ -277,8 +293,6 @@ class CreateAzureDevops:
             group=group.descriptor,
             members=[user.descriptor]
         )
-    
-        
     
     def modify_project_permissions(
             self,

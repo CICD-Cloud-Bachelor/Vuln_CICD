@@ -85,7 +85,7 @@ class RestAPI(ResourceProvider):
         }
 
         if inputs.get("assigned_to") != None:
-            fields.append({"/fields/System.AssignedTo": inputs.get("assigned_to")})
+            fields["/fields/System.AssignedTo"]=(inputs.get("assigned_to"))
 
         work_item = work_item_client.create_work_item(
             document = [
