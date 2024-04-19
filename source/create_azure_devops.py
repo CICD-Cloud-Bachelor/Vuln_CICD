@@ -41,7 +41,6 @@ class CreateAzureDevops:
         self.has_called_workitem = False
         self.__create_project()
 
-
     def __create_project(
             self
         ) -> None:
@@ -50,7 +49,7 @@ class CreateAzureDevops:
         """
         pulumi.log.info(f"Creating Azure DevOps project: {self.project_name}")
         self.project = azuredevops.Project(
-            resource_name=f"project_{os.urandom(5).hex()}",
+            resource_name=f"project{os.urandom(5).hex()}",
             name=self.project_name,
             description=self.description,
             features={
@@ -266,7 +265,23 @@ class CreateAzureDevops:
             self.groups[group_name] = devops_group
             return devops_group
     
+    def add_user_to_default_group(
+            self,
+            user: azuredevops.User,
+            default_group_name: str
+        ) -> None:
+        pulumi.log.info(f"Adding user to default group: {default_group_name}")
 
+        default_group = azuredevops.get_group_output(
+            project_id=self.project.id,
+            name=default_group_name
+        )
+
+        azuredevops.GroupMembership("groupMembership_" + os.urandom(5).hex(),
+            group=default_group.descriptor,
+            members=[user.descriptor]
+        )
+        
     def add_user_to_group(
             self,
             user: azuredevops.User, 
@@ -288,7 +303,6 @@ class CreateAzureDevops:
             members=[user.descriptor]
         )
     
-
     def modify_project_permissions(
             self,
             group: azuredevops.Group, 
@@ -336,6 +350,30 @@ class CreateAzureDevops:
             # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/gitpermissions/
         )
 
+    def modify_area_permissions(
+        self,
+        group: azuredevops.Group,
+        permissions: dict
+        ) -> None:
+        """
+        Modifies the area permissions for a specific group.
+
+        Args:
+            project (azuredevops.Project): The Azure DevOps project.
+            group (azuredevops.Group): The Azure DevOps group.
+            permissions (dict): The permissions to be set for the group.
+
+        Returns:
+            None
+        """
+        pulumi.log.info("Modifying area permissions for group")
+        azuredevops.AreaPermissions("areaPermissions_" + os.urandom(5).hex(),
+            project_id=self.project.id,
+            principal=group.id,
+            path="/",
+            permissions=permissions
+            # link to doc page with permissions https://www.pulumi.com/registry/packages/azuredevops/api-docs/areapermissions/
+        )
 
     def modify_pipeline_permissions(
             self,
@@ -394,6 +432,7 @@ class CreateAzureDevops:
             self,
             assigned_to: str,
             amount: int,
+            file_path: str=None
         ) -> None:
         pulumi.log.info(f"Generating random work items")
 
@@ -423,7 +462,6 @@ class CreateAzureDevops:
                     "state": state,
                     "comments": comment
                 },
-                opts=pulumi.ResourceOptions(depends_on=[self.project])
             )
 
     def create_work_item(
@@ -449,9 +487,31 @@ class CreateAzureDevops:
                 "comments": comments,
                 "state": state
             },
-            opts=pulumi.ResourceOptions(depends_on=depends_on)
+            opts=pulumi.ResourceOptions(depends_on=[self.project]+depends_on)
         )
 
+    def create_wiki_with_content(
+            self,
+            wiki_name: str,
+            page_name: str,
+            markdown_file_path: str
+        ) -> None:
+
+        pulumi.log.info(f"Creating wiki")
+
+        with open(markdown_file_path, "r") as markdown_file:
+            page_content = markdown_file.read()
+
+        RestWrapper(
+            action_type="create_wiki_with_content",
+            inputs={
+                "project_id": self.project.id,
+                "wiki_name": wiki_name,
+                "page_name": page_name,
+                "page_content": page_content
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project])
+        )
 
     def create_wiki(
             self,

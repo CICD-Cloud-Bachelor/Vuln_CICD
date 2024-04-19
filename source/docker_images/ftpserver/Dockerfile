@@ -1,3 +1,12 @@
+# FROM delfer/alpine-ftp-server
+
+# ENV USERS="ftpshared|MAsds8ASDsadm82988|/home/ftpshared/"
+# ENV ADDRESS="ftpserverpulumibachelorproject.westeurope.azurecontainer.io"
+# ENV MIN_PORT=40000
+# ENV MAX_PORT=40003
+
+# EXPOSE 21 40000-40003
+
 # Use a base image with a Linux distribution, e.g., Ubuntu
 FROM ubuntu:latest
 
@@ -24,13 +33,13 @@ RUN adduser --disabled-password --gecos "" ftpshared && \
 COPY vsftpd.conf /etc/vsftpd.conf
 
 # Expose the FTP command port and the single data port
-EXPOSE 20/tcp 21/tcp 40000-40009/tcp
+EXPOSE 21 40000-40003
 
-# Add the script to the image
-COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
+# # Add the script to the image
+# COPY configure_vsftpd.sh /usr/local/bin/configure_vsftpd.sh
 
-# Make the script executable
-RUN chmod +x /usr/local/bin/configure_vsftpd.sh
+# # Make the script executable
+# RUN chmod +x /usr/local/bin/configure_vsftpd.sh
 
 # Run the script when the container starts
 #CMD ["/usr/local/bin/configure_vsftpd.sh"]

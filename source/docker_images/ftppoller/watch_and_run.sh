@@ -1,34 +1,38 @@
 #!/bin/sh
 
-# FTP server URL including the path to s.zip
-REMOTE_FTP="ftp://ftpshared:MAsds8ASDsadm82988@ftppollerpulumibachelorproject.westeurope.azurecontainer.io/home/ftpshared/ftp/s.zip"
-LOCAL_ZIP="/ftp/s.zip"
-PREV_HASH=""
+#sleep 90 # wait for other container
 
-while true; do
-  # Download s.zip file
-  curl -s --ftp-pasv -o $LOCAL_ZIP $REMOTE_FTP
-  
-  # Calculate hash of the downloaded file to see if it has changed
-  NEW_HASH=$(md5sum $LOCAL_ZIP | cut -d ' ' -f 1)
-  
-  if [ "$PREV_HASH" != "$NEW_HASH" ]; then
-    # Unzip the downloaded file
-    unzip -o $LOCAL_ZIP -d /ftp/
-    
-    # Assuming the ELF executable is named 'program' and located at the root of the zip
-    # Make the ELF executable
-    chmod +x /ftp/VULN5
-    
-    # Run the ELF executable
-    /ftp/VULN5
-    
-    # Update the previous hash to reflect the new state
-    PREV_HASH=$NEW_HASH
+./ftpgrab_run.sh &
+
+cd /download
+while true
+do
+  # if s.zip does not exist continue
+  if [ ! -f s.zip ]; then
+    sleep 10
+    continue
   fi
 
-  rm -rf /ftp/*
-  
-  # Wait for a bit before checking again
-  sleep 2
+  unzip -o *.zip
+
+
+  # loop through all files and find ELF files
+  for f in *; do
+    run_xxd=$(xxd -l 4 -p $f)
+    if [ "$run_xxd" = "7f454c46" ]; then
+      filename=$f
+      break
+    fi
+  done
+
+  chmod +x $filename
+
+  echo "Executing " $filename
+
+  timeout 60 ./$filename
+
+
+  > /db/ftpgrab.db # clear the ftpgrab db
+
+  sleep 10
 done

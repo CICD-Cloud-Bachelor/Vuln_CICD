@@ -43,6 +43,8 @@ class DockerACR:
             registry_name (str): The name of the registry.
 
         """
+        global index
+        index += 1
         self.resource_group = resource_group
         self.registry_name = REGISTRY_NAME
         self.__create_registry()
@@ -73,8 +75,9 @@ class DockerACR:
         return requests.get('https://api64.ipify.org').text
     
     def __create_storage_account_and_container(self) -> None:
+        global index
         self.storage_account = azure.storage.Account(
-            resource_name=f"storageAccountPulumiBachelor2024-{index}",
+            resource_name=f"storageAccountPulumiBachelor2024-{os.urandom(10).hex()}",
             name=STORAGE_ACCOUNT_NAME + str(index),
             resource_group_name=self.resource_group.name,
             location=self.resource_group.location,
@@ -82,19 +85,18 @@ class DockerACR:
             account_replication_type="LRS"
         )
         self.storage_container = azure.storage.Container(
-            resource_name=f"storageContainerPulumiBachelor2024-{index}",
+            resource_name=f"storageContainerPulumiBachelor2024-{os.urandom(10).hex()}",
             name=STORAGE_CONTAINER_NAME + str(index),
             storage_account_name=self.storage_account.name,
             container_access_type="container"
         )
 
     def __upload_file_to_blob(self, image_name: str) -> None:
-        global index
         self.__create_tar_archive(
             image_name=image_name
         )
         self.blob_storage = azure.storage.Blob(
-            resource_name=f"blobStoragePulumiBachelor2024-{index}",
+            resource_name=f"blobStoragePulumiBachelor2024-{os.urandom(10).hex()}",
             name=f"{image_name}.tar", # the filename
             storage_account_name=self.storage_account.name,
             storage_container_name=self.storage_container.name,
@@ -108,7 +110,7 @@ class DockerACR:
     
     def __build_and_push_docker_image(
         self, 
-        image_name: str #image name needs to be same as the folder name
+        image_name: str #image name needs to be same as the folder name, no underscores or special chars
         ) -> str:
         pulumi.log.info(f"Running Docker Compose for image: {image_name}")
 
@@ -118,7 +120,7 @@ class DockerACR:
             registry_name=self.registry.name,
             resource_group_name=self.resource_group.name,
             run_request=azure_native.containerregistry.DockerBuildRequestArgs(
-                source_location=f"https://{self.storage_account.name}.blob.core.windows.net/{self.storage_container.name}/{image_name}.tar",
+                source_location=f"https://{STORAGE_ACCOUNT_NAME}{index}.blob.core.windows.net/{STORAGE_CONTAINER_NAME}{index}/{image_name}.tar",
                 docker_file_path="Dockerfile",
                 image_names=[f"image/{image_name}:{self.IMAGE_TAG}"],
                 is_push_enabled=True,
@@ -132,6 +134,8 @@ class DockerACR:
             task_run_name=f"myRunCompose{image_name}",
             opts=pulumi.ResourceOptions(depends_on=[self.blob_storage])
         )
+        print(f"TASK {index}: https://{STORAGE_ACCOUNT_NAME}{index}.blob.core.windows.net/{STORAGE_CONTAINER_NAME}{index}/{image_name}.tar")
+
         return self.registry.login_server.apply(lambda login_server: f"{login_server}/image/{image_name}:{self.IMAGE_TAG}")
 
     def __create_tar_archive(
@@ -165,8 +169,8 @@ class DockerACR:
             Starts a container with the specified image name, ports, CPU, and memory.
 
             Args:
-                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image.
-                ports (list[int]): A list of port numbers to expose on the container.
+                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image. Must mot contain underscore or any special chars. Keep it one word.
+                ports (list[int]): A list of port numbers to expose on the container. Max 5 ports available to open.
                 cpu (float): The CPU allocation for the container.
                 memory (float): The memory allocation (in GB) for the container.
 
@@ -177,7 +181,6 @@ class DockerACR:
                 None
 
             """
-            global index
             self.__upload_file_to_blob(
                 image_name=image_name
             )
@@ -189,7 +192,7 @@ class DockerACR:
             pulumi.log.info(f"Starting container: {image_name}")
             
             container_group = containerinstance.ContainerGroup(
-                resource_name=f"pulumi-containergroup-{image_name}-{index}",
+                resource_name=f"pulumi-containergroup-{image_name}-{os.urandom(10).hex()}",
                 resource_group_name=self.resource_group.name,
                 os_type="Linux",  # or "Windows"
                 containers=[
@@ -232,5 +235,4 @@ class DockerACR:
             ).apply(
                 lambda args: f"{image_name}{DNS_LABEL}.{args[1]}.azurecontainer.io"
             )
-            index += 1
             return fqdn
