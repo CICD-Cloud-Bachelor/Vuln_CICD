@@ -1,0 +1,57 @@
+.admin-wrapper {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.admin-wrapper h1 {
+    color: #333;
+}
+
+.feedback {
+    color: green;
+}
+
+input[type="text"], button, select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#helpMenu {
+    text-align: left;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+}
+
+#helpMenu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#helpMenu li b {
+    color: #007BFF;
+}

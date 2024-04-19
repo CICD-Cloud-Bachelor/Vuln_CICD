@@ -1,66 +1,112 @@
 {
-    "templates": [
-      {
-        "title": "Virtual Machine Access Issue",
-        "template": "Cannot access Azure Virtual Machine named {resource_name}."
-      },
-      {
-        "title": "Service Latency Issue",
-        "template": "Experiencing latency issues with Azure {service_name}."
-      },
-      {
-        "title": "Deployment Failure",
-        "template": "{resource_name} failed to deploy."
-      },
-      {
-        "title": "Permission Request in Azure Entra ID",
-        "template": "Need additional permissions in Azure Entra ID for {user_role}."
-      },
-      {
-        "title": "High Availability Configuration",
-        "template": "How do I configure {service_name} for high availability?"
-      },
-      {
-        "title": "Quota Increase Request",
-        "template": "Requesting increase in quota for {service_name}."
-      },
-      {
-        "title": "Unexpected Charges Inquiry",
-        "template": "Azure {service_name} is showing unexpected charges."
-      },
-      {
-        "title": "VPN Connectivity Issue",
-        "template": "Connectivity issues between Azure VPN Gateway and {resource_name}."
-      },
-      {
-        "title": "Data Recovery Request",
-        "template": "Data recovery needed for Azure Blob Storage account named {resource_name}."
-      },
-      {
-        "title": "Azure AD Connect Setup Trouble",
-        "template": "Trouble setting up Azure AD Connect for {resource_name}."
-      }
-    ],
-    "service_names": [
-      "Virtual Networks",
-      "SQL Database",
-      "Function App",
-      "Kubernetes Service",
-      "Blob Storage"
-    ],
-    "resource_names": [
-      "ResourceGroup1",
-      "MyAzureVM",
-      "StorageAccount",
-      "SQLServerDB",
-      "WebAppService"
-    ],
-    "user_roles": [
-      "developer",
-      "project manager",
-      "data scientist",
-      "system administrator",
-      "network engineer"
-    ]
-  }
-  
+  "templates": [
+    {
+      "title": "Virtual Machine Access Issue",
+      "template": "Cannot access Azure Virtual Machine named {resource_name}."
+    },
+    {
+      "title": "Service Latency Issue",
+      "template": "Experiencing latency issues with Azure {service_name}."
+    },
+    {
+      "title": "Deployment Failure",
+      "template": "{resource_name} failed to deploy."
+    },
+    {
+      "title": "Permission Request in Azure Entra ID",
+      "template": "Need additional permissions in Azure Entra ID for {user_role}."
+    },
+    {
+      "title": "High Availability Configuration",
+      "template": "How do I configure {service_name} for high availability?"
+    },
+    {
+      "title": "Quota Increase Request",
+      "template": "Requesting increase in quota for {service_name}."
+    },
+    {
+      "title": "Unexpected Charges Inquiry",
+      "template": "Azure {service_name} is showing unexpected charges."
+    },
+    {
+      "title": "VPN Connectivity Issue",
+      "template": "Connectivity issues between Azure VPN Gateway and {resource_name}."
+    },
+    {
+      "title": "Data Recovery Request",
+      "template": "Data recovery needed for Azure Blob Storage account named {resource_name}."
+    },
+    {
+      "title": "Azure AD Connect Setup Trouble",
+      "template": "Trouble setting up Azure AD Connect for {resource_name}."
+    },
+    {
+      "title": "Subscription Upgrade Inquiry",
+      "template": "Considering an upgrade of Azure subscription for {resource_name}. What are the benefits?"
+    },
+    {
+      "title": "Security Alert Configuration",
+      "template": "How to configure security alerts for {service_name}?"
+    },
+    {
+      "title": "Network Security Group Setup",
+      "template": "Guidance needed on setting up Network Security Group for {resource_name}."
+    },
+    {
+      "title": "Compliance Report Request",
+      "template": "Requesting a compliance report for Azure service {service_name}."
+    },
+    {
+      "title": "Integration Issue with Azure Logic Apps",
+      "template": "Facing integration issues with Azure Logic Apps and {resource_name}."
+    },
+    {
+      "title": "Azure Monitor Alert Setup",
+      "template": "How to set up alerts in Azure Monitor for {service_name}?"
+    },
+    {
+      "title": "Cost Management Query",
+      "template": "How can I optimize costs for {service_name} in Azure?"
+    },
+    {
+      "title": "Azure Service Health Check",
+      "template": "How to perform a health check for {service_name}?"
+    }
+  ],
+  "service_names": [
+    "Virtual Networks",
+    "SQL Database",
+    "Function App",
+    "Kubernetes Service",
+    "Blob Storage",
+    "Logic Apps",
+    "Azure Monitor",
+    "Event Hub",
+    "Cosmos DB",
+    "Machine Learning"
+  ],
+  "resource_names": [
+    "ResourceGroup1",
+    "MyAzureVM",
+    "StorageAccount",
+    "SQLServerDB",
+    "WebAppService",
+    "LogicAppWorkflow",
+    "EventHubNamespace",
+    "CosmosDBAccount",
+    "MLWorkspace",
+    "ContainerRegistry"
+  ],
+  "user_roles": [
+    "developer",
+    "project manager",
+    "data scientist",
+    "system administrator",
+    "network engineer",
+    "security analyst",
+    "cloud architect",
+    "application architect",
+    "DevOps engineer",
+    "compliance officer"
+  ]
+}

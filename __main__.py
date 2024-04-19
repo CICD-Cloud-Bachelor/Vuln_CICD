@@ -1,28 +1,19 @@
 import pulumi_azure as azure
-import pulumi
-from vulnerabilities.vuln3 import main as vuln3
+from pulumi import Config
+#from vulnerabilities.vuln1 import main as vuln1
+import source.container as test_container
+from vulnerabilities.vuln2 import main as vuln2
+from vulnerabilities.vuln4 import main as vuln4
 from vulnerabilities.vuln5 import main as vuln5
-from source.container import CtfdContainer
 from source.config import LOCATION
+from pulumi import Config
+
 
 #resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
-
-#vuln3.start(resource_group)
-
-#ctfd = CtfdContainer()
-
-resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
-
-
+#ctf = test_container.CtfdContainer()
 
 #vuln1.start(resource_group)
-
-#vuln3.start(resource_group)
-vuln5.start(resource_group)
-
-
-
-
-
+vuln2.start()
 #vuln4.start(resource_group)
+#vuln5.start(resource_group)
