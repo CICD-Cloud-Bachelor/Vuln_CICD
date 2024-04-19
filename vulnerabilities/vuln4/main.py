@@ -13,6 +13,12 @@ REPO_NAME = "VULN4_REPO"
 PIPELINE_NAME = "testpipeline"
 IMAGE_NAME = "mysqldb"
 
+CHALLENGE_DESCRIPTION = """
+Dette er fjerde challenge jippi!!
+Den er veldig morro og du kommer til å like den
+Denne er veldig enkel
+"""
+
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(
         resource_group=resource_group, 

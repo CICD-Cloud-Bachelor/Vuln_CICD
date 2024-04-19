@@ -1,6 +1,6 @@
 import pulumi_azure as azure
 from source.create_azure_devops import CreateAzureDevops
-from source.config import ORGANIZATION_NAME, FLAG1
+from source.config import ORGANIZATION_NAME, FLAGS
 
 
 PROJECT_NAME = "VULN1"
@@ -8,6 +8,12 @@ PROJECT_DESCRIPTION = "Project for VULN1"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN1.git"
 REPO_NAME = "VULN1_REPO"
 PIPELINE_NAME = "BUILD_PIPELINE"
+
+CHALLENGE_DESCRIPTION = """
+Dette er første challenge jippi!!
+Den er veldig morro og du kommer til å like den
+Denne er veldig enkel
+"""
 
 def start(resource_group: azure.core.ResourceGroup):
     azure_devops = CreateAzureDevops(
@@ -22,7 +28,7 @@ def start(resource_group: azure.core.ResourceGroup):
     azure_devops.create_pipeline(
         name=PIPELINE_NAME,
         variables={
-            "FLAG": FLAG1
+            "FLAG": FLAGS["vuln1"]
         },
         branch="main",
         run=True

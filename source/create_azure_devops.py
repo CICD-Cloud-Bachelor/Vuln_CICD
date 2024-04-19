@@ -66,7 +66,7 @@ class CreateAzureDevops:
             github_repo_url: str, 
             repo_name: str,
             is_private: bool,
-            pat = None
+            pat: str = None
         ) -> None:
         """
         Imports a GitHub repository into the Azure DevOps project.
@@ -77,14 +77,15 @@ class CreateAzureDevops:
         """
         github_service_endpoint = None
         if is_private:
-            github_service_endpoint=azuredevops.ServiceEndpointGitHub(
-                "github_service_endpoint",
-                project_id=self.project.id,
-                service_endpoint_name="github_connection",
-                auth_personal=azuredevops.ServiceEndpointGitHubAuthPersonalArgs(
-                    personal_access_token = pat
-                )
-            )
+            github_repo_url = github_repo_url.replace("https://", f"https://{pat}@")
+            # github_service_endpoint=azuredevops.ServiceEndpointGitHub(
+            #     "github_service_endpoint",
+            #     project_id=self.project.id,
+            #     service_endpoint_name="github_connection",
+            #     auth_personal=azuredevops.ServiceEndpointGitHubAuthPersonalArgs(
+            #         personal_access_token = pat
+            #     )
+            # )
 
         pulumi.log.info(f"Importing GitHub repository: {github_repo_url}")
         self.git_repo = azuredevops.Git(
@@ -96,7 +97,7 @@ class CreateAzureDevops:
                 init_type="Import",
                 source_type="Git",
                 source_url=github_repo_url,
-                #service_connection_id=github_service_endpoint.id or None
+                #service_connection_id=github_service_endpoint.id if is_private else None
             )
         )
         pulumi.export("repository_web_url", self.git_repo.web_url)
@@ -169,10 +170,9 @@ class CreateAzureDevops:
         return self.ci_cd_pipeline
     
 
-    def __create_entra_user(
-            self,
+    def create_entra_user(
             name: str, 
-            password: str
+            password: str = None
         ) -> EntraUser:
         """
         Creates a user in Entra (Azure AD).
@@ -184,6 +184,9 @@ class CreateAzureDevops:
         Returns:
             EntraUser
         """
+        if password is None:
+                password = CreateAzureDevops.random_password()
+
         login_name = f"{name.replace(' ', '.')}@{DOMAIN}"
         pulumi.log.info(f"Creating user in Entra (Azure AD) with login: {login_name}")
         
@@ -195,14 +198,13 @@ class CreateAzureDevops:
             force_password_change = False # Set to True if you want to force a password change on first login
         )
 
-        self.entra_users[name] = entra_user
         return entra_user
     
 
     def add_user(
                 self,
                 name: str, 
-                password = None
+                password: str = None
             ) -> azuredevops.User:
             """
             Creates a user and adds it to the Azure DevOps instance.
@@ -214,10 +216,8 @@ class CreateAzureDevops:
             Returns:
                 azuredevops.User
             """
-            if password is None:
-                password = self.__random_password()
 
-            entra_user = self.__create_entra_user(name, password)
+            entra_user = self.create_entra_user(name, password)
             pulumi.log.info(f"Creating user in Azure DevOps: {name}")
             
             devops_user = azuredevops.User(
@@ -229,7 +229,16 @@ class CreateAzureDevops:
             self.users[name] = devops_user
             return devops_user
     
-    def __random_password(self) -> str:
+    def add_entra_user_to_devops(entra_user: EntraUser) -> azuredevops.User:
+        pulumi.log.info(f"Creating user in Azure DevOps: {entra_user.display_name}")
+        devops_user = azuredevops.User(
+            resource_name = entra_user.display_name + "_" + os.urandom(5).hex(),
+            principal_name = entra_user.user_principal_name,
+            opts=pulumi.ResourceOptions(depends_on=[entra_user])
+        )
+        return devops_user
+    
+    def random_password() -> str:
         return fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
     
 

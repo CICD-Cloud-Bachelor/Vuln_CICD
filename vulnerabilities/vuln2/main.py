@@ -6,6 +6,12 @@ from source.create_azure_devops import CreateAzureDevops
 import configparser  
 from source.container import DockerACR
 
+CHALLENGE_DESCRIPTION = """
+Dette er andre challenge jippi!!
+Den er veldig morro og du kommer til å like den
+Denne er veldig enkel
+"""
+
 def generate_users(azure_devops, vuln_azure_devops):
     
     global vuln_username

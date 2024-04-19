@@ -1,19 +1,21 @@
 import pulumi_azure as azure
-from pulumi import Config
-#from vulnerabilities.vuln1 import main as vuln1
-import source.container as test_container
-from vulnerabilities.vuln2 import main as vuln2
-from vulnerabilities.vuln4 import main as vuln4
-from vulnerabilities.vuln5 import main as vuln5
+import pulumi
+from vulnerabilities.vuln3 import main as vuln3
+from source.create_azure_devops import CreateAzureDevops
 from source.config import LOCATION
-from pulumi import Config
+from source.CTFdContainer import CtfdContainer
+from faker import Faker
+
+faker = Faker()
+username = faker.name().replace('.', ' ')
+password = CreateAzureDevops.random_password()
+
+# resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 
-resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
+# entra_user = CreateAzureDevops.create_entra_user(username, password)
 
-#ctf = test_container.CtfdContainer()
+# vuln3.start(resource_group, entra_user)
 
-#vuln1.start(resource_group)
-vuln2.start(resource_group)
-#vuln4.start(resource_group)
-#vuln5.start(resource_group)
+ctfd = CtfdContainer(username, password)
+
