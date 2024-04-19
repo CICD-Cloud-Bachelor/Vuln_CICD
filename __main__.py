@@ -9,11 +9,11 @@ from source.config import LOCATION
 from pulumi import Config
 
 
-#resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
+resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 #ctf = test_container.CtfdContainer()
 
 #vuln1.start(resource_group)
-vuln2.start()
+vuln2.start(resource_group)
 #vuln4.start(resource_group)
 #vuln5.start(resource_group)

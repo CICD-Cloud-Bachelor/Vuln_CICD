@@ -198,11 +198,9 @@ def init_docker_acr(resource_group):
 
     pulumi.export("URL", url)
 
-def start():
+def start(resource_group):
 
     global config
-
-    resource_group = azure.core.ResourceGroup('magnusme_resource-group', location="West Europe")
     
     config = configparser.ConfigParser()
 
