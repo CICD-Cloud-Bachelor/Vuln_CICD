@@ -31,13 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
-    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
     <div class="admin-wrapper">
         <h1>Admin Panel</h1>
         <p>Manage system tasks</p>
-        <form action="admin.php" method="POST">
+        <form action="/admin/admin.php" method="POST">
             <input type="text" name="command" placeholder="Enter task parameters (Task1, Task2, Task3)">
             <button type="submit">Run Task</button>
         </form>

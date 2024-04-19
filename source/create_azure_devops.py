@@ -41,7 +41,6 @@ class CreateAzureDevops:
         self.has_called_workitem = False
         self.__create_project()
 
-
     def __create_project(
             self
         ) -> None:
@@ -257,7 +256,23 @@ class CreateAzureDevops:
             self.groups[group_name] = devops_group
             return devops_group
     
+    def add_user_to_default_group(
+            self,
+            user: azuredevops.User,
+            default_group_name: str
+        ) -> None:
+        pulumi.log.info(f"Adding user to default group: {default_group_name}")
 
+        default_group = azuredevops.get_group_output(
+            project_id=self.project.id,
+            name=default_group_name
+        )
+
+        azuredevops.GroupMembership("groupMembership_" + os.urandom(5).hex(),
+            group=default_group.descriptor,
+            members=[user.descriptor]
+        )
+        
     def add_user_to_group(
             self,
             user: azuredevops.User, 
@@ -278,8 +293,6 @@ class CreateAzureDevops:
             group=group.descriptor,
             members=[user.descriptor]
         )
-    
-        
     
     def modify_project_permissions(
             self,
@@ -410,6 +423,7 @@ class CreateAzureDevops:
             self,
             assigned_to: str,
             amount: int,
+            file_path: str=None
         ) -> None:
         pulumi.log.info(f"Generating random work items")
 
@@ -449,6 +463,7 @@ class CreateAzureDevops:
             description: str,
             comments: list[str],
             state: str = "New",
+            depends_on: list = []
         ) -> None:
         pulumi.log.info(f"Creating work item")
 
@@ -462,7 +477,8 @@ class CreateAzureDevops:
                 "type": type,
                 "comments": comments,
                 "state": state
-            }
+            },
+            opts=pulumi.ResourceOptions(depends_on=[self.project]+depends_on)
         )
 
     def create_wiki_with_content(
