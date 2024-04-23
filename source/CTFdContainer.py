@@ -52,7 +52,9 @@ class CtfdContainer:
             "connection_info": None,
             "next_id": None
         }
-
+        self.descriptions = {}
+        self.categories = {}
+        self.flags = {}
         self.login_name = f"{username.replace(' ', '.')}@{DOMAIN}"
         self.entra_password = password
         self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
@@ -157,7 +159,7 @@ class CtfdContainer:
             chall_entry["description"] = descriptions[vuln]
         return chall_dict
     
-    def __get_vuln_descriptions_and_categories(self) -> dict:
+    def __get_vuln_descriptions_and_categories_and_flags(self) -> None:
         
         vuln_folders = [folder for folder in os.listdir('vulnerabilities/') if folder.startswith('vuln')]
         number_of_vulns = len(vuln_folders)
@@ -166,15 +168,12 @@ class CtfdContainer:
         for i in range(number_of_vulns):
             vuln_modules.append(f"vulnerabilities.vuln{i+1}.main")
 
-        descriptions = {}
-        categories = {}
         for vuln_name in vuln_modules:
             vuln = importlib.import_module(vuln_name)
             vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
-            descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
-            categories[vuln_key] = vuln.CHALLENGE_CATEGORY
-            
-        return descriptions, categories
+            self.descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
+            self.categories[vuln_key] = vuln.CHALLENGE_CATEGORY
+            self.flags[vuln_key] = vuln.FLAG
     
     def __make_files_executable(self, path: list[str]) -> None:
         """
@@ -205,7 +204,7 @@ class CtfdContainer:
         #flags_json = self.__read_json(db_path + "flags.json")
         #challs_json = self.__read_json(db_path + "challenges.json")
 
-        descriptions, categories = self.__get_vuln_descriptions_and_categories()
+        descriptions, categories = self.__get_vuln_descriptions_and_categories_and_flags()
 
         new_flags_json = self.__replace_flags(flags_json)
         new_challs_json = self.__replace_descriptions(challs_json, descriptions)
