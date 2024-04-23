@@ -153,20 +153,17 @@ class CtfdContainer:
             
         return descriptions
     
-    def __change_file_permissions(self, path: list[str]) -> None:
+    def __make_files_executable(self, path: list[str]) -> None:
         """
-        Changes the permissions of a file or directory and its contents to read and write for the owner.
+        Changes the permissions of a list of files
 
-        :param path: The path to the file or directory.
+        :param path: The list of paths to the files or directories.
         """
-        os.chmod(path, 0o777)
-        for root, dirs, files in os.walk(path):
-            if '.data' in dirs:
-                dirs.remove('.data')  # Ignore the .data directory
-            for d in dirs:
-                os.chmod(os.path.join(root, d), 0o777)
-            for f in files:
-                os.chmod(os.path.join(root, f), 0o777)
+        for file_path in path:
+            if os.path.exists(file_path):
+                os.chmod(file_path, 0o755)
+            else:
+                print(f"File {file_path} does not exist.")
 
     def __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None:
         """
@@ -195,4 +192,11 @@ class CtfdContainer:
         self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)
 
-        self.__change_file_permissions_recursively(ctfd_path)
+        files_to_make_executable = [
+            'docker-entrypoint.sh', 
+            'prepare.sh', 
+            'migrations/scripts.py.mako', 
+            'pip.compile.sh'
+        ]
+
+        self.__make_files_executable(files_to_make_executable)
