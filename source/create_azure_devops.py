@@ -229,6 +229,7 @@ class CreateAzureDevops:
             self.users[name] = devops_user
             return devops_user
     
+    @staticmethod
     def add_entra_user_to_devops(entra_user: EntraUser) -> azuredevops.User:
         pulumi.log.info(f"Creating user in Azure DevOps: {entra_user.display_name}")
         devops_user = azuredevops.User(

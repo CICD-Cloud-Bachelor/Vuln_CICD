@@ -18,6 +18,7 @@ DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
 """
+CHALLENGE_CATEGORY = "Easy"
 
 def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User):
 

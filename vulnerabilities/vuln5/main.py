@@ -16,6 +16,7 @@ Dette er femte challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
+CHALLENGE_CATEGORY = "Hard"
 
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(

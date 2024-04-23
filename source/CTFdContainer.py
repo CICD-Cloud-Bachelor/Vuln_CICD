@@ -32,6 +32,27 @@ class CtfdContainer:
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
         in the CTFd export zip file. It then runs the docker-compose command to start the container.
         """
+        self.flagsdb_template = {
+            "id": 1,
+            "challenge_id": 1,
+            "type": "static",
+            "content": "1111",
+            "data": ""
+        }
+        self.challengesdb_template = {
+            "id": 1,
+            "name": "Vulnerability X",
+            "description": "",
+            "max_attempts": 0,
+            "value": 1000,
+            "category": "Easy",
+            "type": "standard",
+            "state": "visible",
+            "requirements": None,
+            "connection_info": None,
+            "next_id": None
+        }
+
         self.login_name = f"{username.replace(' ', '.')}@{DOMAIN}"
         self.entra_password = password
         self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
@@ -136,7 +157,7 @@ class CtfdContainer:
             chall_entry["description"] = descriptions[vuln]
         return chall_dict
     
-    def __get_vuln_descriptions(self) -> dict:
+    def __get_vuln_descriptions_and_categories(self) -> dict:
         
         vuln_folders = [folder for folder in os.listdir('vulnerabilities/') if folder.startswith('vuln')]
         number_of_vulns = len(vuln_folders)
@@ -146,12 +167,14 @@ class CtfdContainer:
             vuln_modules.append(f"vulnerabilities.vuln{i+1}.main")
 
         descriptions = {}
+        categories = {}
         for module_name in vuln_modules:
             vuln = importlib.import_module(module_name)
             vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
             descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
+            categories[vuln_key] = vuln.CHALLENGE_CATEGORY
             
-        return descriptions
+        return descriptions, categories
     
     def __make_files_executable(self, path: list[str]) -> None:
         """
@@ -179,10 +202,10 @@ class CtfdContainer:
         ctfd_export_path = ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
-        flags_json = self.__read_json(db_path + "flags.json")
-        challs_json = self.__read_json(db_path + "challenges.json")
+        #flags_json = self.__read_json(db_path + "flags.json")
+        #challs_json = self.__read_json(db_path + "challenges.json")
 
-        descriptions = self.__get_vuln_descriptions()
+        descriptions, categories = self.__get_vuln_descriptions_and_categories()
 
         new_flags_json = self.__replace_flags(flags_json)
         new_challs_json = self.__replace_descriptions(challs_json, descriptions)

@@ -14,6 +14,7 @@ Dette er første challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
+CHALLENGE_CATEGORY = "Easy"
 
 def start(resource_group: azure.core.ResourceGroup):
     azure_devops = CreateAzureDevops(
