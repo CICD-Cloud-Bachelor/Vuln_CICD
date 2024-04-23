@@ -229,7 +229,7 @@ class CreateAzureDevops:
             self.users[name] = devops_user
             return devops_user
     
-    def add_entra_user_to_devops(user: list) -> azuredevops.User:
+    def add_entra_user_to_devops(user: dict) -> azuredevops.User:
         pulumi.log.info(f"Creating user in Azure DevOps: {user['username']}")
         devops_user = azuredevops.User(
             resource_name = user["username"] + "_" + os.urandom(5).hex(),

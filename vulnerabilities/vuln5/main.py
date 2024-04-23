@@ -20,7 +20,7 @@ Denne er veldig enkel
 
 def start(
         resource_group: azure.core.ResourceGroup,
-        user: list
+        user: dict
     ):
     update_ftp_fqdn()
 
