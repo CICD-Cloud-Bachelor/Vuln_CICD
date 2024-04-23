@@ -162,6 +162,8 @@ class CtfdContainer:
         os.chmod(path, 0o777)
         for root, dirs, files in os.walk(path):
             for d in dirs:
+                if d == ".data":
+                    continue
                 os.chmod(os.path.join(root, d), 0o777)
             for f in files:
                 os.chmod(os.path.join(root, f), 0o777)
