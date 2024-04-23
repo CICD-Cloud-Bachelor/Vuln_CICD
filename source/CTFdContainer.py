@@ -46,7 +46,7 @@ class CtfdContainer:
         """
         pulumi.log.info("Starting CTFd container")
         # Ensure the command is prefixed with 'docker-compose'
-        docker_compose_cmd = ['docker-compose'] + command
+        docker_compose_cmd = ['docker-compose'] + command #['docker', 'compose'] + command
 
         # Run the command
         process = subprocess.Popen(docker_compose_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -149,7 +149,7 @@ class CtfdContainer:
         for module_name in vuln_modules:
             vuln = importlib.import_module(module_name)
             vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
-            descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\nPassword: {self.entra_password}\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
+            descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
             
         return descriptions
     
