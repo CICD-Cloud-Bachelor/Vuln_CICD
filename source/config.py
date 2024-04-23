@@ -18,6 +18,3 @@ DESCRIPTIONS = {}
 
 for flag in config.items("FLAGS"):
     FLAGS[flag[0]] = flag[1]
-
-for desc in config.items("CHALLENGES"):
-    DESCRIPTIONS[desc[0]] = desc[1]
