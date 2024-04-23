@@ -32,25 +32,15 @@ class CtfdContainer:
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
         in the CTFd export zip file. It then runs the docker-compose command to start the container.
         """
-        self.flagsdb_template = {
-            "id": 1,
-            "challenge_id": 1,
-            "type": "static",
-            "content": "1111",
-            "data": ""
+        self.flags_db = {
+            "count": 0,
+            "results": [],
+            "meta": {}
         }
-        self.challengesdb_template = {
-            "id": 1,
-            "name": "Vulnerability X",
-            "description": "",
-            "max_attempts": 0,
-            "value": 1000,
-            "category": "Easy",
-            "type": "standard",
-            "state": "visible",
-            "requirements": None,
-            "connection_info": None,
-            "next_id": None
+        self.challenges_db = {
+            "count": 0,
+            "results": [],
+            "meta": {}
         }
         self.descriptions = {}
         self.categories = {}
@@ -112,17 +102,6 @@ class CtfdContainer:
         """
         shutil.rmtree(dir)
 
-    def __read_json(self, file: str) -> dict:
-        """
-        Reads a JSON file and returns its contents as a dictionary.
-
-        :param file: The path to the JSON file.
-        :return: The contents of the JSON file as a dictionary.
-        """
-        with open(file, 'r') as f:
-            data = json.load(f)
-        return data
-
     def __write_json(self, file: str, data: dict) -> None:
         """
         Writes a dictionary to a JSON file.
@@ -132,32 +111,6 @@ class CtfdContainer:
         """
         with open(file, 'w') as f:
             json.dump(data, f)
-
-    def __replace_flags(self, flag_json: dict) -> None:              
-        """
-        Replaces the flags in the flag dictionary with the provided flags.
-
-        :param flag_dict: The flag dictionary.
-        :param flags: The dict of flags to replace the existing flags with.
-        """
-        for flag_entry in flag_json["results"]:
-            index = flag_entry["id"]
-            vuln = "vuln" + str(index)
-            flag_entry["content"] = FLAGS[vuln]
-        return flag_json
-
-    def __replace_descriptions(self, chall_dict: dict, descriptions: dict) -> None:
-        """
-        Replaces the descriptions in the challenge dictionary with the provided descriptions.
-
-        :param chall_dict: The challenge dictionary.
-        :param descriptions: The dict of descriptions to replace the existing descriptions with.
-        """
-        for chall_entry in chall_dict["results"]:
-            index = chall_entry["id"]
-            vuln = "vuln" + str(index)
-            chall_entry["description"] = descriptions[vuln]
-        return chall_dict
     
     def __get_vuln_descriptions_and_categories_and_flags(self) -> None:
         
@@ -175,6 +128,49 @@ class CtfdContainer:
             self.categories[vuln_key] = vuln.CHALLENGE_CATEGORY
             self.flags[vuln_key] = vuln.FLAG
     
+    def __fill_flags_db_and_challenges_db(self) -> None:    
+        self.__get_vuln_descriptions_and_categories_and_flags()
+
+        #TODO: Check for same amount of challenges, flags and categories
+
+        id = 0
+        for vuln_name in self.descriptions:
+            id += 1
+            challenge = {
+                "id": 1,
+                "name": "__REPLACE_ME__",
+                "description": "__REPLACE_ME__",
+                "max_attempts": 0,
+                "value": 1000,
+                "category": "__REPLACE_ME__",
+                "type": "standard",
+                "state": "visible",
+                "requirements": None,
+                "connection_info": None,
+                "next_id": None
+            }
+            challenge["id"] = id
+            challenge["name"] = "Vulnerability " + str(id)
+            challenge["description"] = self.descriptions[vuln_name]
+            challenge["category"] = self.categories[vuln_name]
+            self.challenges_db["results"].append(challenge)
+
+            flag = {
+                "id": 0,
+                "challenge_id": 1,
+                "type": "static",
+                "content": "__REPLACE_ME__",
+                "data": ""
+            }
+            flag["id"] = id
+            flag["challenge_id"] = id
+            flag["content"] = self.flags[vuln_name]
+            self.flags_db["results"].append(flag)
+
+        count = len(self.descriptions)
+        self.challenges_db["count"] = count
+        self.flags_db["count"] = count
+
     def __make_files_executable(self, path: list[str]) -> None:
         """
         Changes the permissions of a list of files
@@ -201,16 +197,9 @@ class CtfdContainer:
         ctfd_export_path = ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
-        #flags_json = self.__read_json(db_path + "flags.json")
-        #challs_json = self.__read_json(db_path + "challenges.json")
-
-        descriptions, categories = self.__get_vuln_descriptions_and_categories_and_flags()
-
-        new_flags_json = self.__replace_flags(flags_json)
-        new_challs_json = self.__replace_descriptions(challs_json, descriptions)
-
-        self.__write_json(db_path + "flags.json", new_flags_json)
-        self.__write_json(db_path + "challenges.json", new_challs_json)
+        self.__fill_flags_db_and_challenges_db()
+        self.__write_json(db_path + "flags.json", self.flags_db)
+        self.__write_json(db_path + "challenges.json", self.challenges_db)
 
         self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)

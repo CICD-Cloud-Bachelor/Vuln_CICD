@@ -58,32 +58,26 @@ def get_vuln_descriptions_and_categories():
     return descriptions, categories
 
 if __name__ == '__main__':
-    # descriptions, categories = get_vuln_descriptions_and_categories()
+    descriptions, categories = get_vuln_descriptions_and_categories()
 
-    # challenges_db = copy.deepcopy(db_template)
-    # flags_db = copy.deepcopy(db_template)
+    challenges_db = copy.deepcopy(db_template)
+    flags_db = copy.deepcopy(db_template)
     
-    # id = 0
-    # for vuln_name in descriptions:
-    #     id += 1
-    #     challenge = copy.deepcopy(challenges_entry_template)
-    #     challenge["id"] = id
-    #     challenge["name"] = "Vulnerability " + str(id)
-    #     challenge["description"] = descriptions[vuln_name]
-    #     challenge["category"] = categories[vuln_name]
-    #     challenges_db["results"].append(challenge)
+    id = 0
+    for vuln_name in descriptions:
+        id += 1
+        challenge = copy.deepcopy(challenges_entry_template)
+        challenge["id"] = id
+        challenge["name"] = "Vulnerability " + str(id)
+        challenge["description"] = descriptions[vuln_name]
+        challenge["category"] = categories[vuln_name]
+        challenges_db["results"].append(challenge)
 
-    #     flag = copy.deepcopy(flags_entry_template)
-    #     flag["id"] = id
-    #     flag["challenge_id"] = id
-    #     flag["content"] = FLAGS[vuln_name]
-    #     flags_db["results"].append(flag)
+        flag = copy.deepcopy(flags_entry_template)
+        flag["id"] = id
+        flag["challenge_id"] = id
+        flag["content"] = FLAGS[vuln_name]
+        flags_db["results"].append(flag)
 
-    # write_json("challenges.json", challenges_db)
-    # write_json("flags.json", flags_db)
-    pass
-
-
-
-
-
+    write_json("challenges.json", challenges_db)
+    write_json("flags.json", flags_db)
