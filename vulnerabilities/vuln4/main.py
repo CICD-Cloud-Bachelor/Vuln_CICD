@@ -30,9 +30,7 @@ def start(resource_group: azure.core.ResourceGroup):
         cpu=1.0, 
         memory=1.0
     )
-    #import pulumi
-    #pulumi.export("connection_string", connection_string)   
-    
+
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
         description=PROJECT_DESCRIPTION, 
@@ -40,15 +38,15 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group
     )
 
-    azure_devops.create_wiki(
-        wiki_name="VULN4_WIKI"
-    )
+    # azure_devops.create_wiki(
+    #     wiki_name="VULN4_WIKI"
+    # )
 
-    azure_devops.create_wiki_page(
-        wiki_name="VULN4_WIKI",
-        page_name="Dev",
-        markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
-    )
+    # azure_devops.create_wiki_page(
+    #     wiki_name="VULN4_WIKI",
+    #     page_name="Dev",
+    #     markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
+    # )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
@@ -64,7 +62,7 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        #run=True
+        run=True
     ) 
 
     group = azure_devops.add_group(
