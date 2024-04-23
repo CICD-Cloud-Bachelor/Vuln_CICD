@@ -15,6 +15,7 @@ Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
 CHALLENGE_CATEGORY = "Easy"
+FLAG = "FLAG{flag1}"
 
 def start(resource_group: azure.core.ResourceGroup):
     azure_devops = CreateAzureDevops(

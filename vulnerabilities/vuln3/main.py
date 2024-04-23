@@ -19,6 +19,7 @@ CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
 """
 CHALLENGE_CATEGORY = "Easy"
+FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
 
 def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User):
 

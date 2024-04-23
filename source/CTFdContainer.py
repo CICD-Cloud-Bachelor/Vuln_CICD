@@ -168,8 +168,8 @@ class CtfdContainer:
 
         descriptions = {}
         categories = {}
-        for module_name in vuln_modules:
-            vuln = importlib.import_module(module_name)
+        for vuln_name in vuln_modules:
+            vuln = importlib.import_module(vuln_name)
             vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
             descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
             categories[vuln_key] = vuln.CHALLENGE_CATEGORY

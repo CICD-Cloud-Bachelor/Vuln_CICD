@@ -19,6 +19,7 @@ Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
 CHALLENGE_CATEGORY = "Medium"
+FLAG = "FLAG{flag4}"
 
 def start(resource_group: azure.core.ResourceGroup):
     acr = DockerACR(
