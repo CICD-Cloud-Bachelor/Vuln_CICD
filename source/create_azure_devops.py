@@ -169,7 +169,7 @@ class CreateAzureDevops:
 
         return self.ci_cd_pipeline
     
-
+    @staticmethod
     def create_entra_user(
             name: str, 
             password: str = None
@@ -217,7 +217,7 @@ class CreateAzureDevops:
                 azuredevops.User
             """
 
-            entra_user = self.create_entra_user(name, password)
+            entra_user = CreateAzureDevops.create_entra_user(name, password)
             pulumi.log.info(f"Creating user in Azure DevOps: {name}")
             
             devops_user = azuredevops.User(

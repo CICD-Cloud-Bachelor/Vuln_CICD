@@ -75,9 +75,8 @@ class DockerACR:
         return requests.get('https://api64.ipify.org').text
     
     def __create_storage_account_and_container(self) -> None:
-        global index
         self.storage_account = azure.storage.Account(
-            resource_name=f"storageAccountPulumiBachelor2024-{os.urandom(10).hex()}",
+            resource_name=f"storAcc{os.urandom(7).hex()}",
             name=STORAGE_ACCOUNT_NAME + str(index),
             resource_group_name=self.resource_group.name,
             location=self.resource_group.location,
@@ -85,7 +84,7 @@ class DockerACR:
             account_replication_type="LRS"
         )
         self.storage_container = azure.storage.Container(
-            resource_name=f"storageContainerPulumiBachelor2024-{os.urandom(10).hex()}",
+            resource_name=f"storCont{os.urandom(7).hex()}",
             name=STORAGE_CONTAINER_NAME + str(index),
             storage_account_name=self.storage_account.name,
             container_access_type="container"
@@ -96,7 +95,7 @@ class DockerACR:
             image_name=image_name
         )
         self.blob_storage = azure.storage.Blob(
-            resource_name=f"blobStoragePulumiBachelor2024-{os.urandom(10).hex()}",
+            resource_name=f"blobStor{os.urandom(7).hex()}",
             name=f"{image_name}.tar", # the filename
             storage_account_name=self.storage_account.name,
             storage_container_name=self.storage_container.name,
@@ -192,7 +191,7 @@ class DockerACR:
             pulumi.log.info(f"Starting container: {image_name}")
             
             container_group = containerinstance.ContainerGroup(
-                resource_name=f"pulumi-containergroup-{image_name}-{os.urandom(10).hex()}",
+                resource_name=f"cgroup-{image_name}-{os.urandom(5).hex()}",
                 resource_group_name=self.resource_group.name,
                 os_type="Linux",  # or "Windows"
                 containers=[
