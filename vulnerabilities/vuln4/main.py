@@ -10,7 +10,7 @@ PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
 REPO_NAME = "VULN4_REPO"
-PIPELINE_NAME = "testpipeline"
+PIPELINE_NAME = "pipeline"
 IMAGE_NAME = "mysqldb"
 
 CHALLENGE_DESCRIPTION = """
@@ -53,7 +53,8 @@ def start(
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
-        repo_name=REPO_NAME
+        repo_name=REPO_NAME,
+        is_private=False
     )
 
     azure_devops.create_pipeline(
@@ -68,29 +69,16 @@ def start(
         run=True
     ) 
 
+    devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
+
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
-    user = azure_devops.add_user(
-        name=faker.name().replace(".", ""),
-        password="Troll57Hoho69%MerryChristmas"
-    )
+    
     azure_devops.add_user_to_group(
-        user=user,
+        user=devops_user,
         group=group
     )
-
-    users = [
-        azure_devops.add_user(
-            name=faker.name().replace(".", "")
-        ) for _ in range(2)
-    ]
-
-    for user in users:
-        azure_devops.add_user_to_group(
-            user=user,
-            group=group
-        )
 
     azure_devops.modify_project_permissions(
         group=group, 
@@ -116,11 +104,11 @@ def start(
         type="Task",
         title="Investigate production outage",
         description="Investigate production outage",
-        assigned_to=user.principal_name,
+        assigned_to=devops_user.principal_name,
         comments=[
             "Investigating",
             "Fixed" 
         ],
-        depends_on=[user, azure_devops.project]
+        depends_on=[devops_user, azure_devops.project]
     )
   
