@@ -7,7 +7,7 @@ from faker import Faker
 import json
 from pulumi import Config
 from pulumi_azuread import User as EntraUser
-from source.rest_test import *
+from source.azure_devops_rest_api import *
 from source.config import *
 
 fake = Faker()

@@ -15,7 +15,10 @@ Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
 
-def start(resource_group: azure.core.ResourceGroup):
+def start(
+        resource_group: azure.core.ResourceGroup, 
+        user: dict
+    ):
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
         description=PROJECT_DESCRIPTION, 
