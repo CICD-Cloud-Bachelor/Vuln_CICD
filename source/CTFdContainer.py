@@ -153,6 +153,19 @@ class CtfdContainer:
             
         return descriptions
     
+    def __change_file_permissions_recursively(self, path: str) -> None:
+        """
+        Changes the permissions of a file or directory and its contents to read and write for the owner.
+
+        :param path: The path to the file or directory.
+        """
+        os.chmod(path, 0o777)
+        for root, dirs, files in os.walk(path):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), 0o777)
+            for f in files:
+                os.chmod(os.path.join(root, f), 0o777)
+
     def __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None:
         """
         Replaces the challenge flags and descriptions in the CTFd export zip file.
@@ -179,3 +192,5 @@ class CtfdContainer:
 
         self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)
+
+        self.__change_file_permissions_recursively(ctfd_path)
