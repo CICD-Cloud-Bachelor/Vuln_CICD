@@ -28,6 +28,11 @@ fi
 # Initialize database
 flask db upgrade
 
+# Import ctfd_export.zip if it exists
+if [ -f ctfd_export.zip ]; then
+    python3 manage.py import_ctf ctfd_export.zip
+fi
+
 # Start CTFd
 echo "Starting CTFd"
 exec gunicorn 'CTFd:create_app()' \

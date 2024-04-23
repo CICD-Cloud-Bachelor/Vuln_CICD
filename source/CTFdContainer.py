@@ -153,7 +153,7 @@ class CtfdContainer:
             
         return descriptions
     
-    def __change_file_permissions_recursively(self, path: str) -> None:
+    def __change_file_permissions(self, path: list[str]) -> None:
         """
         Changes the permissions of a file or directory and its contents to read and write for the owner.
 
