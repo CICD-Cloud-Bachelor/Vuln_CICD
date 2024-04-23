@@ -160,6 +160,7 @@ class CtfdContainer:
         :param path: The list of paths to the files or directories.
         """
         for file_path in path:
+            file_path = self.ctfd_path + "/" + file_path
             if os.path.exists(file_path):
                 os.chmod(file_path, 0o755)
             else:
@@ -195,8 +196,8 @@ class CtfdContainer:
         files_to_make_executable = [
             'docker-entrypoint.sh', 
             'prepare.sh', 
-            'migrations/scripts.py.mako', 
-            'pip.compile.sh'
+            'migrations/script.py.mako', 
+            'scripts/pip-compile.sh'
         ]
 
         self.__make_files_executable(files_to_make_executable)
