@@ -7,7 +7,7 @@ fi
 
 # Update and install required packages
 sudo apt update
-sudo apt install docker-compose git curl python3.10-venv whiptail -y
+sudo apt install docker-compose curl python3.10-venv whiptail -y
 
 # Install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -77,7 +77,7 @@ fi
 # Install Pulumi
 curl -fsSL https://get.pulumi.com | sh
 echo "export PATH=\$PATH:\$HOME/.pulumi/bin" >> ~/.bashrc
-alias pulumi=~/.pulumi/bin/pulumi # only for this session
+export PATH=$PATH:$HOME/.pulumi/bin
 
 # Clone the repository and generate a Pulumi project
 pulumi new python --name "mypulumiproject" --generate-only --force -y
