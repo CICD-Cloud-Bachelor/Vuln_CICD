@@ -24,9 +24,10 @@ resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 #vuln1.start(resource_group, user)
 #vuln2.start(resource_group, user)
-#vuln3.start(resource_group, user)
+vuln3.start(resource_group, user)
 #vuln4.start(resource_group, user)
 #vuln5.start(resource_group, user)
 
-ctfd = CtfdContainer(username, password)
+if not pulumi.runtime.is_dry_run(): # check if preview is running
+    CTFd = CtfdContainer(username, password)
 

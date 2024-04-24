@@ -21,7 +21,7 @@ Credentials... Hold them safe, or else you might have to look for a needle in a 
 CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
 
-def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User):
+def start(resource_group: azure.core.ResourceGroup, user: dict):
 
     devops_project = CreateAzureDevops(
         PROJECT_NAME,
@@ -30,47 +30,38 @@ def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User
         resource_group
     )
 
-    low_privil_username = faker.name().replace('.', ' ')
+    low_privilege_user = CreateAzureDevops.add_entra_user_to_devops(user)
 
-    low_privil_user = devops_project.add_user(
-        low_privil_username,
-        DEVOPS_USER1_PASSWORD
+    devops_project.import_github_repo(
+        GITHUB_REPO_URL, 
+        REPO_NAME,
+        is_private=False
     )
 
-    # devops_project.import_github_repo(
-    #     GITHUB_REPO_URL, 
-    #     REPO_NAME,
-    #     is_private=False,
-    #     pat=GITHUB_PAT
-    # )
+    devops_project.create_pipeline(
+        PIPELINE_NAME,
+        run=False,
+        branch="dev"
+    )
 
-    # devops_project.create_pipeline(
-    #     PIPELINE_NAME,
-    #     run=False,
-    #     branch="dev"
-    # )
-
-    # custom_group = devops_project.add_group(GROUP_NAME)
+    custom_group = devops_project.add_group(GROUP_NAME)
     
-    # devops_project.add_user_to_group(
-    #     low_privil_user, 
-    #     custom_group
-    # )
+    devops_project.add_user_to_group(
+        low_privilege_user, 
+        custom_group
+    )
 
-    # # Give custom_group read permissions to the devops project
-    # devops_project.modify_project_permissions(
-    #     custom_group,
-    #     permissions = {
-    #         "GENERIC_READ": "Allow"
-    #     }
-    # )
+    # Give custom_group read permissions to the devops project
+    devops_project.modify_project_permissions(
+        custom_group,
+        permissions = {
+            "GENERIC_READ": "Allow"
+        }
+    )
 
-    # devops_project.modify_repository_permissions(
-    #     custom_group,
-    #     permissions = {
-    #         "GenericRead": "Allow"
-    #     }
-    # )
-
-    #pulumi.export("low_privil_user_name", low_privil_user.principal_name)
-
+    devops_project.modify_repository_permissions(
+        custom_group,
+        permissions = {
+            "GenericRead": "Allow"
+        }
+    )

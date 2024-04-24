@@ -5,6 +5,7 @@ services:
     build: .
     user: root
     restart: always
+    container_name: ctfd_azure_pulumi
     ports:
       - "8000:8000"
     environment:
