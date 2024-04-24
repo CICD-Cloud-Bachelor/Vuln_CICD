@@ -74,7 +74,7 @@ class CtfdContainer:
         """
         pulumi.log.info("Starting CTFd container")
         # Ensure the command is prefixed with 'docker-compose'
-        docker_compose_cmd = ['docker', 'compose'] + command
+        docker_compose_cmd = ['docker-compose'] + command
 
         # Run the command
         process = subprocess.Popen(docker_compose_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
