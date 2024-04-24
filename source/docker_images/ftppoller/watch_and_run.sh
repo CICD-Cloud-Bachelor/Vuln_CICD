@@ -1,8 +1,8 @@
 #!/bin/sh
 
-#sleep 90 # wait for other container
+sleep 90 # wait for other container
 
-./ftpgrab_run.sh &
+/usr/local/bin/ftpgrab_run.sh &
 
 cd /download
 while true

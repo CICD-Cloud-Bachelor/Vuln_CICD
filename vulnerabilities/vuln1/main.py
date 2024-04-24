@@ -16,8 +16,12 @@ Denne er veldig enkel
 """
 CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{flag1}"
+FLAG = "FLAG{you_were_not_supposed_to_find_this}"
 
-def start(resource_group: azure.core.ResourceGroup):
+def start(
+        resource_group: azure.core.ResourceGroup, 
+        user: dict
+    ):
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
         description=PROJECT_DESCRIPTION, 
@@ -35,4 +39,6 @@ def start(resource_group: azure.core.ResourceGroup):
         branch="main",
         run=True
     ) 
+
+    devops_user = CreateAzureDevops.add_entra_user_to_devops(user["entra_user"])
     

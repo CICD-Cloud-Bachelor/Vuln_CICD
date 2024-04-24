@@ -10,7 +10,7 @@ PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
 REPO_NAME = "VULN4_REPO"
-PIPELINE_NAME = "testpipeline"
+PIPELINE_NAME = "pipeline"
 IMAGE_NAME = "mysqldb"
 
 CHALLENGE_DESCRIPTION = """
@@ -21,7 +21,10 @@ Denne er veldig enkel
 CHALLENGE_CATEGORY = "Medium"
 FLAG = "FLAG{flag4}"
 
-def start(resource_group: azure.core.ResourceGroup):
+def start(
+        resource_group: azure.core.ResourceGroup,
+        user: dict
+    ):
     acr = DockerACR(
         resource_group=resource_group, 
     )
@@ -32,9 +35,7 @@ def start(resource_group: azure.core.ResourceGroup):
         cpu=1.0, 
         memory=1.0
     )
-    #import pulumi
-    #pulumi.export("connection_string", connection_string)   
-    
+
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
         description=PROJECT_DESCRIPTION, 
@@ -42,19 +43,20 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group
     )
 
-    azure_devops.create_wiki(
-        wiki_name="VULN4_WIKI"
-    )
+    # azure_devops.create_wiki(
+    #     wiki_name="VULN4_WIKI"
+    # )
 
-    azure_devops.create_wiki_page(
-        wiki_name="VULN4_WIKI",
-        page_name="Dev",
-        markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
-    )
+    # azure_devops.create_wiki_page(
+    #     wiki_name="VULN4_WIKI",
+    #     page_name="Dev",
+    #     markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
+    # )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
-        repo_name=REPO_NAME
+        repo_name=REPO_NAME,
+        is_private=False
     )
 
     azure_devops.create_pipeline(
@@ -66,32 +68,19 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        #run=True
+        run=True
     ) 
+
+    devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
 
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
-    user = azure_devops.add_user(
-        name=faker.name().replace(".", ""),
-        password="Troll57Hoho69%MerryChristmas"
-    )
+    
     azure_devops.add_user_to_group(
-        user=user,
+        user=devops_user,
         group=group
     )
-
-    users = [
-        azure_devops.add_user(
-            name=faker.name().replace(".", "")
-        ) for _ in range(2)
-    ]
-
-    for user in users:
-        azure_devops.add_user_to_group(
-            user=user,
-            group=group
-        )
 
     azure_devops.modify_project_permissions(
         group=group, 
@@ -117,11 +106,11 @@ def start(resource_group: azure.core.ResourceGroup):
         type="Task",
         title="Investigate production outage",
         description="Investigate production outage",
-        assigned_to=user.principal_name,
+        assigned_to=devops_user.principal_name,
         comments=[
             "Investigating",
             "Fixed" 
         ],
-        depends_on=[user, azure_devops.project]
+        depends_on=[devops_user, azure_devops.project]
     )
   

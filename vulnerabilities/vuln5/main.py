@@ -16,10 +16,15 @@ Dette er femte challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
-CHALLENGE_CATEGORY = "Hard"
-FLAG = "FLAG{flag5555555}"
+FLAG = "FLAG{pwned_the_customer}"
 
-def start(resource_group: azure.core.ResourceGroup):
+def start(
+        resource_group: azure.core.ResourceGroup,
+        user: dict
+    ):
+    update_flag_file()
+    original_file_contents = update_ftp_fqdn()
+
     acr = DockerACR(
         resource_group=resource_group, 
     )
@@ -37,6 +42,7 @@ def start(resource_group: azure.core.ResourceGroup):
         cpu=1.0,
         memory=1.0
     )
+    revert_file_content(original_file_contents)
 
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -61,3 +67,58 @@ def start(resource_group: azure.core.ResourceGroup):
         branch="main",
         run=False
     )
+
+    CreateAzureDevops.add_entra_user_to_devops(user)
+    azure_devops.create_work_item(
+        type="Task",
+        title="Deploy FTP Server",
+        description="Deploy the FTP server to the Azure Container Registry",
+        comments=[
+            "Why are you doing this?",
+            "Please hurry up!"
+        ],
+        assigned_to=user["entra_user"].user_principal_name
+    )
+    
+    # azure_devops.create_wiki(
+    #     wiki_name="FTP"
+    # )
+    # azure_devops.create_wiki_page(
+    #     wiki_name="FTP",
+    #     page_name="FTP Server",
+    #     markdown_file_path="vulnerabilities/vuln5/fake_wiki/wiki.md"
+    # )
+
+
+
+
+
+
+
+def update_ftp_fqdn() -> dict:
+    fqdn = f"{IMAGE_NAME1}{DNS_LABEL}.{LOCATION}.azurecontainer.io"
+    files_to_update = [
+        "ftpserver/vsftpd.conf",
+        "ftppoller/Dockerfile"
+    ]
+    file_contents = {}
+
+    for file in files_to_update:
+        with open(CONTAINER_PATH + file, "r") as f:
+            contents = f.read()
+            file_contents[file] = contents
+            contents = contents.replace(r"{{FQDN}}", fqdn)
+
+        with open(CONTAINER_PATH + file, "w") as f:
+            f.write(contents)
+
+    return file_contents
+
+def revert_file_content(file_contents: dict):
+    for file, contents in file_contents.items():
+        with open(CONTAINER_PATH + file, "w") as f:
+            f.write(contents)
+
+def update_flag_file():
+    with open(f"{CONTAINER_PATH}/{IMAGE_NAME2}/flag.txt", "w") as f:
+        f.write(FLAG)
