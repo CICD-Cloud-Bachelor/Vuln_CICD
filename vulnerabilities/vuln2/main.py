@@ -12,9 +12,9 @@ Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
 CHALLENGE_CATEGORY = "Easy"
-FLAG = "FLAG{flag2}"
+FLAG = "FLAG{7haNk_GoD_Y0U_FounD_THE_rCE_8eFoRE_17_W@$_pUSHED_wi7H_tHE_pIpe11Ne<3}"
 
-def generate_users(azure_devops, vuln_azure_devops):
+def generate_users(azure_devops, vuln_azure_devops, devops_user):
     
     global vuln_username
     global it_department_username
@@ -41,7 +41,12 @@ def generate_users(azure_devops, vuln_azure_devops):
         permissions = {"GENERIC_READ": "Allow",
                         "GENERIC_WRITE": "Allow"
                         })
-                                                                                                   
+
+    azure_devops.add_user_to_default_group(
+        user=devops_user,
+        default_group_name="Readers"
+        )
+
     vuln_username = faker.name().replace(" ", "_")  
     vuln_password = "Complex!Start2024$PassW0rd#"
     vuln_group_name = "Vulnerability_2_Group"
@@ -187,15 +192,11 @@ def import_pipeline_to_project(azure_devops, vuln_azure_devops):
             run=False
         )
 
-def init_docker_acr(resource_group):
+def init_docker_acr(resource_group, acr):
     
     global IMAGENAME
 
     IMAGENAME = "bestadminpanel"
-
-    acr = DockerACR(
-        resource_group=resource_group, 
-    )
 
     url = acr.start_container(
         image_name=IMAGENAME,
@@ -206,17 +207,15 @@ def init_docker_acr(resource_group):
 
     pulumi.export("URL", url)
 
-def start():
+def start(resource_group, devops_user, acr):
 
     global config
-
-    resource_group = azure.core.ResourceGroup('magnusme_resource-group', location="West Europe")
     
     config = configparser.ConfigParser()
 
     config.read('config.ini')
     
-    project_name = "IT_Department"
+    project_name = "IT_Department_Project123"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
     organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
@@ -241,13 +240,13 @@ def start():
 
     import_pipeline_to_project(azure_devops, vuln_azure_devops)
 
-    generate_users(azure_devops, vuln_azure_devops)
+    generate_users(azure_devops, vuln_azure_devops, devops_user)
 
     generate_work_items_IT(azure_devops)
 
     generate_wiki_page(azure_devops, vuln_azure_devops)
 
-    init_docker_acr(resource_group)
+    init_docker_acr(resource_group, acr)
 
     generate_work_items_vuln(vuln_azure_devops)
 
