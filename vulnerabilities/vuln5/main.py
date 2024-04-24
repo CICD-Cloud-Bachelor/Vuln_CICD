@@ -126,19 +126,19 @@ def update_ftp_fqdn() -> dict:
     file_contents = {}
 
     for file in files_to_update:
-        with open(CONTAINER_PATH + file, "r") as f:
+        with open(CONTAINER_PATH + "/" + file, "r") as f:
             contents = f.read()
             file_contents[file] = contents
             contents = contents.replace(r"{{FQDN}}", fqdn)
 
-        with open(CONTAINER_PATH + file, "w") as f:
+        with open(CONTAINER_PATH + "/" + file, "w") as f:
             f.write(contents)
 
     return file_contents
 
 def revert_file_content(file_contents: dict):
     for file, contents in file_contents.items():
-        with open(CONTAINER_PATH + file, "w") as f:
+        with open(CONTAINER_PATH +"/"+ file, "w") as f:
             f.write(contents)
 
 def update_flag_file():
