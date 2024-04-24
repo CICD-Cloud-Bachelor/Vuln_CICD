@@ -29,7 +29,10 @@ if [ -z "$LOCATION" ]; then
     LOCATION="westeurope"
 fi
 
-GITHUB_PAT=$(whiptail --inputbox "Enter your GitHub PAT:" 8 78 --title "GitHub PAT Input" 3>&1 1>&2 2>&3)
+GITHUB_PAT=$(whiptail --inputbox "Enter your GitHub PAT if you intend to import private GitHub repos (default: NULL):" 8 78 --title "GitHub PAT Input" 3>&1 1>&2 2>&3)
+if [ -z "$GITHUB_PAT" ]; then
+    GITHUB_PAT="NULL"
+fi
 
 # Allow users to skip input for DNS_LABEL and use default if they do
 DNS_LABEL=$(whiptail --inputbox "Create a DNS Label for public access to containers (default: pulumibachelorproject):" 8 78 --title "DNS Label Input" 3>&1 1>&2 2>&3)
@@ -74,7 +77,7 @@ fi
 # Install Pulumi
 curl -fsSL https://get.pulumi.com | sh
 echo "export PATH=\$PATH:\$HOME/.pulumi/bin" >> ~/.bashrc
-source ~/.bashrc
+alias pulumi=~/.pulumi/bin/pulumi # only for this session
 
 # Clone the repository and generate a Pulumi project
 pulumi new python --name "mypulumiproject" --generate-only --force -y
@@ -93,7 +96,6 @@ echo "#######################################################"
 pulumi login
 
 # Initialize and select Pulumi stack
-#pulumi stack init dev
 pulumi stack select dev
 
 
@@ -108,3 +110,4 @@ echo "#                 SETUP COMPLETED                     #"
 echo "#######################################################"
 echo "Please source your rc file to apply changes:"
 echo "source ~/.bashrc"
+echo "You can now run 'pulumi up' to deploy the infrastructure."
