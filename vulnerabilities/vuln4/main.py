@@ -1,10 +1,8 @@
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-from faker import Faker
 from source.config import ORGANIZATION_NAME
-
-faker = Faker()
 
 PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
@@ -14,18 +12,16 @@ PIPELINE_NAME = "pipeline"
 IMAGE_NAME = "mysqldb"
 
 CHALLENGE_DESCRIPTION = """
-This challenge introduces artifacts. The challenge contains a repository and a pipeline that deploys a MySQL database. The pipeline contains connection details to the database. The flag is the password for the user "Troll Trollington" wrapped with "FLAG{}".
+This challenge introduces artifacts. The challenge contains a repository and a pipeline that deploys a MySQL database. The pipeline contains connection details to the database. The flag is the password for the user "Troll_Trollington" wrapped with "FLAG{}".
 """
 CHALLENGE_CATEGORY = "Medium"
 FLAG = "FLAG{princess}"
 
 def start(
         resource_group: azure.core.ResourceGroup,
-        user: dict
+        devops_user: azuredevops.User,
+        acr: DockerACR
     ):
-    acr = DockerACR(
-        resource_group=resource_group, 
-    )
 
     connection_string = acr.start_container(
         image_name=IMAGE_NAME,
@@ -65,8 +61,6 @@ def start(
         run=True
     ) 
 
-    devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
-
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
@@ -93,6 +87,14 @@ def start(
         group=group, 
         permissions={
             "GenericRead": "Allow"
+        }
+    )
+    azure_devops.modify_area_permissions(
+        group=group,
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+            "WORK_ITEM_READ": "Allow"  
         }
     )
     

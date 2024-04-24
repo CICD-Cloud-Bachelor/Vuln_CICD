@@ -1,4 +1,5 @@
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 from source.config import *
@@ -12,23 +13,18 @@ IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
 
 CHALLENGE_DESCRIPTION = """
-Dette er femte challenge jippi!!
-Den er veldig morro og du kommer til å like den
-Denne er veldig enkel
+This challenge simulates a complete pipeline from development to customer. The CI/CD pipeline builds and pushes code to a FTP server which works as a distributer to the customers. The customer automatically downloads and runs the file from the FTP server. Your task is to retrieve the flag file from the customer.
 """
 CHALLENGE_CATEGORY = "Hard"
 FLAG = "FLAG{pwned_the_customer}"
 
 def start(
         resource_group: azure.core.ResourceGroup,
-        user: dict
+        devops_user: azuredevops.User,
+        acr: DockerACR
     ):
     update_flag_file()
     original_file_contents = update_ftp_fqdn()
-
-    acr = DockerACR(
-        resource_group=resource_group, 
-    )
 
     connection_string = acr.start_container(
         image_name=IMAGE_NAME1,
@@ -69,7 +65,6 @@ def start(
         run=False
     )
 
-    CreateAzureDevops.add_entra_user_to_devops(user)
     azure_devops.create_work_item(
         type="Task",
         title="Deploy FTP Server",
@@ -78,22 +73,48 @@ def start(
             "Why are you doing this?",
             "Please hurry up!"
         ],
-        assigned_to=user["entra_user"].user_principal_name
+        assigned_to=devops_user.principal_name,
+        depends_on=[devops_user]
     )
     
-    # azure_devops.create_wiki(
-    #     wiki_name="FTP"
-    # )
-    # azure_devops.create_wiki_page(
-    #     wiki_name="FTP",
-    #     page_name="FTP Server",
-    #     markdown_file_path="vulnerabilities/vuln5/fake_wiki/wiki.md"
-    # )
+    group = azure_devops.add_group(
+        group_name="Custom Group"
+    )
+    
+    azure_devops.add_user_to_group(
+        user=devops_user,
+        group=group
+    )
 
-
-
-
-
+    azure_devops.modify_project_permissions(
+        group=group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+        }
+    )
+    azure_devops.modify_pipeline_permissions(
+        group=group, 
+        permissions={
+            "ViewBuilds": "Allow",
+            "ViewBuildDefinition": "Allow"
+        }
+    )
+    azure_devops.modify_repository_permissions(
+        group=group, 
+        permissions={
+            "GenericContribute": "Allow",
+            "GenericRead": "Allow"
+        }
+    )
+    azure_devops.modify_area_permissions(
+        group=group,
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+            "WORK_ITEM_READ": "Allow"  
+        }
+    )
 
 
 def update_ftp_fqdn() -> dict:

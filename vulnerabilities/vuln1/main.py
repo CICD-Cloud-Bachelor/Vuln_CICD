@@ -1,4 +1,5 @@
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.config import ORGANIZATION_NAME
 
@@ -17,7 +18,7 @@ FLAG = "FLAG{you_were_not_supposed_to_find_this}"
 
 def start(
         resource_group: azure.core.ResourceGroup, 
-        user: dict
+        devops_user: azuredevops.User
     ):
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -41,7 +42,7 @@ def start(
         run=True
     ) 
 
-    devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
+    #devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
     
 
     group = azure_devops.add_group(
@@ -88,13 +89,3 @@ def start(
         page_name="VULN1CHALLENGE",
         markdown_file_path="vulnerabilities/vuln1/README.md"
     )
-
-
-    # azure_devops.create_wiki(
-    #     wiki_name="VULN1_WIKI"
-    # )
-    # azure_devops.create_wiki_page(
-    #     wiki_name="VULN1_WIKI",
-    #     page_name="VULN1_CHALLENGE",
-    #     markdown_file_path="vulnerabilities/vuln1/README.md"
-    # )
