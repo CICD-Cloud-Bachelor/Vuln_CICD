@@ -98,7 +98,7 @@ class DockerACR:
             storage_account_name=self.storage_account.name,
             storage_container_name=self.storage_container.name,
             type="Block",
-            source=pulumi.FileAsset(f"{CONTAINER_PATH}/{image_name}.tar")
+            source=pulumi.FileAsset(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar")
         )
         # self.__remove_tar_archive(
         #     image_name=image_name
@@ -139,8 +139,8 @@ class DockerACR:
         self,
         image_name: str
         ) -> None:
-        pulumi.log.info(f"Creating {CONTAINER_PATH}/{image_name}.tar")
-        with tarfile.open(f"{CONTAINER_PATH}/{image_name}.tar", "w") as tar:
+        pulumi.log.info(f"Creating {CONTAINER_PATH}/.tarfiles/{image_name}.tar")
+        with tarfile.open(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar", "w") as tar:
             for name in os.listdir(f"{CONTAINER_PATH}/{image_name}"):
                 pulumi.log.info(f"Adding {name} to archive")
                 tar.add(f"{CONTAINER_PATH}/{image_name}/{name}", arcname=name)
@@ -149,11 +149,11 @@ class DockerACR:
             self, 
             image_name: str
         ) -> None:
-        pulumi.log.info(f"Removing {CONTAINER_PATH}/{image_name}.tar")
-        for file in os.listdir(CONTAINER_PATH):
+        pulumi.log.info(f"Removing {CONTAINER_PATH}/.tarfiles/{image_name}.tar")
+        for file in os.listdir(f"{CONTAINER_PATH}/.tarfiles/"):
             pulumi.log.info(f"Removing {file}")
             if file.endswith(".tar"):
-                os.remove(f"{CONTAINER_PATH}/{file}")
+                os.remove(f"{CONTAINER_PATH}/.tarfiles/{file}")
 
     def start_container(
                 self, 
