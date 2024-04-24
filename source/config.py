@@ -1,5 +1,5 @@
 """
-A random sequence of bytes are appended to values required to be unique in the Azure environment.
+A random 5 byte sequence of bytes are appended to values required to be unique in the Azure environment.
 """
 
 import configparser, os

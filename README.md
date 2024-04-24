@@ -3,11 +3,14 @@
 ## Install
 
 ```
-sudo apt install docker-compose
-```
+sudo apt update
+sudo apt install docker-compose git curl python3.10-venv whiptail -y
 
-```
-git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git .
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+az login --use-device-code
+
+curl -fsSL https://get.pulumi.com | sh
+export PATH=$PATH:$HOME/.pulumi/bin
 pulumi new python --name "mypulumiproject" --generate-only --force
 git restore .
 
@@ -16,10 +19,12 @@ source venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
 
+pulumi login
+pulumi stack init dev
 pulumi stack select dev
 pulumi config set azure-native:location westeurope
 pulumi config set azuredevops:personalAccessToken $PAT --plaintext
-pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/bachelorcicd2024
+pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/$ORGANIZATION_NAME
 ```
 
 ## Configure `az` cli
