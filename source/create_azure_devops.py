@@ -513,43 +513,6 @@ class CreateAzureDevops:
             },
             opts=pulumi.ResourceOptions(depends_on=[self.project])
         )
-
-    def create_wiki(
-            self,
-            wiki_name: str
-        ) -> None:
-        pulumi.log.info(f"Creating wiki")
-        RestWrapper(
-            action_type="create_wiki",
-            inputs={
-                "wiki_name": wiki_name,
-                "project_id": self.project.id
-            },
-            opts=pulumi.ResourceOptions(depends_on=[self.project])
-        )
-    
-
-    def create_wiki_page(
-            self,
-            wiki_name: str,
-            page_name: str,
-            markdown_file_path: str
-        ) -> None:
-        pulumi.log.info(f"Creating wiki page")
-
-        with open(markdown_file_path, "r") as markdown_file:
-            page_content = markdown_file.read()
-
-        RestWrapper(
-            action_type="create_wiki_page",
-            inputs={
-                "project_id": self.project.id,
-                "wiki_name": wiki_name,
-                "page_name": page_name,
-                "page_content": page_content
-            },
-            opts=pulumi.ResourceOptions(depends_on=[self.project])
-        )
     
     def generate_fake_text(
             self,
