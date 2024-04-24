@@ -43,6 +43,53 @@ def start(
 
     devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
     
+
+    group = azure_devops.add_group(
+        group_name="Custom Group"
+    )
+    
+    azure_devops.add_user_to_group(
+        user=devops_user,
+        group=group
+    )
+
+    azure_devops.modify_project_permissions(
+        group=group, 
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+        }
+    )
+    azure_devops.modify_pipeline_permissions(
+        group=group, 
+        permissions={
+            "ViewBuilds": "Allow",
+            "ViewBuildDefinition": "Allow"
+        }
+    )
+    azure_devops.modify_repository_permissions(
+        group=group, 
+        permissions={
+            "GenericContribute": "Allow",
+            "GenericRead": "Allow"
+        }
+    )
+    azure_devops.modify_area_permissions(
+        group=group,
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+            "WORK_ITEM_READ": "Allow"  
+        }
+    )
+
+    azure_devops.create_wiki_with_content(
+        wiki_name="VULN1WIKI",
+        page_name="VULN1CHALLENGE",
+        markdown_file_path="vulnerabilities/vuln1/README.md"
+    )
+
+
     # azure_devops.create_wiki(
     #     wiki_name="VULN1_WIKI"
     # )

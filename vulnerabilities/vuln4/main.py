@@ -14,12 +14,10 @@ PIPELINE_NAME = "pipeline"
 IMAGE_NAME = "mysqldb"
 
 CHALLENGE_DESCRIPTION = """
-Dette er fjerde challenge jippi!!
-Den er veldig morro og du kommer til å like den
-Denne er veldig enkel
+This challenge introduces artifacts. The challenge contains a repository and a pipeline that deploys a MySQL database. The pipeline contains connection details to the database. The flag is the password for the user "Troll Trollington" wrapped with "FLAG{}".
 """
 CHALLENGE_CATEGORY = "Medium"
-FLAG = "FLAG{flag4}"
+FLAG = "FLAG{princess}"
 
 def start(
         resource_group: azure.core.ResourceGroup,
@@ -43,15 +41,11 @@ def start(
         resource_group=resource_group
     )
 
-    # azure_devops.create_wiki(
-    #     wiki_name="VULN4_WIKI"
-    # )
-
-    # azure_devops.create_wiki_page(
-    #     wiki_name="VULN4_WIKI",
-    #     page_name="Dev",
-    #     markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
-    # )
+    azure_devops.create_wiki_with_content(
+        wiki_name="VULN4WIKI",
+        page_name="Dev",
+        markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
+    )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
