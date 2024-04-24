@@ -1,28 +1,27 @@
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
-from faker import Faker
 from source.config import ORGANIZATION_NAME
-
-faker = Faker()
 
 PROJECT_NAME = "VULN4"
 PROJECT_DESCRIPTION = "Project for VULN4"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN4.git"
 REPO_NAME = "VULN4_REPO"
-PIPELINE_NAME = "testpipeline"
+PIPELINE_NAME = "pipeline"
 IMAGE_NAME = "mysqldb"
 
 CHALLENGE_DESCRIPTION = """
-Dette er fjerde challenge jippi!!
-Den er veldig morro og du kommer til å like den
-Denne er veldig enkel
+This challenge introduces artifacts. The challenge contains a repository and a pipeline that deploys a MySQL database. The pipeline contains connection details to the database. The flag is the password for the user "Troll_Trollington" wrapped with "FLAG{}".
 """
+CHALLENGE_CATEGORY = "Medium"
+FLAG = "FLAG{princess}"
 
-def start(resource_group: azure.core.ResourceGroup):
-    acr = DockerACR(
-        resource_group=resource_group, 
-    )
+def start(
+        resource_group: azure.core.ResourceGroup,
+        devops_user: azuredevops.User,
+        acr: DockerACR
+    ):
 
     connection_string = acr.start_container(
         image_name=IMAGE_NAME,
@@ -30,9 +29,7 @@ def start(resource_group: azure.core.ResourceGroup):
         cpu=1.0, 
         memory=1.0
     )
-    #import pulumi
-    #pulumi.export("connection_string", connection_string)   
-    
+
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
         description=PROJECT_DESCRIPTION, 
@@ -40,19 +37,16 @@ def start(resource_group: azure.core.ResourceGroup):
         resource_group=resource_group
     )
 
-    azure_devops.create_wiki(
-        wiki_name="VULN4_WIKI"
-    )
-
-    azure_devops.create_wiki_page(
-        wiki_name="VULN4_WIKI",
+    azure_devops.create_wiki_with_content(
+        wiki_name="VULN4WIKI",
         page_name="Dev",
         markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
     )
 
     azure_devops.import_github_repo(
         github_repo_url=GITHUB_REPO_URL, 
-        repo_name=REPO_NAME
+        repo_name=REPO_NAME,
+        is_private=False
     )
 
     azure_devops.create_pipeline(
@@ -64,32 +58,17 @@ def start(resource_group: azure.core.ResourceGroup):
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        #run=True
+        run=True
     ) 
 
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
-    user = azure_devops.add_user(
-        name=faker.name().replace(".", ""),
-        password="Troll57Hoho69%MerryChristmas"
-    )
+    
     azure_devops.add_user_to_group(
-        user=user,
+        user=devops_user,
         group=group
     )
-
-    users = [
-        azure_devops.add_user(
-            name=faker.name().replace(".", "")
-        ) for _ in range(2)
-    ]
-
-    for user in users:
-        azure_devops.add_user_to_group(
-            user=user,
-            group=group
-        )
 
     azure_devops.modify_project_permissions(
         group=group, 
@@ -110,16 +89,24 @@ def start(resource_group: azure.core.ResourceGroup):
             "GenericRead": "Allow"
         }
     )
+    azure_devops.modify_area_permissions(
+        group=group,
+        permissions={
+            "GENERIC_READ": "Allow",
+            "GENERIC_WRITE": "Allow",
+            "WORK_ITEM_READ": "Allow"  
+        }
+    )
     
     azure_devops.create_work_item(
         type="Task",
         title="Investigate production outage",
         description="Investigate production outage",
-        assigned_to=user.principal_name,
+        assigned_to=devops_user.principal_name,
         comments=[
             "Investigating",
             "Fixed" 
         ],
-        depends_on=[user, azure_devops.project]
+        depends_on=[devops_user, azure_devops.project]
     )
   

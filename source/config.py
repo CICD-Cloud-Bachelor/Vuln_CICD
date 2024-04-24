@@ -1,5 +1,4 @@
-import configparser
-import os
+import configparser, os
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -10,15 +9,8 @@ PAT                         = config["AZURE"]["PAT"]
 LOCATION                    = config["AZURE"]["LOCATION"]
 STORAGE_ACCOUNT_NAME        = config["AZURE"]["STORAGE_ACCOUNT_NAME"]
 STORAGE_CONTAINER_NAME      = config["AZURE"]["STORAGE_CONTAINER_NAME"]
-GITHUB_PAT                  = config["GITHUB"]["PAT"]+str(os.urandom(5).hex())
+GITHUB_PAT                  = config["GITHUB"]["PAT"]
 DNS_LABEL                   = config["DOCKER"]["DNS_LABEL"]
-REGISTRY_NAME               = config["DOCKER"]["REGISTRY_NAME"]
+REGISTRY_NAME               = config["DOCKER"]["REGISTRY_NAME"] + os.urandom(10).hex()
 CONTAINER_PATH              = config["DOCKER"]["CONTAINER_PATH"]
-FLAGS = {}
-DESCRIPTIONS = {}
 
-for flag in config.items("FLAGS"):
-    FLAGS[flag[0]] = flag[1]
-
-for desc in config.items("CHALLENGES"):
-    DESCRIPTIONS[desc[0]] = desc[1]
