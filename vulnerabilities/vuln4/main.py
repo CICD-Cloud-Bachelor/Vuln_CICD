@@ -58,7 +58,7 @@ def start(
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        run=True
+        run=False
     ) 
 
     group = azure_devops.add_group(
@@ -79,6 +79,8 @@ def start(
     azure_devops.modify_pipeline_permissions(
         group=group, 
         permissions={
+            "QueueBuilds": "Allow",
+            "ManageBuildQueue": "Allow",
             "ViewBuilds": "Allow",
             "ViewBuildDefinition": "Allow"
         }
