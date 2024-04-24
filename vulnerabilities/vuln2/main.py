@@ -11,6 +11,8 @@ Dette er andre challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
+CHALLENGE_CATEGORY = "Easy"
+FLAG = "FLAG{flag2}"
 
 def generate_users(azure_devops, vuln_azure_devops):
     

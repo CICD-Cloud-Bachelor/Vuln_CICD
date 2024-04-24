@@ -14,6 +14,7 @@ Dette er første challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
+CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{you_were_not_supposed_to_find_this}"
 
 def start(

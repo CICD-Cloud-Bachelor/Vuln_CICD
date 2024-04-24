@@ -13,8 +13,4 @@ GITHUB_PAT                  = config["GITHUB"]["PAT"]
 DNS_LABEL                   = config["DOCKER"]["DNS_LABEL"]
 REGISTRY_NAME               = config["DOCKER"]["REGISTRY_NAME"] + os.urandom(10).hex()
 CONTAINER_PATH              = config["DOCKER"]["CONTAINER_PATH"]
-FLAGS = {}
-DESCRIPTIONS = {}
 
-for flag in config.items("FLAGS"):
-    FLAGS[flag[0]] = flag[1]

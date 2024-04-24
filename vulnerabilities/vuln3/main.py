@@ -11,15 +11,15 @@ PROJECT_NAME = "Vulnerability 3"
 PROJECT_DESCRIPTION = "Insufficient Credential Hygiene"
 GROUP_NAME = "Reduced_Permissions_Group"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"
-# GITHUB_REPO_URL = "https://github.com/flis5/MatchingGameBlazor.git"
 REPO_NAME = "python-calculator"
-# REPO_NAME = "MatchingGameBlazor"
 PIPELINE_NAME = "Run unit tests"
 DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
 """
+CHALLENGE_CATEGORY = "Easy"
+FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
 
 def start(resource_group: azure.core.ResourceGroup, entra_user: azuredevops.User):
 
