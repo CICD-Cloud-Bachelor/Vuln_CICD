@@ -35,7 +35,7 @@ acr = DockerACR(
 )
 
 vuln1.start(resource_group, devops_user)
-#vuln2.start(resource_group, devops_user)
+#vuln2.start(resource_group, devops_user, acr)
 vuln3.start(resource_group, devops_user)
 vuln4.start(resource_group, devops_user, acr)
 vuln5.start(resource_group, devops_user, acr)

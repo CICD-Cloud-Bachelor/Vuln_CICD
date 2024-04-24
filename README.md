@@ -3,6 +3,10 @@
 ## Install
 
 ```
+sudo apt install docker-compose
+```
+
+```
 git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git .
 pulumi new python --name "mypulumiproject" --generate-only --force
 git restore .
