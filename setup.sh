@@ -24,27 +24,8 @@ fi
 
 # Install Pulumi
 curl -fsSL https://get.pulumi.com | sh
-export PATH=$PATH:$HOME/.pulumi/bin
-lines_to_add="export PATH=\$PATH:\$HOME/.pulumi/bin"
-# Detect the current shell using the SHELL variable and append to the appropriate rc file
-case $SHELL in
-    */bash)
-        echo "$lines_to_add" >> ~/.bashrc
-        echo "Lines added to .bashrc successfully."
-        ;;
-    */zsh)
-        echo "$lines_to_add" >> ~/.zshrc
-        echo "Lines added to .zshrc successfully."
-        ;;
-    */ksh)
-        echo "$lines_to_add" >> ~/.kshrc
-        echo "Lines added to .kshrc successfully."
-        ;;
-    # Add more cases as needed for different shells
-    *)
-        echo "Unsupported shell: $SHELL"
-        ;;
-esac
+echo "export PATH=\$PATH:\$HOME/.pulumi/bin" >> ~/.bashrc
+source ~/.bashrc
 
 # Clone the repository and generate a Pulumi project
 pulumi new python --name "mypulumiproject" --generate-only --force
@@ -57,10 +38,13 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
 
 # Log into Pulumi
+echo "#######################################################"
+echo "#                   LOGIN TO PULUMI                   #"
+echo "#######################################################"
 pulumi login
 
 # Initialize and select Pulumi stack
-pulumi stack init dev
+#pulumi stack init dev
 pulumi stack select dev
 
 
@@ -69,4 +53,9 @@ pulumi config set azure-native:location westeurope
 pulumi config set azuredevops:personalAccessToken $PAT --plaintext
 pulumi config set azuredevops:orgServiceUrl "https://dev.azure.com/$ORGANIZATION_NAME"
 
-echo "Setup complete. Please verify everything is configured correctly."
+
+echo "#######################################################"
+echo "#                 SETUP COMPLETED                     #"
+echo "#######################################################"
+echo "Please source your rc file to apply changes:"
+echo "source ~/.bashrc"
