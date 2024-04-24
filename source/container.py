@@ -1,9 +1,7 @@
 import pulumi
 import pulumi_azure as azure
-import pulumi_docker as docker
 import pulumi_azure_native as azure_native
-from pulumi_azure_native import containerinstance, resources
-from pulumi_azure_native import network, dbformysql
+from pulumi_azure_native import containerinstance
 import requests, os
 import tarfile
 from source.config import *
@@ -133,7 +131,7 @@ class DockerACR:
             task_run_name=f"myRunCompose{image_name}",
             opts=pulumi.ResourceOptions(depends_on=[self.blob_storage])
         )
-        print(f"TASK {index}: https://{STORAGE_ACCOUNT_NAME}{index}.blob.core.windows.net/{STORAGE_CONTAINER_NAME}{index}/{image_name}.tar")
+        #print(f"TASK {index}: https://{STORAGE_ACCOUNT_NAME}{index}.blob.core.windows.net/{STORAGE_CONTAINER_NAME}{index}/{image_name}.tar")
 
         return self.registry.login_server.apply(lambda login_server: f"{login_server}/image/{image_name}:{self.IMAGE_TAG}")
 

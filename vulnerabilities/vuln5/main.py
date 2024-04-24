@@ -1,5 +1,4 @@
 import pulumi_azure as azure
-import pulumi_azuread
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 from source.config import *
@@ -17,12 +16,14 @@ Dette er femte challenge jippi!!
 Den er veldig morro og du kommer til å like den
 Denne er veldig enkel
 """
+FLAG = "FLAG{pwned_the_customer}"
 
 def start(
         resource_group: azure.core.ResourceGroup,
         user: dict
     ):
-    update_ftp_fqdn()
+    update_flag_file()
+    original_file_contents = update_ftp_fqdn()
 
     acr = DockerACR(
         resource_group=resource_group, 
@@ -41,6 +42,7 @@ def start(
         cpu=1.0,
         memory=1.0
     )
+    revert_file_content(original_file_contents)
 
     azure_devops = CreateAzureDevops(
         project_name=PROJECT_NAME, 
@@ -93,17 +95,30 @@ def start(
 
 
 
-def update_ftp_fqdn():
+def update_ftp_fqdn() -> dict:
     fqdn = f"{IMAGE_NAME1}{DNS_LABEL}.{LOCATION}.azurecontainer.io"
     files_to_update = [
         "ftpserver/vsftpd.conf",
         "ftppoller/Dockerfile"
     ]
+    file_contents = {}
 
     for file in files_to_update:
         with open(CONTAINER_PATH + file, "r") as f:
             contents = f.read()
+            file_contents[file] = contents
             contents = contents.replace(r"{{FQDN}}", fqdn)
 
         with open(CONTAINER_PATH + file, "w") as f:
             f.write(contents)
+
+    return file_contents
+
+def revert_file_content(file_contents: dict):
+    for file, contents in file_contents.items():
+        with open(CONTAINER_PATH + file, "w") as f:
+            f.write(contents)
+
+def update_flag_file():
+    with open(f"{CONTAINER_PATH}/{IMAGE_NAME2}/flag.txt", "w") as f:
+        f.write(FLAG)

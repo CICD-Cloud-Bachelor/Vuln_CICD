@@ -8,7 +8,7 @@ RUN apk add gcompat build-base icu-libs
 ENV TZ=Europe/Paris
 
 # Set the FTP server details
-ENV FTPGRAB_SERVER_FTP_HOST=ftpserverpulumibachelorproject.westeurope.azurecontainer.io
+ENV FTPGRAB_SERVER_FTP_HOST={{FQDN}}
 ENV FTPGRAB_SERVER_FTP_PORT=21
 ENV FTPGRAB_SERVER_FTP_USERNAME=ftpshared
 ENV FTPGRAB_SERVER_FTP_PASSWORD=MAsds8ASDsadm82988
