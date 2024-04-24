@@ -4,6 +4,14 @@
 sudo apt update
 sudo apt install docker-compose git curl python3.10-venv whiptail -y
 
+# Install Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+echo "#######################################################"
+echo "#                   LOGIN TO AZURE                    #"
+echo "#######################################################"
+az login --use-device-code
+
 # Use whiptail to interactively ask for PAT and Organization Name
 PAT=$(whiptail --inputbox "Enter your Azure DevOps Personal Access Token:" 8 78 --title "Personal Access Token Input" 3>&1 1>&2 2>&3)
 ORGANIZATION_NAME=$(whiptail --inputbox "Enter your Azure DevOps Organization Name:" 8 78 --title "Organization Name Input" 3>&1 1>&2 2>&3)
@@ -13,16 +21,32 @@ if [ $? -eq 1 ]; then
     echo "User cancelled the input. Exiting..."
     exit 1
 fi
-# Install Azure CLI
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-az login --use-device-code
 
 # Install Pulumi
 curl -fsSL https://get.pulumi.com | sh
 export PATH=$PATH:$HOME/.pulumi/bin
+lines_to_add="export PATH=\$PATH:\$HOME/.pulumi/bin"
+# Detect the current shell using the SHELL variable and append to the appropriate rc file
+case $SHELL in
+    */bash)
+        echo "$lines_to_add" >> ~/.bashrc
+        echo "Lines added to .bashrc successfully."
+        ;;
+    */zsh)
+        echo "$lines_to_add" >> ~/.zshrc
+        echo "Lines added to .zshrc successfully."
+        ;;
+    */ksh)
+        echo "$lines_to_add" >> ~/.kshrc
+        echo "Lines added to .kshrc successfully."
+        ;;
+    # Add more cases as needed for different shells
+    *)
+        echo "Unsupported shell: $SHELL"
+        ;;
+esac
 
 # Clone the repository and generate a Pulumi project
-git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git .
 pulumi new python --name "mypulumiproject" --generate-only --force
 git restore .
 
