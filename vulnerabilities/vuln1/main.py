@@ -27,16 +27,24 @@ def start(
         resource_group=resource_group
     )
 
-    azure_devops.import_github_repo(GITHUB_REPO_URL, REPO_NAME)
+    # azure_devops.import_github_repo(GITHUB_REPO_URL, REPO_NAME)
 
-    azure_devops.create_pipeline(
-        name=PIPELINE_NAME,
-        variables={
-            "FLAG": FLAG
-        },
-        branch="main",
-        run=True
-    ) 
+    # azure_devops.create_pipeline(
+    #     name=PIPELINE_NAME,
+    #     variables={
+    #         "FLAG": FLAG
+    #     },
+    #     branch="main",
+    #     run=True
+    # ) 
 
-    devops_user = CreateAzureDevops.add_entra_user_to_devops(user["entra_user"])
+    # devops_user = CreateAzureDevops.add_entra_user_to_devops(user["entra_user"])
     
+    azure_devops.create_wiki(
+        wiki_name="VULN1_WIKI"
+    )
+    azure_devops.create_wiki_page(
+        wiki_name="VULN1_WIKI",
+        page_name="VULN1_CHALLENGE",
+        markdown_file_path="vulnerabilities/vuln1/README.md"
+    )

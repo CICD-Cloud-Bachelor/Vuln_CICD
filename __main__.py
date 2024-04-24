@@ -10,19 +10,19 @@ from source.config import LOCATION
 from source.CTFdContainer import CtfdContainer
 from faker import Faker
 
-faker = Faker()
-username = faker.name().replace('.', ' ')
-password = CreateAzureDevops.random_password()
-entra_user = CreateAzureDevops.create_entra_user(username, password)
-user = {
-    "entra_user": entra_user, 
-    "username": username
-}
+# faker = Faker()
+# username = faker.name().replace('.', ' ')
+# password = CreateAzureDevops.random_password()
+# entra_user = CreateAzureDevops.create_entra_user(username, password)
+# user = {
+#     "entra_user": entra_user, 
+#     "username": username
+# }
 
 
 resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
-vuln1.start(resource_group, user)
+vuln1.start(resource_group, {"a":"a"})
 #vuln2.start(resource_group, user)
 #vuln3.start(resource_group, user)
 #vuln4.start(resource_group, user)

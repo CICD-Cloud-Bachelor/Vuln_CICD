@@ -5,6 +5,7 @@ import pulumi_azure as azure
 import os
 from faker import Faker
 import json
+import random
 from pulumi import Config
 from pulumi_azuread import User as EntraUser
 from source.azure_devops_rest_api import *
