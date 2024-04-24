@@ -7,8 +7,8 @@ from source.config import *
 PROJECT_NAME = "VULN5"
 PROJECT_DESCRIPTION = "Project for VULN5"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN5.git"
-REPO_NAME = "VULN5_REPO"
-PIPELINE_NAME = "testpipeline"
+REPO_NAME = "development_repo"
+PIPELINE_NAME = "pipeline"
 IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
 
@@ -129,19 +129,19 @@ def update_ftp_fqdn() -> dict:
     file_contents = {}
 
     for file in files_to_update:
-        with open(CONTAINER_PATH+ "/"+ file, "r") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "r") as f:
             contents = f.read()
             file_contents[file] = contents
             contents = contents.replace(r"{{FQDN}}", fqdn)
 
-        with open(CONTAINER_PATH +"/"+ file, "w") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "w") as f:
             f.write(contents)
 
     return file_contents
 
 def revert_file_content(file_contents: dict):
     for file, contents in file_contents.items():
-        with open(CONTAINER_PATH+ "/"+ file, "w") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "w") as f:
             f.write(contents)
 
 def update_flag_file():
