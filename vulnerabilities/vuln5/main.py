@@ -80,12 +80,10 @@ def start(
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
-    
     azure_devops.add_user_to_group(
         user=devops_user,
         group=group
     )
-
     azure_devops.modify_project_permissions(
         group=group, 
         permissions={
@@ -114,6 +112,11 @@ def start(
             "GENERIC_WRITE": "Allow",
             "WORK_ITEM_READ": "Allow"  
         }
+    )
+    azure_devops.create_wiki_with_content(
+        wiki_name="Setup",
+        page_name="Customers",
+        markdown_file_path="vulnerabilities/vuln5/fake_wiki/fake_wiki.md"
     )
 
 

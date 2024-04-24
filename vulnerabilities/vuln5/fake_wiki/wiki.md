@@ -13,7 +13,7 @@
 - [Contacts](#contacts)
 
 ## Introduction
-Welcome to the Automated Software Deployment system documentation. This system is designed for seamless software updates via an FTP server with automatic retrieval and execution by client systems. This environment mimics a real-world enterprise scenario to support continuous integration and continuous deployment (CI/CD) practices.
+Welcome to the Automated Software Deployment system documentation. This system is designed for seamless software updates via an FTP server with automatic retrieval and execution by client systems.
 
 ## System Components
 ### Source Code Repository
