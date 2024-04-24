@@ -1,4 +1,5 @@
 import configparser
+import os
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -9,7 +10,7 @@ PAT                         = config["AZURE"]["PAT"]
 LOCATION                    = config["AZURE"]["LOCATION"]
 STORAGE_ACCOUNT_NAME        = config["AZURE"]["STORAGE_ACCOUNT_NAME"]
 STORAGE_CONTAINER_NAME      = config["AZURE"]["STORAGE_CONTAINER_NAME"]
-GITHUB_PAT                  = config["GITHUB"]["PAT"]
+GITHUB_PAT                  = config["GITHUB"]["PAT"]+str(os.urandom(5).hex())
 DNS_LABEL                   = config["DOCKER"]["DNS_LABEL"]
 REGISTRY_NAME               = config["DOCKER"]["REGISTRY_NAME"]
 CONTAINER_PATH              = config["DOCKER"]["CONTAINER_PATH"]
