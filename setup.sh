@@ -17,9 +17,53 @@ echo "#                   LOGIN TO AZURE                    #"
 echo "#######################################################"
 az login --use-device-code
 
-# Use whiptail to interactively ask for PAT and Organization Name
+# Requesting user inputs with whiptail
 PAT=$(whiptail --inputbox "Enter your Azure DevOps Personal Access Token:" 8 78 --title "Personal Access Token Input" 3>&1 1>&2 2>&3)
 ORGANIZATION_NAME=$(whiptail --inputbox "Enter your Azure DevOps Organization Name:" 8 78 --title "Organization Name Input" 3>&1 1>&2 2>&3)
+DOMAIN=$(whiptail --inputbox "Enter your Azure Domain (ex: bacheloroppgave2024proton.onmicrosoft.com):" 8 78 --title "Domain Input" 3>&1 1>&2 2>&3)
+USERNAME=$(whiptail --inputbox "Enter your Azure Username:" 8 78 --title "Username Input" 3>&1 1>&2 2>&3)
+
+# Allow users to skip input for LOCATION and use default if they do
+LOCATION=$(whiptail --inputbox "Enter your Azure Location (default: westeurope):" 8 78 --title "Location Input" 3>&1 1>&2 2>&3)
+if [ -z "$LOCATION" ]; then
+    LOCATION="westeurope"
+fi
+
+GITHUB_PAT=$(whiptail --inputbox "Enter your GitHub PAT:" 8 78 --title "GitHub PAT Input" 3>&1 1>&2 2>&3)
+
+# Allow users to skip input for DNS_LABEL and use default if they do
+DNS_LABEL=$(whiptail --inputbox "Create a DNS Label for public access to containers (default: pulumibachelorproject):" 8 78 --title "DNS Label Input" 3>&1 1>&2 2>&3)
+if [ -z "$DNS_LABEL" ]; then
+    DNS_LABEL="pulumibachelorproject"
+fi
+
+# Default values for those not given by the user
+STORAGE_ACCOUNT_NAME="storaccount"
+STORAGE_CONTAINER_NAME="storcontainer"
+REGISTRY_NAME="registrypulumi"
+CONTAINER_PATH="source/docker_images/"
+
+# Create config.ini file
+cat > config.ini << EOF
+[AZURE]
+DOMAIN = $DOMAIN
+USERNAME = $USERNAME
+ORGANIZATION_NAME = $ORGANIZATION_NAME
+PAT = $PAT
+LOCATION = $LOCATION
+STORAGE_ACCOUNT_NAME = $STORAGE_ACCOUNT_NAME
+STORAGE_CONTAINER_NAME = $STORAGE_CONTAINER_NAME
+
+[GITHUB]
+PAT = $GITHUB_PAT
+
+[DOCKER]
+DNS_LABEL = $DNS_LABEL
+REGISTRY_NAME = $REGISTRY_NAME
+CONTAINER_PATH = $CONTAINER_PATH
+EOF
+
+echo "config.ini has been created successfully."
 
 # Check if the user cancelled the input
 if [ $? -eq 1 ]; then
