@@ -101,7 +101,6 @@ class CreateAzureDevops:
                 #service_connection_id=github_service_endpoint.id if is_private else None
             )
         )
-        pulumi.export("repository_web_url", self.git_repo.web_url)
 
 
     def create_pipeline(
