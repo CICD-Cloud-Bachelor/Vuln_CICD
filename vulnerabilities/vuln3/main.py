@@ -21,7 +21,7 @@ Credentials... Hold them safe, or else you might have to look for a needle in a 
 CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
 
-def start(resource_group: azure.core.ResourceGroup, user: dict):
+def start(resource_group: azure.core.ResourceGroup, devops_user: azuredevops.User):
 
     devops_project = CreateAzureDevops(
         PROJECT_NAME,
@@ -29,8 +29,6 @@ def start(resource_group: azure.core.ResourceGroup, user: dict):
         ORGANIZATION_NAME,
         resource_group
     )
-
-    low_privilege_user = CreateAzureDevops.add_entra_user_to_devops(user)
 
     devops_project.import_github_repo(
         GITHUB_REPO_URL, 
@@ -47,7 +45,7 @@ def start(resource_group: azure.core.ResourceGroup, user: dict):
     custom_group = devops_project.add_group(GROUP_NAME)
     
     devops_project.add_user_to_group(
-        low_privilege_user, 
+        devops_user, 
         custom_group
     )
 

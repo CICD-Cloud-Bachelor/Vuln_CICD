@@ -26,19 +26,17 @@ entra_user_dict = {
 devops_user = CreateAzureDevops.add_entra_user_to_devops(entra_user_dict)
 ####################################################################
 
-
-
 resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
 acr = DockerACR(
     resource_group=resource_group, 
 )
 
-#vuln1.start(resource_group, devops_user)
+vuln1.start(resource_group, devops_user)
 vuln2.start(resource_group, devops_user, acr)
-#vuln3.start(resource_group, devops_user)
-#vuln4.start(resource_group, devops_user, acr)
-#vuln5.start(resource_group, devops_user, acr)
+vuln3.start(resource_group, devops_user)
+vuln4.start(resource_group, devops_user, acr)
+vuln5.start(resource_group, devops_user, acr)
 
 if not pulumi.runtime.is_dry_run(): # check if preview is running
     CTFd = CtfdContainer(username, password)
