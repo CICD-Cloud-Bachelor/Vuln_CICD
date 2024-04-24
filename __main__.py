@@ -22,11 +22,11 @@ user = {
 
 resource_group = azure.core.ResourceGroup('resource-group', location=LOCATION)
 
-vuln1.start(resource_group, user)
+#vuln1.start(resource_group, user)
 #vuln2.start(resource_group, user)
 #vuln3.start(resource_group, user)
 #vuln4.start(resource_group, user)
 #vuln5.start(resource_group, user)
 
-#ctfd = CtfdContainer(username, password)
+ctfd = CtfdContainer(username, password)
 
