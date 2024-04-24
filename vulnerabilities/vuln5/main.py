@@ -76,6 +76,11 @@ def start(
         assigned_to=devops_user.principal_name,
         depends_on=[devops_user]
     )
+    azure_devops.generate_random_work_items(
+        assigned_to=devops_user.principal_name,
+        amount=10,
+        file_path="templates/work_items/work_item_dataset.json"
+    )
     
     group = azure_devops.add_group(
         group_name="Custom Group"
@@ -116,7 +121,7 @@ def start(
     azure_devops.create_wiki_with_content(
         wiki_name="Setup",
         page_name="Customers",
-        markdown_file_path="vulnerabilities/vuln5/fake_wiki/fake_wiki.md"
+        markdown_file_path="templates/wiki_pages/vuln5.md"
     )
 
 
