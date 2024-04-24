@@ -87,5 +87,5 @@ def start(
     azure_devops.create_wiki_with_content(
         wiki_name="VULN1WIKI",
         page_name="VULN1CHALLENGE",
-        markdown_file_path="vulnerabilities/vuln1/README.md"
+        markdown_file_path="templates/wiki_pages/vuln1.md"
     )

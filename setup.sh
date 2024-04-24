@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -f config.ini ]; then
+    echo "You already have configured the environment with a config.ini file. Please remove it and run the script again."
+    exit 1
+fi
+
 # Update and install required packages
 sudo apt update
 sudo apt install docker-compose git curl python3.10-venv whiptail -y
@@ -28,7 +33,7 @@ echo "export PATH=\$PATH:\$HOME/.pulumi/bin" >> ~/.bashrc
 source ~/.bashrc
 
 # Clone the repository and generate a Pulumi project
-pulumi new python --name "mypulumiproject" --generate-only --force
+pulumi new python --name "mypulumiproject" --generate-only --force -y
 git restore .
 
 # Setup Python virtual environment and install dependencies
