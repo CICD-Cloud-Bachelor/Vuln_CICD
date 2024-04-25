@@ -16,7 +16,7 @@ ENV CONTAINER_PATH="source/docker_images/"
 WORKDIR /app
 
 RUN apt update && \
-    apt install -y git curl python3.10-venv && \
+    apt install -y git curl python3 python3-pip python3.10-venv && \
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
     az login --use-device-code && \
     curl -fsSL https://get.pulumi.com | sh
