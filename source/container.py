@@ -85,7 +85,8 @@ class DockerACR:
             resource_name=f"storCont{os.urandom(7).hex()}",
             name=STORAGE_CONTAINER_NAME + str(index),
             storage_account_name=self.storage_account.name,
-            container_access_type="container"
+            container_access_type="container",
+            opts=pulumi.ResourceOptions(depends_on=[self.storage_account])
         )
 
     def __upload_file_to_blob(self, image_name: str) -> None:
@@ -98,7 +99,8 @@ class DockerACR:
             storage_account_name=self.storage_account.name,
             storage_container_name=self.storage_container.name,
             type="Block",
-            source=pulumi.FileAsset(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar")
+            source=pulumi.FileAsset(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar"),
+            opts=pulumi.ResourceOptions(depends_on=[self.storage_container, self.storage_account])
         )
         # self.__remove_tar_archive(
         #     image_name=image_name
