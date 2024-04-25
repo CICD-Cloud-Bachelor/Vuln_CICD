@@ -102,9 +102,6 @@ class DockerACR:
             source=pulumi.FileAsset(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar"),
             opts=pulumi.ResourceOptions(depends_on=[self.storage_container, self.storage_account])
         )
-        # self.__remove_tar_archive(
-        #     image_name=image_name
-        # )
         
     
     def __build_and_push_docker_image(
