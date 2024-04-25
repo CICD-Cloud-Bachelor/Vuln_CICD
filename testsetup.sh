@@ -1,5 +1,8 @@
 #!/bin/bash
 
+sudo apt update
+sudo apt install curl python3.10-venv whiptail -y
+
 # Check if config.ini exists
 if [ -f config.ini ]; then
     whiptail --title "Error" --msgbox "You already have configured the environment with a config.ini file. Please remove it and run the script again." 10 60
@@ -11,7 +14,7 @@ fi
     echo 20
     sudo apt update
     echo 40
-    sudo apt install docker-compose curl python3.10-venv whiptail -y
+    sudo apt install curl python3.10-venv whiptail -y
     echo 60
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     echo 80
