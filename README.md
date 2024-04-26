@@ -4,7 +4,10 @@
 
 ```
 sudo apt update
-sudo apt install docker-compose git curl python3.10-venv whiptail -y
+sudo apt install docker-compose git curl python3 python3-pip python3.10-venv -y
+
+git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git
+cd Vuln_CICD
 
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 az login --use-device-code
@@ -102,3 +105,14 @@ Creating user entitlement: Adding user entitlement: (5101) You are trying to inv
   - Under `User Policies`, find and enable `External guest access`.
 
 Enabling this setting will allow you to invite and collaborate with users who are not part of your Azure Active Directory domain, expanding your development team's capabilities.
+
+### Azure DNS Lookup Error
+
+**Issue**: In rare cases there may be a DNS lookup error to Azure. 
+
+**Error Message**:
+```
+Options "https://dev.azure.com/ORG/_apis": dial tcp: lookup dev.azure.com on 172.28.240.1:53: read udp 172.28.243.145:35138->172.28.240.1:53: i/o timeout
+```
+
+**Solution**: Run `pulumi up` again
