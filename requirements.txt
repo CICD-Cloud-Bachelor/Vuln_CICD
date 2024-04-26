@@ -1,10 +1,10 @@
 pulumi>=3.0.0,<4.0.0
 pulumi_azuread
-faker
 pulumi_docker
 pulumi_azure
 pulumi_azure_native
 pulumi_azuredevops
 pulumi_mysql
+azure-devops # microsoft azure devops REST API
 requests
-azure-devops
+faker

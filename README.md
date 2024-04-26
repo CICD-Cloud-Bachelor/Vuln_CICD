@@ -32,7 +32,7 @@ pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/$ORGANIZATION_
 
 ## Configure `az` cli
 ```
-az devops configure --defaults organization=https://dev.azure.com/bachelor2024
+az login --use-device-code
 ```
 
 # Configuration Details for `config.ini`
