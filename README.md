@@ -1,5 +1,12 @@
 # Vuln_CICD
 
+
+## Azure Setup
+### Create a DevOps Organization
+Create a DevOps organization using the on the following URL: https://aex.dev.azure.com 
+
+
+
 ## Install
 
 ### Using Docker
