@@ -2,9 +2,28 @@
 
 ## Install
 
+### Using Docker
+By using Docker, the environment will be setup inside of a container and will not interfere with the host system. This is an easy an reliable way to start the application. 
+Use the following commands to build and run the Docker container.
+```
+docker build -t pulumicicddocker .
+docker run -it pulumicicddocker /bin/bash
+```
+Inside the container you need to login to Azure using the Azure CLI tool: `az`. Enter the following command:
+```
+az login --use-device-code
+```
+This will prompt you to access a link in the web browser and use a one-time-code to verify the login. Then choose your Azure account for which to use for this application.
+
+After this has completed, the environment is ready.
+
+Run `pulumi up` to start the application.
+
+
+### Manual
 ```
 sudo apt update
-sudo apt install docker-compose git curl python3 python3-pip python3.10-venv -y
+sudo apt install git curl python3 python3-pip python3.10-venv -y
 
 git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git
 cd Vuln_CICD
@@ -14,8 +33,6 @@ az login --use-device-code
 
 curl -fsSL https://get.pulumi.com | sh
 export PATH=$PATH:$HOME/.pulumi/bin
-pulumi new python --name "mypulumiproject" --generate-only --force
-git restore .
 
 python3 -m venv venv
 source venv/bin/activate
