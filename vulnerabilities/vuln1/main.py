@@ -42,9 +42,6 @@ def start(
         run=True
     ) 
 
-    #devops_user = CreateAzureDevops.add_entra_user_to_devops(user)
-    
-
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
@@ -88,4 +85,10 @@ def start(
         wiki_name="VULN1WIKI",
         page_name="VULN1CHALLENGE",
         markdown_file_path="templates/wiki_pages/vuln1.md"
+    )
+
+    azure_devops.generate_random_work_items(
+        assigned_to=devops_user.principal_name,
+        amount=10,
+        file_path="templates/work_items/work_item_dataset.json"
     )
