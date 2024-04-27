@@ -165,7 +165,7 @@ class DockerACR:
             Starts a container with the specified image name, ports, CPU, and memory.
 
             Args:
-                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image. Must mot contain underscore or any special chars. Keep it one word.
+                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image. Must mot contain underscore or any special chars, and must be lowercase. Keep it one word.
                 ports (list[int]): A list of port numbers to expose on the container. Max 5 ports available to open.
                 cpu (float): The CPU allocation for the container.
                 memory (float): The memory allocation (in GB) for the container.
