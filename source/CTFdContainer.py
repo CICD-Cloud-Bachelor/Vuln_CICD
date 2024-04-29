@@ -5,13 +5,14 @@ import json
 import subprocess
 import importlib
 import os
+from source.container import DockerACR
 from source.config import *
 
 class CtfdContainer:
     """
     Represents a CTFd container.
 
-    This class provides methods to initialize and manage a CTFd container. It allows replacing challenge flags and descriptions in the CTFd export zip file, running the container using docker-compose, and performing other related operations.
+    This class provides methods to initialize and manage a CTFd container. It allows replacing challenge flags and descriptions in the CTFd export zip file, running the container using Azure Container Instances, and performing other related operations.
 
     Attributes:
         flags_db (dict): The database of challenge flags.
@@ -36,12 +37,12 @@ class CtfdContainer:
         __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None: Replaces the challenge flags and descriptions in the CTFd export zip file.
     """
     
-    def __init__(self, username: str, password: str):
+    def __init__(self, username: str, password: str, acr: DockerACR):
         """
         Initializes a new instance of the CtfdContainer class.
 
         This method sets the ctfd_path attribute and replaces challenge flags and descriptions
-        in the CTFd export zip file. It then runs the docker-compose command to start the container.
+        in the CTFd export zip file. It then runs the start_container method from container.py to upload it to Azure.
 
         Args:
             username (str): The username for the Azure DevOps user.
@@ -57,37 +58,22 @@ class CtfdContainer:
             "results": [],
             "meta": {}
         }
+        self.acr = acr
         self.descriptions = {}
         self.categories = {}
         self.flags = {}
         self.login_name = f"{username.replace(' ', '.')}@{DOMAIN}"
         self.entra_password = password
-        self.ctfd_path = f"{CONTAINER_PATH}/CTFd"
-        self.__replace_ctfd_export_flags_and_descriptions(self.ctfd_path)
-        self.__run_docker_compose(['--project-directory', self.ctfd_path, 'up', '-d'])
+        self.ctfd_path = f"{CONTAINER_PATH}/ctfd"
+        self.__replace_ctfd_export_flags_and_descriptions()
 
-    def __run_docker_compose(self, command: list[str]):
-        """
-        Runs a docker-compose command and prints its output.
-
-        :param command: List of the command parts, e.g., ['up', '-d'] for 'docker-compose up -d'.
-        """
-        pulumi.log.info("Starting CTFd container")
-        # Ensure the command is prefixed with 'docker-compose'
-        docker_compose_cmd = ['docker-compose'] + command
-
-        # Run the command
-        process = subprocess.Popen(docker_compose_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        
-        # Wait for the command to complete
-        stdout, stderr = process.communicate()
-        
-        if process.returncode == 0:
-            print("Docker compose executed successfully")
-            print(stdout.decode())
-        else:
-            print("Error executing docker compose")
-            print(stderr.decode())
+        ctfd_link = self.acr.start_container(
+            image_name="ctfd", 
+            ports=[8000], 
+            cpu=1.0,
+            memory=1.0
+        )
+        pulumi.export("CTFd Link", ctfd_link)
 
     def __unzip_file(self, zip_file: str, extraction_dir: str) -> None:
         """
@@ -207,20 +193,7 @@ class CtfdContainer:
         self.challenges_db["count"] = count
         self.flags_db["count"] = count
 
-    def __make_files_executable(self, path: list[str]) -> None:
-        """
-        Changes the permissions of a list of files
-
-        :param path: The list of paths to the files or directories.
-        """
-        for file_path in path:
-            file_path = self.ctfd_path + "/" + file_path
-            if os.path.exists(file_path):
-                os.chmod(file_path, 0o755)
-            else:
-                print(f"File {file_path} does not exist.")
-
-    def __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None:
+    def __replace_ctfd_export_flags_and_descriptions(self) -> None:
         """
         Replaces the challenge flags and descriptions in the CTFd export zip file.
 
@@ -230,21 +203,12 @@ class CtfdContainer:
         temp_dir = "ctfd_export_temp_dir/"
         db_path = "ctfd_export_temp_dir/db/"
 
-        ctfd_export_path = ctfd_path + "/ctfd_export.zip"
+        ctfd_export_path = self.ctfd_path + "/ctfd_export.zip"
         self.__unzip_file(ctfd_export_path, temp_dir)
 
         self.__fill_flags_db_and_challenges_db()
         self.__write_json(db_path + "flags.json", self.flags_db)
         self.__write_json(db_path + "challenges.json", self.challenges_db)
 
-        self.__zip_dir(temp_dir, ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
+        self.__zip_dir(temp_dir, self.ctfd_path + "/ctfd_export") # shutil adds .zip to the filename
         self.__delete_dir(temp_dir)
-
-        files_to_make_executable = [
-            'docker-entrypoint.sh', 
-            'prepare.sh', 
-            'migrations/script.py.mako', 
-            'scripts/pip-compile.sh'
-        ]
-
-        self.__make_files_executable(files_to_make_executable)

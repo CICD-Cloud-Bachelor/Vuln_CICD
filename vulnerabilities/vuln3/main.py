@@ -13,7 +13,6 @@ GROUP_NAME = "Reduced_Permissions_Group"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"
 REPO_NAME = "python-calculator"
 PIPELINE_NAME = "Run unit tests"
-DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
@@ -21,7 +20,7 @@ Credentials... Hold them safe, or else you might have to look for a needle in a 
 CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
 
-def start(resource_group: azure.core.ResourceGroup, low_privilege_user: dict):
+def start(resource_group: azure.core.ResourceGroup, devops_user: azuredevops.User):
 
     devops_project = CreateAzureDevops(
         PROJECT_NAME,
@@ -29,8 +28,6 @@ def start(resource_group: azure.core.ResourceGroup, low_privilege_user: dict):
         ORGANIZATION_NAME,
         resource_group
     )
-
-    #low_privilege_user = CreateAzureDevops.add_entra_user_to_devops(user)
 
     devops_project.import_github_repo(
         GITHUB_REPO_URL, 
@@ -47,7 +44,7 @@ def start(resource_group: azure.core.ResourceGroup, low_privilege_user: dict):
     custom_group = devops_project.add_group(GROUP_NAME)
     
     devops_project.add_user_to_group(
-        low_privilege_user, 
+        devops_user, 
         custom_group
     )
 
