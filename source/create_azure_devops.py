@@ -423,7 +423,6 @@ class CreateAzureDevops:
             self,
             assigned_to: str,
             amount: int,
-            file_path: str=None
         ) -> None:
         pulumi.log.info(f"Generating random work items")
 
