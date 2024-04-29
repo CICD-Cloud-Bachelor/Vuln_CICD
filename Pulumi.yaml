@@ -1,0 +1,5 @@
+name: mypulumiproject
+runtime:
+  name: python
+  options:
+    virtualenv: venv

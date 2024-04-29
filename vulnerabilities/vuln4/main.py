@@ -40,7 +40,7 @@ def start(
     azure_devops.create_wiki_with_content(
         wiki_name="VULN4WIKI",
         page_name="Dev",
-        markdown_file_path="vulnerabilities/vuln4/fake_wiki/fake_wiki.md"
+        markdown_file_path="templates/wiki_pages/vuln4.md"
     )
 
     azure_devops.import_github_repo(
@@ -58,7 +58,7 @@ def start(
             "PASSWORD": "myr00tp455w0rd"
         },
         branch="main",
-        run=True
+        run=False
     ) 
 
     group = azure_devops.add_group(
@@ -79,6 +79,8 @@ def start(
     azure_devops.modify_pipeline_permissions(
         group=group, 
         permissions={
+            "QueueBuilds": "Allow",
+            "ManageBuildQueue": "Allow",
             "ViewBuilds": "Allow",
             "ViewBuildDefinition": "Allow"
         }
@@ -109,4 +111,9 @@ def start(
         ],
         depends_on=[devops_user, azure_devops.project]
     )
-  
+    
+    azure_devops.generate_random_work_items(
+        assigned_to=devops_user.principal_name,
+        amount=10,
+        file_path="templates/work_items/work_item_dataset.json"
+    )
