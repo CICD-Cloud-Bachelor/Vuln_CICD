@@ -13,7 +13,6 @@ GROUP_NAME = "Reduced_Permissions_Group"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"
 REPO_NAME = "python-calculator"
 PIPELINE_NAME = "Run unit tests"
-DEVOPS_USER1_PASSWORD = "Troll57Hoho69%MerryChristmas"
 
 CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
