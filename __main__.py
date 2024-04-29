@@ -38,6 +38,6 @@ vuln3.start(resource_group, devops_user)
 vuln4.start(resource_group, devops_user, acr)
 vuln5.start(resource_group, devops_user, acr)
 
-if not pulumi.runtime.is_dry_run(): # check if preview is running
-    CTFd = CtfdContainer(username, password)
+#if not pulumi.runtime.is_dry_run(): # check if preview is running
+#    CTFd = CtfdContainer(username, password)
 

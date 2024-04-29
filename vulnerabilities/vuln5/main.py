@@ -7,8 +7,8 @@ from source.config import *
 PROJECT_NAME = "VULN5"
 PROJECT_DESCRIPTION = "Project for VULN5"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN5.git"
-REPO_NAME = "VULN5_REPO"
-PIPELINE_NAME = "testpipeline"
+REPO_NAME = "development_repo"
+PIPELINE_NAME = "pipeline"
 IMAGE_NAME1 = "ftpserver"
 IMAGE_NAME2 = "ftppoller"
 
@@ -76,16 +76,19 @@ def start(
         assigned_to=devops_user.principal_name,
         depends_on=[devops_user]
     )
+    azure_devops.generate_random_work_items(
+        assigned_to=devops_user.principal_name,
+        amount=10,
+        file_path="templates/work_items/work_item_dataset.json"
+    )
     
     group = azure_devops.add_group(
         group_name="Custom Group"
     )
-    
     azure_devops.add_user_to_group(
         user=devops_user,
         group=group
     )
-
     azure_devops.modify_project_permissions(
         group=group, 
         permissions={
@@ -115,6 +118,11 @@ def start(
             "WORK_ITEM_READ": "Allow"  
         }
     )
+    azure_devops.create_wiki_with_content(
+        wiki_name="Setup",
+        page_name="Customers",
+        markdown_file_path="templates/wiki_pages/vuln5.md"
+    )
 
 
 def update_ftp_fqdn() -> dict:
@@ -126,19 +134,19 @@ def update_ftp_fqdn() -> dict:
     file_contents = {}
 
     for file in files_to_update:
-        with open(CONTAINER_PATH + file, "r") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "r") as f:
             contents = f.read()
             file_contents[file] = contents
             contents = contents.replace(r"{{FQDN}}", fqdn)
 
-        with open(CONTAINER_PATH + file, "w") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "w") as f:
             f.write(contents)
 
     return file_contents
 
 def revert_file_content(file_contents: dict):
     for file, contents in file_contents.items():
-        with open(CONTAINER_PATH + file, "w") as f:
+        with open(f"{CONTAINER_PATH}/{file}", "w") as f:
             f.write(contents)
 
 def update_flag_file():

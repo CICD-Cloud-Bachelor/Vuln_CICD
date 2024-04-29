@@ -3,8 +3,7 @@ from faker import Faker
 import pulumi_azure as azure
 import random as ra
 from source.create_azure_devops import CreateAzureDevops
-import configparser  
-from source.container import DockerACR
+from source.config import *
 
 CHALLENGE_DESCRIPTION = """
 Dette er andre challenge jippi!!
@@ -111,14 +110,14 @@ def generate_work_items_IT(azure_devops):
     azure_devops.create_work_item(
         type = "Task",
         title = work_item_title,
-        assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        assigned_to = f"{it_department_username}@{DOMAIN}",
         description = work_item_description,
         comments = work_item_comment,
         state="Closed"
         )
     
     azure_devops.generate_random_work_items(
-        assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        assigned_to=f"{it_department_username}@{DOMAIN}",
         amount=60,
     )
 
@@ -128,13 +127,13 @@ def generate_work_items_IT(azure_devops):
     azure_devops.create_work_item(
         type = "Task",
         title = work_item_title,
-        assigned_to = f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        assigned_to = f"{it_department_username}@{DOMAIN}",
         description = work_item_description,
         comments = []
         )
     
     azure_devops.generate_random_work_items(
-        assigned_to=f"{it_department_username}@{config['AZURE']['DOMAIN']}",
+        assigned_to=f"{it_department_username}@{DOMAIN}",
         amount=38,
     )
 
@@ -157,7 +156,7 @@ def generate_work_items_vuln(vuln_azure_devops):
         assigned_to = None,
         description = f"""There is 1 day left to deploy the admin panel.
                           I have set up a azure web series to host the application.
-                          The URL is http://{IMAGENAME}{config['DOCKER']['DNS_LABEL']}.{config['AZURE']['LOCATION']}.azurecontainer.io.""",            
+                          The URL is http://{IMAGENAME}{DNS_LABEL}.{LOCATION}.azurecontainer.io.""",            
         state="Active",
         comments = [],
         depends_on = []
@@ -208,21 +207,13 @@ def init_docker_acr(resource_group, acr):
     pulumi.export("URL", url)
 
 def start(resource_group, devops_user, acr):
-
-    global config
-    
-    config = configparser.ConfigParser()
-
-    config.read('config.ini')
-    
     project_name = "IT_Department_Project123"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
-    organization_name = config["AZURE"]["ORGANIZATION_NAME"]
 
     azure_devops = CreateAzureDevops(
         project_name=project_name, 
         description=project_descrition, 
-        organization_name=organization_name, 
+        organization_name=ORGANIZATION_NAME, 
         resource_group=resource_group
         )
 
@@ -232,7 +223,7 @@ def start(resource_group, devops_user, acr):
     vuln_azure_devops = CreateAzureDevops(
         project_name=vuln_project_name,
         description=vuln_project_description, 
-        organization_name=organization_name,
+        organization_name=ORGANIZATION_NAME,
         resource_group=resource_group
         )
 
