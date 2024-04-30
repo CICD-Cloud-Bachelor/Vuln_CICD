@@ -7,7 +7,7 @@ from source.config import *
 
 faker = Faker()
 
-PROJECT_NAME = "Vulnerability 3"
+PROJECT_NAME = "VULN3"
 PROJECT_DESCRIPTION = "Insufficient Credential Hygiene"
 GROUP_NAME = "Reduced_Permissions_Group"
 GITHUB_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN3.git"

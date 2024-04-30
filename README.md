@@ -149,7 +149,7 @@ Options "https://dev.azure.com/ORG/_apis": dial tcp: lookup dev.azure.com on 172
 
 **Error Message**
 ```
-Error 401 Account not authorized to view this page
+Error 401 - Uh-oh, you do not have access.
 ```
 
 **Solution** Log out and in again and it should be fixed.
