@@ -76,6 +76,8 @@ class CTFdContainer:
         )
         pulumi.export("CTFd Link", ctfd_link)
         pulumi.export("CTFd port", "8000")
+        pulumi.export("CTFd login", "hacker")
+        pulumi.export("CTFd password", "hacker")
 
     def __unzip_file(self, zip_file: str, extraction_dir: str) -> None:
         """

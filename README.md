@@ -142,3 +142,14 @@ Options "https://dev.azure.com/ORG/_apis": dial tcp: lookup dev.azure.com on 172
 ```
 
 **Solution**: Run `pulumi up` again
+
+### Player login permissions error
+
+**Issue** The newly made Azure account does not have permisson to view the DevOps organization.
+
+**Error Message**
+```
+Error 401 Account not authorized to view this page
+```
+
+**Solution** Log out and in again and it should be fixed.
