@@ -153,10 +153,6 @@ class RestAPI(ResourceProvider):
             project=inputs.get("project_id")
         )
 
-        #if not has_been_called:
-        #    time.sleep(60)
-        #    has_been_called = True
-
         CreateResult(id_="1", outs={"wiki id": new_wiki.id})
 
         parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
@@ -164,53 +160,13 @@ class RestAPI(ResourceProvider):
         wiki_client.create_or_update_page(
             parameters=parameters,
             project=inputs.get("project_id"),
-            wiki_identifier=inputs.get("wiki_name"),  # This could be the wiki name or ID
+            wiki_identifier=inputs.get("wiki_name").replace(" ", "-"),
             path=inputs.get("page_name"),
-            comment='Adding a new wiki page',  # Optional comment for the commit
+            comment='Adding a new wiki page',
             version=None
         )
 
         return CreateResult(id_="1", outs={"wiki page created": True})
-
-
-    def create_wiki(
-            self,
-            inputs: dict
-        ) -> CreateResult:
-        wiki_params = WikiCreateParametersV2(
-            name=inputs.get("wiki_name"), 
-            project_id=inputs.get("project_id"), 
-            type='projectWiki'
-        )
-
-        wiki_client = self.connection.clients.get_wiki_client()
-        
-        new_wiki = wiki_client.create_wiki(
-            wiki_create_params=wiki_params, 
-            project=inputs.get("project_id")
-        )
-
-        return CreateResult(id_="1", outs={"wiki id": new_wiki.id})
-    
-    def create_wiki_page(
-            self,
-            inputs: dict
-        ) -> CreateResult:
-        wiki_client = self.connection.clients.get_wiki_client()
-
-        parameters = WikiPageCreateOrUpdateParameters(content=inputs.get("page_content"))
-
-        wiki_client.create_or_update_page(
-            parameters=parameters,
-            project=inputs.get("project_id"),
-            wiki_identifier=inputs.get("wiki_name"),  # This could be the wiki name or ID
-            path=inputs.get("page_name"),
-            comment='Adding a new wiki page',  # Optional comment for the commit
-            version=None
-        )
-
-        return CreateResult(id_="1", outs={"wiki page created": True})
-   
 
 index = 0
 class RestWrapper(Resource):

@@ -1,19 +1,31 @@
 import pulumi
 from faker import Faker
 import pulumi_azure as azure
+import pulumi_azuredevops as azuredevops
 import random as ra
 from source.create_azure_devops import CreateAzureDevops
 from source.config import *
+from source.container import DockerACR
+
+CHALLENGE_NAME = "VULN2"
+PROJECT_IT_DESCRIPTION = "Project for the IT department to manage development and handle tickets."
+PROJECT_SECRET_DESCRIPTION = "This project is so secret that not even the IT department should know about it."
+GITHUB_IT_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_IT.git"
+GITHUB_SECRET_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_Secret.git"
+VULN_WEBSITE = "bestadminpanel"
 
 CHALLENGE_DESCRIPTION = """
-Dette er andre challenge jippi!!
-Den er veldig morro og du kommer til å like den
-Denne er veldig enkel
+Tickets here tickets there, tickets everywhere. 
+The IT department is working hard to manage the development and handle tickets, but they can be a bit lazy and have a strange policy.
 """
 CHALLENGE_CATEGORY = "Easy"
 FLAG = "FLAG{7haNk_GoD_Y0U_FounD_THE_rCE_8eFoRE_17_W@$_pUSHED_wi7H_tHE_pIpe11Ne<3}"
 
-def generate_users(azure_devops, vuln_azure_devops, devops_user):
+def generate_users(
+        azure_devops: CreateAzureDevops,
+        vuln_azure_devops: CreateAzureDevops,
+        devops_user: azuredevops.User
+        ) -> None:
     
     global vuln_username
     global it_department_username
@@ -87,21 +99,27 @@ def generate_users(azure_devops, vuln_azure_devops, devops_user):
         permissions = {"ViewBuilds": "Allow"}
         )
 
-def generate_wiki_page(azure_devops, vuln_azure_devops):
+def generate_wiki_page(
+        azure_devops: CreateAzureDevops,
+        vuln_azure_devops: CreateAzureDevops
+        ) -> None:
 
     ##Understrek på navnet er muligens feil
     azure_devops.create_wiki_with_content(
-        wiki_name="IT_Department_Wiki",
-        page_name="IT_Department",
+        wiki_name="IT Department Wiki",
+        page_name="IT Department",
         markdown_file_path="templates/wiki_pages/wiki_page_vuln2_IT.md"
         )
 
     vuln_azure_devops.create_wiki_with_content(
-        wiki_name="Super_Secret_Wiki",
-        page_name="Super_Secret",
+        wiki_name="Super Secret Wiki",
+        page_name="Super Secret",
         markdown_file_path="templates/wiki_pages/wiki_page_vuln2_Secret_Project.md")
 
-def generate_work_items_IT(azure_devops):
+def generate_work_items_IT(
+        azure_devops: CreateAzureDevops
+        ) -> None:
+    
     work_item_title = "Important - create the new user to project"
     work_item_description = f"We need to add a new user to the important project. The user name is {vuln_username}."
                                 
@@ -137,7 +155,9 @@ def generate_work_items_IT(azure_devops):
         amount=38,
     )
 
-def generate_work_items_vuln(vuln_azure_devops):
+def generate_work_items_vuln(
+        vuln_azure_devops : CreateAzureDevops
+        ) -> None:
 
     vuln_azure_devops.create_work_item(
         type = "Task",
@@ -163,7 +183,10 @@ def generate_work_items_vuln(vuln_azure_devops):
         )
 
 
-def import_gitrepo_to_project(azure_devops, vuln_azure_devops):
+def import_gitrepo_to_project(
+        azure_devops: CreateAzureDevops,
+        vuln_azure_devops: CreateAzureDevops
+        ) -> None:
 
         azure_devops.import_github_repo(
             github_repo_url="https://github.com/CICD-Cloud-Bachelor/VULN2_IT.git",
@@ -177,7 +200,10 @@ def import_gitrepo_to_project(azure_devops, vuln_azure_devops):
             is_private=False
         )
 
-def import_pipeline_to_project(azure_devops, vuln_azure_devops):
+def import_pipeline_to_project(
+        azure_devops: CreateAzureDevops,
+        vuln_azure_devops: CreateAzureDevops    
+        ) -> None:
          
         azure_devops.create_pipeline(
             name="IT_Department_Pipeline",
@@ -191,7 +217,9 @@ def import_pipeline_to_project(azure_devops, vuln_azure_devops):
             run=False
         )
 
-def init_docker_acr(resource_group, acr):
+def init_docker_acr(
+        acr: DockerACR, 
+        ):
     
     global IMAGENAME
 
@@ -204,11 +232,14 @@ def init_docker_acr(resource_group, acr):
         memory=1.0
     )
 
-    pulumi.export("URL", url)
-
-def start(resource_group, devops_user, acr):
-    project_name = "IT_Department_Project123"
-    project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
+def start(
+        resource_group: azure.core.ResourceGroup,
+        devops_user: azuredevops.User,
+        acr: DockerACR
+        ) -> None:
+    
+    project_name = "VULN2"
+    project_descrition = "Project for the IT department to manage development and handle tickets."
 
     azure_devops = CreateAzureDevops(
         project_name=project_name, 
@@ -217,7 +248,7 @@ def start(resource_group, devops_user, acr):
         resource_group=resource_group
         )
 
-    vuln_project_name = "Super_Secret_Project"
+    vuln_project_name = "Super Secret Project"
     vuln_project_description = "This project is so secret that not even the IT department should know about it."
 
     vuln_azure_devops = CreateAzureDevops(
@@ -227,19 +258,38 @@ def start(resource_group, devops_user, acr):
         resource_group=resource_group
         )
 
-    import_gitrepo_to_project(azure_devops, vuln_azure_devops)
+    import_gitrepo_to_project(
+        azure_devops=azure_devops,
+        vuln_azure_devops=vuln_azure_devops
+        )
 
-    import_pipeline_to_project(azure_devops, vuln_azure_devops)
+    import_pipeline_to_project(
+        azure_devops=azure_devops,
+        vuln_azure_devops=vuln_azure_devops
+        )
 
-    generate_users(azure_devops, vuln_azure_devops, devops_user)
+    generate_users(
+        azure_devops=azure_devops,
+        vuln_azure_devops=vuln_azure_devops,
+        devops_user=devops_user
+        )
 
-    generate_work_items_IT(azure_devops)
+    generate_work_items_IT(
+        azure_devops=azure_devops
+        )
 
-    generate_wiki_page(azure_devops, vuln_azure_devops)
+    generate_wiki_page(
+        azure_devops=azure_devops,
+        vuln_azure_devops=vuln_azure_devops
+        )
 
-    init_docker_acr(resource_group, acr)
+    init_docker_acr(
+        acr=acr
+        )
 
-    generate_work_items_vuln(vuln_azure_devops)
+    generate_work_items_vuln(
+        vuln_azure_devops=vuln_azure_devops
+        )
 
  
         
