@@ -1,4 +1,4 @@
-name: devops_test1
+name: mypulumiproject
 runtime:
   name: python
   options:
