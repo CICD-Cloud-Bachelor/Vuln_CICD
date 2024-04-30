@@ -69,6 +69,10 @@ def start(
         user=devops_user,
         group=group
     )
+    azure_devops.add_user_to_default_group(
+        user=devops_user,
+        default_group_name="Readers"
+    )
 
     azure_devops.modify_project_permissions(
         group=group, 
