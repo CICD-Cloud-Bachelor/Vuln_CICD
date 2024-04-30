@@ -7,6 +7,13 @@ from source.create_azure_devops import CreateAzureDevops
 from source.config import *
 from source.container import DockerACR
 
+CHALLENGE_NAME = "VULN2"
+PROJECT_IT_DESCRIPTION = "Project for the IT department to manage development and handle tickets."
+PROJECT_SECRET_DESCRIPTION = "This project is so secret that not even the IT department should know about it."
+GITHUB_IT_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_IT.git"
+GITHUB_SECRET_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_Secret.git"
+VULN_WEBSITE = "bestadminpanel"
+
 CHALLENGE_DESCRIPTION = """
 Tickets here tickets there, tickets everywhere. 
 The IT department is working hard to manage the development and handle tickets, but they can be a bit lazy and have a strange policy.
