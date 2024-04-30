@@ -133,3 +133,13 @@ the --mount option requires BuildKit. Refer to https://docs.docker.com/go/buildk
 ```
 DOCKER_BUILDKIT=1 docker build -t pulumidocker .
 ```
+### Player login permissions error
+
+**Issue** The newly made Azure account does not have permisson to view the DevOps organization.
+
+**Error Message**
+```
+Error 401 - Uh-oh, you do not have access.
+```
+
+**Solution** Log out and in again and it should be fixed.
