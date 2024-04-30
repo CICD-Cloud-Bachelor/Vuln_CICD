@@ -3,9 +3,9 @@
 
 ## Azure Setup
 ### Create a DevOps Organization
-Create a DevOps organization using the on the following URL: https://aex.dev.azure.com 
+**Create DevOps Organization**: Create a DevOps organization using the following URL: https://aex.dev.azure.com 
 
-
+**Request Parallelism**: Fill out the [parallelism request form](https://aka.ms/azpipelines-parallelism-request) provided by Azure to apply for additional parallelism. This is **required** to run pipelines. 
 
 ## Install
 
@@ -15,13 +15,10 @@ By using Docker, the environment will be setup inside of a container and will no
 Use the following commands to build and run the Docker container.
 ```
 docker build -t pulumicicddocker .
-docker run -it pulumicicddocker /bin/bash
+docker run -it pulumicicddocker
 ```
-Inside the container you need to login to Azure using the Azure CLI tool: `az`. Enter the following command:
-```
-az login --use-device-code
-```
-This will prompt you to access a link in the web browser and use a one-time-code to verify the login. Then choose your Azure account for which to use for this application.
+
+The run command will prompt you to access a link in the web browser and use a one-time-code to verify the login. Then choose your Azure account for which to use for this application.
 
 After this has completed, the environment is ready.
 
@@ -55,11 +52,6 @@ pulumi config set azuredevops:personalAccessToken $PAT --plaintext
 pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/$ORGANIZATION_NAME
 ```
 
-## Configure `az` cli
-```
-az login --use-device-code
-```
-
 # Configuration Details for Environmental variables in Dockerfile
 
 The enviromental variables serves as the central configuration hub for the project, encompassing critical settings that are essential for the correct functioning of the application within Azure, GitHub, and Docker environments. This file includes credentials, resource names, and specific paths that are utilized across various services. Here is an explanation of each section and its parameters:
@@ -77,6 +69,7 @@ The enviromental variables serves as the central configuration hub for the proje
   - The length in the `config.ini` file must therefore not be longer than 13 characters.
 - **STORAGE_CONTAINER_NAME**:
   - Must follow the same uniqueness and character rules as `STORAGE_ACCOUNT_NAME`.
+- **AZURE_TENANT_ID**: The Tenant ID found in Entra ID.
 
 ## **GITHUB**
 - **PAT (Personal Access Token)**: Token used for authentication to GitHub to manage private repositories and other resources. Is only used if `is_private=True` is done in the `import_github_repo()` function.
@@ -111,7 +104,7 @@ Encountering issues during the setup or operation of the CI/CD pipeline can be f
 No hosted parallelism has been purchased or granted. To request a free parallelism grant, please fill out the following form https://aka.ms/azpipelines-parallelism-request
 ```
 
-**Solution**: Azure DevOps requires parallelism, which refers to the number of concurrent jobs that can run. If your account does not have any parallel jobs available, you need to request them. This can be done for free for certain account types, particularly open-source projects or small teams.
+**Solution**: Azure DevOps Pipelines requires parallelism, which refers to the number of concurrent jobs that can run. If your account does not have any parallel jobs available, you need to request them. This can be done for free for certain account types, particularly open-source projects or small teams.
 
 - **Request Parallelism**: Fill out the [parallelism request form](https://aka.ms/azpipelines-parallelism-request) provided by Azure to apply for additional parallelism.
 
