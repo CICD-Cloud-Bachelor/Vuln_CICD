@@ -12,7 +12,7 @@ PROJECT_IT_DESCRIPTION = "Project for the IT department to manage development an
 PROJECT_SECRET_DESCRIPTION = "This project is so secret that not even the IT department should know about it."
 GITHUB_IT_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_IT.git"
 GITHUB_SECRET_REPO_URL = "https://github.com/CICD-Cloud-Bachelor/VULN2_Secret.git"
-VULN_WEBSITE = "bestadminpanel"
+IMAGE_NAME = "bestadminpanel"
 
 CHALLENGE_DESCRIPTION = """
 Tickets here tickets there, tickets everywhere. 
@@ -176,7 +176,7 @@ def generate_work_items_vuln(
         assigned_to = None,
         description = f"""There is 1 day left to deploy the admin panel.
                           I have set up a azure web series to host the application.
-                          The URL is http://{IMAGENAME}{DNS_LABEL}.{LOCATION}.azurecontainer.io.""",            
+                          The URL is http://{IMAGE_NAME}{DNS_LABEL}.{LOCATION}.azurecontainer.io.""",            
         state="Active",
         comments = [],
         depends_on = []
@@ -189,13 +189,13 @@ def import_gitrepo_to_project(
         ) -> None:
 
         azure_devops.import_github_repo(
-            github_repo_url="https://github.com/CICD-Cloud-Bachelor/VULN2_IT.git",
+            github_repo_url=f"{GITHUB_IT_REPO_URL}",
             repo_name="IT Department Ticket Development",
             is_private=False
         )
 
         vuln_azure_devops.import_github_repo(
-            github_repo_url="https://github.com/CICD-Cloud-Bachelor/VULN2_Secret.git",
+            github_repo_url=f"{GITHUB_SECRET_REPO_URL}",
             repo_name="Super Secret Admin Panel",
             is_private=False
         )
@@ -220,13 +220,9 @@ def import_pipeline_to_project(
 def init_docker_acr(
         acr: DockerACR, 
         ):
-    
-    global IMAGENAME
-
-    IMAGENAME = "bestadminpanel"
 
     url = acr.start_container(
-        image_name=IMAGENAME,
+        image_name=f"{IMAGE_NAME}",
         ports=[80],
         cpu=1.0,
         memory=1.0
@@ -237,6 +233,10 @@ def start(
         devops_user: azuredevops.User,
         acr: DockerACR
         ) -> None:
+    
+    with open(f"{CONTAINER_PATH}/{IMAGE_NAME}/flag.txt", "w") as file:
+        file.write(FLAG)
+
     
     project_name = "VULN2"
     project_descrition = "Project for the IT department to manage development and handle tickets."
