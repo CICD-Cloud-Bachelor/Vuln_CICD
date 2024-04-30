@@ -22,7 +22,7 @@ The run command will prompt you to access a link in the web browser and use a on
 
 After this has completed, the environment is ready.
 
-Run `pulumi up` to start the application.
+Run `pulumi up` to start the application. This may take between 6 and 10 minutes.
 
 # Configuration Details for Environmental variables in Dockerfile
 
