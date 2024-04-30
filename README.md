@@ -73,6 +73,7 @@ The `config.ini` file serves as the central configuration hub for the project, e
   - Must be unique across all Azure accounts.
   - Should be between 3 and 24 characters, containing only lowercase letters and numbers.
   - 10 random hex digits are appended to ensure uniqueness.
+  - The length in the `config.ini` file must therefore not be longer than 13 characters.
 - **STORAGE_CONTAINER_NAME**:
   - Must follow the same uniqueness and character rules as `STORAGE_ACCOUNT_NAME`.
 
@@ -86,6 +87,7 @@ The `config.ini` file serves as the central configuration hub for the project, e
   - The name of the Docker registry.
   - Must not exceed 50 characters in length.
   - 10 random hex digits are appended to ensure uniqueness.
+  - The length in the `config.ini` file must therefore not be longer than 39 characters.
 - **CONTAINER_PATH**: The file path relative to the root project directory that leads to Docker configurations and images.
 
 ## General Guidelines for `config.ini`
