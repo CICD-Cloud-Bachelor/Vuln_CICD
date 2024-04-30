@@ -24,34 +24,6 @@ After this has completed, the environment is ready.
 
 Run `pulumi up` to start the application.
 
-
-### Manual
-```
-sudo apt update
-sudo apt install git curl python3 python3-pip python3.10-venv -y
-
-git clone https://github.com/CICD-Cloud-Bachelor/Vuln_CICD.git
-cd Vuln_CICD
-
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-az login --use-device-code
-
-curl -fsSL https://get.pulumi.com | sh
-export PATH=$PATH:$HOME/.pulumi/bin
-
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install -r requirements.txt
-
-pulumi login
-pulumi stack init dev
-pulumi stack select dev
-pulumi config set azure-native:location westeurope
-pulumi config set azuredevops:personalAccessToken $PAT --plaintext
-pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/$ORGANIZATION_NAME
-```
-
 # Configuration Details for Environmental variables in Dockerfile
 
 The enviromental variables serves as the central configuration hub for the project, encompassing critical settings that are essential for the correct functioning of the application within Azure, GitHub, and Docker environments. This file includes credentials, resource names, and specific paths that are utilized across various services. Here is an explanation of each section and its parameters:
@@ -136,3 +108,28 @@ Options "https://dev.azure.com/ORG/_apis": dial tcp: lookup dev.azure.com on 172
 ```
 
 **Solution**: Run `pulumi up` again
+
+### Error when starting project with `Pulumi up`
+
+**Issue**: In some cases, certain resources may be created in the wrong order. 
+
+**Error Message**: 
+```
+error: 1 error occurred:
+```
+
+**Solution**: Run `pulumi destroy -y` and the try again.
+
+### Error building Docker container
+
+**Issue**: Docker requires a certain build backend to build the image properly.
+
+**Error Message**:
+```
+the --mount option requires BuildKit. Refer to https://docs.docker.com/go/buildkit/ to learn how to build images with BuildKit enabled
+```
+
+**Solution**: To fix this, download Docker Desktop which comes with a newer build backend, or run the `docker build` command as such:
+```
+DOCKER_BUILDKIT=1 docker build -t pulumidocker .
+```
