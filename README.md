@@ -11,6 +11,7 @@ Create a DevOps organization using the on the following URL: https://aex.dev.azu
 
 ### Using Docker
 By using Docker, the environment will be setup inside of a container and will not interfere with the host system. This is an easy an reliable way to start the application. 
+**Important**: Change the environmental variables in the `Dockerfile` to your own values.
 Use the following commands to build and run the Docker container.
 ```
 docker build -t pulumicicddocker .
@@ -59,11 +60,11 @@ pulumi config set azuredevops:orgServiceUrl https://dev.azure.com/$ORGANIZATION_
 az login --use-device-code
 ```
 
-# Configuration Details for `config.ini`
+# Configuration Details for Environmental variables in Dockerfile
 
-The `config.ini` file serves as the central configuration hub for the project, encompassing critical settings that are essential for the correct functioning of the application within Azure, GitHub, and Docker environments. This file includes credentials, resource names, and specific paths that are utilized across various services. Here is an explanation of each section and its parameters:
+The enviromental variables serves as the central configuration hub for the project, encompassing critical settings that are essential for the correct functioning of the application within Azure, GitHub, and Docker environments. This file includes credentials, resource names, and specific paths that are utilized across various services. Here is an explanation of each section and its parameters:
 
-## [AZURE]
+## **AZURE**
 - **DOMAIN**: Specifies the unique domain for the Azure Active Directory tenant, e.g., `bacheloroppgave2024proton.onmicrosoft.com`.
 - **USERNAME**: The username associated with the Azure account, e.g., `bachelor_oppgave2024`.
 - **ORGANIZATION_NAME**: The name of the Azure DevOps organization, e.g., `bachelor2024`.
@@ -77,10 +78,10 @@ The `config.ini` file serves as the central configuration hub for the project, e
 - **STORAGE_CONTAINER_NAME**:
   - Must follow the same uniqueness and character rules as `STORAGE_ACCOUNT_NAME`.
 
-## [GITHUB]
+## **GITHUB**
 - **PAT (Personal Access Token)**: Token used for authentication to GitHub to manage private repositories and other resources. Is only used if `is_private=True` is done in the `import_github_repo()` function.
 
-## [DOCKER]
+## **DOCKER**
 - **DNS_LABEL**: A unique DNS label for Docker-related resources.
   - 10 random hex digits are appended to ensure uniqueness.
 - **REGISTRY_NAME**:
@@ -90,7 +91,7 @@ The `config.ini` file serves as the central configuration hub for the project, e
   - The length in the `config.ini` file must therefore not be longer than 39 characters.
 - **CONTAINER_PATH**: The file path relative to the root project directory that leads to Docker configurations and images.
 
-## General Guidelines for `config.ini`
+## General Guidelines for ENV variables
 - **Uniqueness**: Any parameter that specifies a resource name which must be globally or regionally unique will have a safeguard by appending random hex digits to prevent name collisions. This includes storage account names, container names, DNS labels, and registry names.
 - **Security**: Sensitive information such as Personal Access Tokens (PAT) should be handled securely. Ensure that the `config.ini` file is not included in version control to prevent unauthorized access.
 - **Validation**: When configuring the parameters, ensure that the values meet the required criteria for length and character set to avoid deployment issues.
