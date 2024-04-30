@@ -75,6 +75,7 @@ class CTFdContainer:
             memory=1.0
         )
         pulumi.export("CTFd Link", ctfd_link)
+        pulumi.export("CTFd port", "8000")
 
     def __unzip_file(self, zip_file: str, extraction_dir: str) -> None:
         """
