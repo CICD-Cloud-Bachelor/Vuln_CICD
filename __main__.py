@@ -8,7 +8,7 @@ from vulnerabilities.vuln5 import main as vuln5
 from source.create_azure_devops import CreateAzureDevops
 from source.container import DockerACR
 from source.config import LOCATION, DOMAIN
-from source.CTFdContainer import CtfdContainer
+from source.CTFdContainer import CTFdContainer
 from faker import Faker
 
 
@@ -37,6 +37,6 @@ vuln3.start(resource_group, devops_user)
 vuln4.start(resource_group, devops_user, acr)
 vuln5.start(resource_group, devops_user, acr)
 
-if not pulumi.runtime.is_dry_run(): # check if preview is running
-   CTFd = CtfdContainer(username, password, acr)
+# if not pulumi.runtime.is_dry_run(): # check if preview is running
+CTFd = CTFdContainer(username, password, acr)
 

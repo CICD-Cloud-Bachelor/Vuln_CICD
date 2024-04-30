@@ -160,7 +160,7 @@ class DockerACR:
                 ports: list[int], 
                 cpu: float, 
                 memory: float
-            ) -> str:
+            ) -> pulumi.Output[any]:
             """
             Starts a container with the specified image name, ports, CPU, and memory.
 
