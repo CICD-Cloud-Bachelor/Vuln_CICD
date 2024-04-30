@@ -18,7 +18,7 @@ CHALLENGE_DESCRIPTION = """
 Credentials... Hold them safe, or else you might have to look for a needle in a haystack
 """
 CHALLENGE_CATEGORY = "Easy"
-FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}"
+FLAG = "FLAG{AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa}" # This flag is not set dynamically, its value is hardcoded in the commit history of the github repo
 
 def start(resource_group: azure.core.ResourceGroup, devops_user: azuredevops.User):
 

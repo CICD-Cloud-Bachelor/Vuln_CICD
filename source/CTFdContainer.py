@@ -8,7 +8,7 @@ import os
 from source.container import DockerACR
 from source.config import *
 
-class CtfdContainer:
+class CTFdContainer:
     """
     Represents a CTFd container.
 
@@ -65,6 +65,7 @@ class CtfdContainer:
         self.login_name = f"{username.replace(' ', '.')}@{DOMAIN}"
         self.entra_password = password
         self.ctfd_path = f"{CONTAINER_PATH}/ctfd"
+        self.organization_link = f"https://dev.azure.com/{ORGANIZATION_NAME}"
         self.__replace_ctfd_export_flags_and_descriptions()
 
         ctfd_link = self.acr.start_container(
@@ -122,6 +123,8 @@ class CtfdContainer:
         Returns:
             None
         """
+        description_login_info = f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href={self.organization_link}>{self.organization_link}</a>'
+        
         vuln_folders = [folder for folder in os.listdir('vulnerabilities/') if folder.startswith('vuln')]
         number_of_vulns = len(vuln_folders)
 
@@ -132,7 +135,7 @@ class CtfdContainer:
         for vuln_name in vuln_modules:
             vuln = importlib.import_module(vuln_name)
             vuln_key = vuln.__name__.replace("vulnerabilities.", "").replace(".main", "")
-            self.descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href="https://dev.azure.com/{ORGANIZATION_NAME}">Link</a>'
+            self.descriptions[vuln_key] = vuln.CHALLENGE_DESCRIPTION + description_login_info
             self.categories[vuln_key] = vuln.CHALLENGE_CATEGORY
             self.flags[vuln_key] = vuln.FLAG
     
