@@ -24,6 +24,8 @@ After this has completed, the environment is ready.
 
 Run `pulumi up` to start the application. This may take between 6 and 10 minutes.
 
+To destroy the environment, run: `pulumi destroy -y`
+
 # Configuration Details for Environmental variables in Dockerfile
 
 The enviromental variables serves as the central configuration hub for the project, encompassing critical settings that are essential for the correct functioning of the application within Azure, GitHub, and Docker environments. This file includes credentials, resource names, and specific paths that are utilized across various services. Here is an explanation of each section and its parameters:
