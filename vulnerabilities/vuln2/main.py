@@ -204,8 +204,6 @@ def init_docker_acr(resource_group, acr):
         memory=1.0
     )
 
-    pulumi.export("URL", url)
-
 def start(resource_group, devops_user, acr):
     project_name = "IT_Department_Project123"
     project_descrition = "Project for the IT department to manage development and handle tickets. Much better than Jira."
