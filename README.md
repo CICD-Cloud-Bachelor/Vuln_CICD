@@ -142,4 +142,4 @@ DOCKER_BUILDKIT=1 docker build -t pulumidocker .
 Error 401 - Uh-oh, you do not have access.
 ```
 
-**Solution** Log out and in again and it should be fixed.
+**Solution** Log out and in again and it should be fixed. Use the link that is given in the tasks in CTFd when logging in.
