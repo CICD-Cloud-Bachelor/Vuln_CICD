@@ -2,16 +2,26 @@
 
 
 ## Azure Setup
-### Create a DevOps Organization
-**Create DevOps Organization**: Create a DevOps organization using the following URL: https://aex.dev.azure.com 
 
-**Request Parallelism**: Fill out the [parallelism request form](https://aka.ms/azpipelines-parallelism-request) provided by Azure to apply for additional parallelism. This is **required** to run pipelines. 
+**Create an Azure Free Tier account**: 
+- Register a new account with Azure
+- Add the "Free Trial" or "Pay-As-You-Go" subscription in Azure
+
+**Create DevOps Organization**: 
+
+Create a DevOps organization using the following URL: https://aex.dev.azure.com 
+
+**Request Parallelism**: 
+
+Fill out the [parallelism request form](https://aka.ms/azpipelines-parallelism-request) provided by Azure to apply for additional parallelism. This is **required** to run pipelines and can take 24 hours to get approved. 
 
 ## Install
 
 ### Using Docker
 By using Docker, the environment will be setup inside of a container and will not interfere with the host system. This is an easy an reliable way to start the application. 
+
 **Important**: Change the environmental variables in the `Dockerfile` to your own values.
+
 Use the following commands to build and run the Docker container.
 ```
 docker build -t pulumicicddocker .
@@ -46,7 +56,7 @@ The enviromental variables serves as the central configuration hub for the proje
 - **AZURE_TENANT_ID**: The Tenant ID found in Entra ID.
 
 ## **GITHUB**
-- **PAT (Personal Access Token)**: Token used for authentication to GitHub to manage private repositories and other resources. Is only used if `is_private=True` is done in the `import_github_repo()` function.
+- **PAT (Personal Access Token)**: Token used for authentication to GitHub to manage private repositories and other resources. Is only used if `is_private=True` is done in the `import_github_repo()` function. Can be set to any value if unused.
 
 ## **DOCKER**
 - **DNS_LABEL**: A unique DNS label for Docker-related resources.
@@ -55,12 +65,11 @@ The enviromental variables serves as the central configuration hub for the proje
   - The name of the Docker registry.
   - Must not exceed 50 characters in length.
   - 10 random hex digits are appended to ensure uniqueness.
-  - The length in the `config.ini` file must therefore not be longer than 39 characters.
+  - The length in the `Dockerfile` must therefore not be longer than 39 characters.
 - **CONTAINER_PATH**: The file path relative to the root project directory that leads to Docker configurations and images.
 
 ## General Guidelines for ENV variables
 - **Uniqueness**: Any parameter that specifies a resource name which must be globally or regionally unique will have a safeguard by appending random hex digits to prevent name collisions. This includes storage account names, container names, DNS labels, and registry names.
-- **Security**: Sensitive information such as Personal Access Tokens (PAT) should be handled securely. Ensure that the `config.ini` file is not included in version control to prevent unauthorized access.
 - **Validation**: When configuring the parameters, ensure that the values meet the required criteria for length and character set to avoid deployment issues.
 
 This structured format aims to provide clear and concise information about each configuration parameter, ensuring that the setup process is as smooth as possible.
@@ -120,7 +129,7 @@ Options "https://dev.azure.com/ORG/_apis": dial tcp: lookup dev.azure.com on 172
 error: 1 error occurred:
 ```
 
-**Solution**: Run `pulumi destroy -y` and the try again.
+**Solution**: Run `pulumi destroy -y` and try again.
 
 ### Error building Docker container
 
