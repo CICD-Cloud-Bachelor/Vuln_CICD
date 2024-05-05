@@ -2,7 +2,6 @@ import pulumi
 import zipfile
 import shutil
 import json
-import subprocess
 import importlib
 import os
 from source.container import DockerACR

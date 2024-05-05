@@ -77,6 +77,10 @@ class CreateAzureDevops:
             repo_name (str): The name of the repository in Azure DevOps.
         """
         github_service_endpoint = None
+
+        # Private repo does not work btw, idk why
+        # Tried both using the PAT in the beginning of the link and creating a pulumi GithubServiceConnection object
+        # Could not get it to work
         if is_private:
             github_repo_url = github_repo_url.replace("https://", f"https://{pat}@")
 
