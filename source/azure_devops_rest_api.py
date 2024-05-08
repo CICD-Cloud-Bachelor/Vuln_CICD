@@ -133,12 +133,10 @@ class RestAPI(ResourceProvider):
 
         return CreateResult(id_="1", outs={"work item id": work_item.id})
 
-    def create_wiki_with_content(self,
-                                 inputs: dict
-                                ) -> CreateResult:
-        
-        ## You must have underscore on the wiki name atm
-        global has_been_called
+    def create_wiki_with_content(
+            self,
+            inputs: dict
+            ) -> CreateResult:
 
         wiki_params = WikiCreateParametersV2(
             name=inputs.get("wiki_name"), 
