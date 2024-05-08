@@ -108,13 +108,13 @@ class DockerACR:
     
     def __build_and_push_docker_image(
         self, 
-        image_name: str #image name needs to be same as the folder name, no underscores or special chars
+        image_name: str 
         ) -> str:
         """
         Builds and pushes a Docker image to the configured Azure Container Registry.
 
         Args:
-            image_name (str): The name of the Docker image.
+            image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
 
         Returns:
             str: The repository path of the Docker image in the registry.
@@ -156,7 +156,7 @@ class DockerACR:
         Creates a tar archive of the specified Docker image directory for uploading.
 
         Args:
-            image_name (str): The name of the Docker image.
+            image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
 
         Example:
             >>> self.__create_tar_archive('example_image')
@@ -175,7 +175,7 @@ class DockerACR:
         Removes the tar archive of a Docker image after it has been uploaded to Azure Blob Storage.
 
         Args:
-            image_name (str): The name of the Docker image whose tar file is to be removed.
+            image_name (str): The name of the Docker image whose tar file is to be removed. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
 
         Example:
             >>> self.__remove_tar_archive('example_image')
@@ -188,7 +188,7 @@ class DockerACR:
 
     def start_container(
                 self, 
-                image_name: str, # must be the name of a folder in the "CONTAINER_PATH" folder
+                image_name: str,
                 ports: list[int], 
                 cpu: float, 
                 memory: float
@@ -197,7 +197,7 @@ class DockerACR:
             Starts a Docker container from an image stored in Azure Container Registry with specified configurations.
     
             Args:
-                image_name (str): The name of the Docker image.
+                image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
                 ports (list[int]): A list of ports to expose from the container.
                 cpu (float): The amount of CPU to allocate to the container.
                 memory (float): The amount of memory (in GB) to allocate to the container.
