@@ -95,6 +95,13 @@ This section details the environment variables used in the Dockerfile. These var
 
 This structured format aims to provide clear and concise information about each configuration parameter, ensuring that the setup process is as smooth as possible.
 
+## External software used
+- CTFd
+- Docker
+- Pulumi
+- Azure CLI
+
+
 ## Common Problems
 
 Encountering issues during the setup or operation of the CI/CD pipeline can be frustrating. Below are solutions to some common problems that you might face when working with Azure DevOps.
