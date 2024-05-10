@@ -10,21 +10,7 @@ index = 0
 
 class DockerACR:
     """
-    DockerACR class represents a Docker Azure Container Registry.
-
-    Args:
-        resource_group (pulumi.ResourceGroup): The resource group where the registry will be created.
-        registry_name (str): The name of the registry.
-
-    Attributes:
-        IMAGE_TAG (str): The tag for the Docker image.
-
-    Methods:
-        __init__(self, resource_group, registry_name): Initializes a new instance of the DockerACR class.
-        __create_registry(self): Creates the Azure Container Registry.
-        build_and_push_docker_image(self, image_name): Builds and pushes a Docker image to the registry.
-        start_container(self, image_name, container_name, ports, cpu, memory): Starts a container in a container group.
-
+    DockerACR class represents a Docker Azure Container Registry. 
     """
 
     IMAGE_TAG = "v1.0"
@@ -50,7 +36,9 @@ class DockerACR:
 
     def __create_registry(self) -> None:
         """
-        Creates the Azure Container Registry.
+        Creates an Azure Container Registry in the specified resource group with basic configuration.
+
+        This method is called internally during initialization.
         """
         pulumi.log.info(f"Creating registry: {self.registry_name}")
         self.registry = azure_native.containerregistry.Registry(
@@ -73,6 +61,11 @@ class DockerACR:
         return requests.get('https://api64.ipify.org').text
     
     def __create_storage_account_and_container(self) -> None:
+        """
+        Sets up a storage account and container for handling Docker image files. This is used for storing Docker images as blobs.
+
+        This method is called internally during initialization.
+        """
         self.storage_account = azure.storage.Account(
             resource_name=f"storAcc{os.urandom(7).hex()}",
             name=STORAGE_ACCOUNT_NAME + str(index),
@@ -90,6 +83,15 @@ class DockerACR:
         )
 
     def __upload_file_to_blob(self, image_name: str) -> None:
+        """
+        Uploads a Docker image file to Azure Blob Storage after creating a tar archive of the image.
+
+        Args:
+            image_name (str): The name of the Docker image to be uploaded.
+
+        Example:
+            >>> self.__upload_file_to_blob('example_image')
+        """
         self.__create_tar_archive(
             image_name=image_name
         )
@@ -106,8 +108,20 @@ class DockerACR:
     
     def __build_and_push_docker_image(
         self, 
-        image_name: str #image name needs to be same as the folder name, no underscores or special chars
+        image_name: str 
         ) -> str:
+        """
+        Builds and pushes a Docker image to the configured Azure Container Registry.
+
+        Args:
+            image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
+
+        Returns:
+            str: The repository path of the Docker image in the registry.
+
+        Example:
+            >>> self.__build_and_push_docker_image('example_image')
+        """
         pulumi.log.info(f"Running Docker Compose for image: {image_name}")
 
         self.task = azure_native.containerregistry.TaskRun(f"taskRun{image_name}",
@@ -138,6 +152,15 @@ class DockerACR:
         self,
         image_name: str
         ) -> None:
+        """
+        Creates a tar archive of the specified Docker image directory for uploading.
+
+        Args:
+            image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
+
+        Example:
+            >>> self.__create_tar_archive('example_image')
+        """
         pulumi.log.info(f"Creating {CONTAINER_PATH}/.tarfiles/{image_name}.tar")
         with tarfile.open(f"{CONTAINER_PATH}/.tarfiles/{image_name}.tar", "w") as tar:
             for name in os.listdir(f"{CONTAINER_PATH}/{image_name}"):
@@ -148,6 +171,15 @@ class DockerACR:
             self, 
             image_name: str
         ) -> None:
+        """
+        Removes the tar archive of a Docker image after it has been uploaded to Azure Blob Storage.
+
+        Args:
+            image_name (str): The name of the Docker image whose tar file is to be removed. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
+
+        Example:
+            >>> self.__remove_tar_archive('example_image')
+        """
         pulumi.log.info(f"Removing {CONTAINER_PATH}/.tarfiles/{image_name}.tar")
         for file in os.listdir(f"{CONTAINER_PATH}/.tarfiles/"):
             pulumi.log.info(f"Removing {file}")
@@ -156,26 +188,25 @@ class DockerACR:
 
     def start_container(
                 self, 
-                image_name: str, # must be the name of a folder in the "CONTAINER_PATH" folder
+                image_name: str,
                 ports: list[int], 
                 cpu: float, 
                 memory: float
             ) -> pulumi.Output[any]:
             """
-            Starts a container with the specified image name, ports, CPU, and memory.
-
+            Starts a Docker container from an image stored in Azure Container Registry with specified configurations.
+    
             Args:
-                image_name (str): The name of the folder in the "CONTAINER_PATH" folder that contains the image. Must mot contain underscore or any special chars, and must be lowercase. Keep it one word.
-                ports (list[int]): A list of port numbers to expose on the container. Max 5 ports available to open.
-                cpu (float): The CPU allocation for the container.
-                memory (float): The memory allocation (in GB) for the container.
-
+                image_name (str): The name of the Docker image. Needs to be same as the folder name in the "CONTAINER_PATH" path, no underscores, special chars, or uppercase letters.
+                ports (list[int]): A list of ports to expose from the container.
+                cpu (float): The amount of CPU to allocate to the container.
+                memory (float): The amount of memory (in GB) to allocate to the container.
+    
             Returns:
                 str: The fully qualified domain name (FQDN) of the container.
-
-            Raises:
-                None
-
+    
+            Example:
+                >>> docker_acr.start_container('example_image', [80, 443], 1.0, 1.5)
             """
             self.__upload_file_to_blob(
                 image_name=image_name

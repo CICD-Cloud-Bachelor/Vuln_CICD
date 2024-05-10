@@ -78,8 +78,7 @@ def start(
     )
     azure_devops.generate_random_work_items(
         assigned_to=devops_user.principal_name,
-        amount=10,
-        file_path="templates/work_items/work_item_dataset.json"
+        amount=10
     )
     
     group = azure_devops.add_group(

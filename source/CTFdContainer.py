@@ -9,31 +9,8 @@ from source.config import *
 
 class CTFdContainer:
     """
-    Represents a CTFd container.
-
-    This class provides methods to initialize and manage a CTFd container. It allows replacing challenge flags and descriptions in the CTFd export zip file, running the container using Azure Container Instances, and performing other related operations.
-
-    Attributes:
-        flags_db (dict): The database of challenge flags.
-        challenges_db (dict): The database of challenges.
-        descriptions (dict): A dictionary to store vulnerability descriptions.
-        categories (dict): A dictionary to store vulnerability categories.
-        flags (dict): A dictionary to store vulnerability flags.
-        login_name (str): The login name for the Azure DevOps user.
-        entra_password (str): The password for the Azure DevOps user.
-        ctfd_path (str): The path to the CTFd container directory.
-
-    Methods:
-        __init__(self, username: str, password: str): Initializes a new instance of the CtfdContainer class.
-        __run_docker_compose(self, command: list[str]): Runs a docker-compose command and prints its output.
-        __unzip_file(self, zip_file: str, extraction_dir: str) -> None: Extracts a zip file to the specified directory.
-        __zip_dir(self, dir: str, zip_file: str) -> None: Zips a directory and its contents.
-        __delete_dir(self, dir: str) -> None: Deletes a directory and its contents.
-        __write_json(self, file: str, data: dict) -> None: Writes a dictionary to a JSON file.
-        __get_vuln_descriptions_and_categories_and_flags(self) -> None: Retrieves vulnerability descriptions, categories, and flags for each vulnerability module.
-        __fill_flags_db_and_challenges_db(self) -> None: Fills the flags and challenges databases with the necessary data.
-        __make_files_executable(self, path: list[str]) -> None: Changes the permissions of a list of files.
-        __replace_ctfd_export_flags_and_descriptions(self, ctfd_path: str) -> None: Replaces the challenge flags and descriptions in the CTFd export zip file.
+    Manages a CTFd (Capture The Flag daemon) container setup, including customizing flags, descriptions,
+    and running the container using Azure Container Instances.
     """
     
     def __init__(self, username: str, password: str, acr: DockerACR):
@@ -80,20 +57,28 @@ class CTFdContainer:
 
     def __unzip_file(self, zip_file: str, extraction_dir: str) -> None:
         """
-        Extracts a zip file to the specified directory.
+        Creates a zip file from the specified directory.
 
-        :param zip_file: The path to the zip file.
-        :param extraction_dir: The directory to extract the files to.
+        Args:
+            zip_file (str): The path to the zip file to create.
+            extraction_dir (str): The path to the directory to zip.
+
+        Example:
+            >>> self.__unzip_dir('path/to/directory', 'path/to/file.zip')
         """
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
             zip_ref.extractall(extraction_dir)
 
     def __zip_dir(self, dir: str, zip_file: str) -> None:
         """
-        Zips a directory and its contents.
+        Creates a zip file from the specified directory.
 
-        :param dir: The path to the directory.
-        :param zip_file: The path to the zip file to create.
+        Args:
+            dir (str): The path to the directory to zip.
+            zip_file (str): The path to the zip file to create.
+
+        Example:
+            >>> self.__zip_dir('path/to/directory', 'path/to/file.zip')
         """
         shutil.make_archive(zip_file, 'zip', dir)
 
@@ -101,7 +86,11 @@ class CTFdContainer:
         """
         Deletes a directory and its contents.
 
-        :param dir: The path to the directory.
+        Args:
+            dir (str): The path to the directory to delete.
+
+        Example:
+            >>> self.__delete_dir('path/to/directory')
         """
         shutil.rmtree(dir)
 
@@ -109,21 +98,24 @@ class CTFdContainer:
         """
         Writes a dictionary to a JSON file.
 
-        :param file: The path to the JSON file.
-        :param data: The dictionary to write to the file.
+        Args:
+            file (str): The file path to write the JSON data to.
+            data (dict): The dictionary data to write.
+        
+        Example:
+            >>> self.__write_json('path/to/file.json', {'key': 'value'})
         """
         with open(file, 'w') as f:
             json.dump(data, f)
     
     def __get_vuln_descriptions_and_categories_and_flags(self) -> None:
         """
-        Retrieves vulnerability descriptions, categories, and flags for each vulnerability module.
+        Retrieves vulnerability descriptions, categories, and flags for each vulnerability module and stores them in dictionaries.
 
-        This method iterates over the vulnerability modules and imports them dynamically using importlib.
-        It then extracts the necessary information from each module and stores it in the respective dictionaries.
+        This method dynamically imports each vulnerability module and extracts required information.
 
-        Returns:
-            None
+        Example:
+            >>> self.__get_vuln_descriptions_and_categories_and_flags()
         """
         description_login_info = f'\n\nLogin: {self.login_name}\n\nPassword: {self.entra_password}\n\n<a href={self.organization_link}>{self.organization_link}</a>'
         
@@ -153,8 +145,8 @@ class CTFdContainer:
         Note: The method assumes that the `descriptions`, `categories`, and `flags`
         dictionaries have already been populated with the necessary data, and are of equal size.
 
-        Returns:
-            None
+        Example:
+            >>> self.__fill_flags_db_and_challenges_db()
         """
         self.__get_vuln_descriptions_and_categories_and_flags()
 
@@ -200,9 +192,10 @@ class CTFdContainer:
 
     def __replace_ctfd_export_flags_and_descriptions(self) -> None:
         """
-        Replaces the challenge flags and descriptions in the CTFd export zip file.
+        Replaces challenge flags and descriptions in the CTFd export zip file by extracting, modifying, and re-packing it.
 
-        :param ctfd_export_path: The path to the CTFd export zip file.
+        Example:
+            >>> self.__replace_ctfd_export_flags_and_descriptions()
         """
         pulumi.log.info("Replacing challenge flags and descriptions in CTFd export")
         temp_dir = "ctfd_export_temp_dir/"
