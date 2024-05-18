@@ -616,6 +616,7 @@ class CreateAzureDevops:
             service_names: list[str],
             resource_names: list[str],
             user_roles: list[str]
+    ):
         """
         Generates fake title and description text for work items using provided templates and random elements from service names, resource names, and user roles.
 
