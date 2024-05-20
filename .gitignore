@@ -5,5 +5,3 @@ venv/
 /__main__.py
 *.tar
 /ctfd_temp_dir/
-/Dockerfile
-/.dockerignore
